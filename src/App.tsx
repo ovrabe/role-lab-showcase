@@ -7,6 +7,7 @@ import { sweepPositionFor } from "./components/RoleBadge";
 import { HomeScreen } from "./screens/HomeScreen";
 import { MethodologyScreen } from "./screens/MethodologyScreen";
 import { AboutScreen } from "./screens/AboutScreen";
+import { ReleaseNotesScreen } from "./screens/ReleaseNotesScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { Footer } from "./components/Footer";
 import { isParticipantBuild, isWebBuild } from "./buildFlags";
@@ -25,6 +26,7 @@ type Screen =
   | { name: "methodology" }
   | { name: "about" }
   | { name: "profile" }
+  | { name: "releaseNotes" }
   | { name: "calibration" }
   | { name: "samples" }
   | { name: "task"; roleId: string };
@@ -145,6 +147,7 @@ export default function App() {
         {screen.name === "profile" && (
           <ProfileScreen roles={activeRoles} onSelectRole={(roleId) => setScreen({ name: "task", roleId })} />
         )}
+        {screen.name === "releaseNotes" && <ReleaseNotesScreen />}
         {isWebBuild && screen.name === "about" && <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} />}
         {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={status} backend={backend} />}
         {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}
@@ -161,7 +164,7 @@ export default function App() {
       </main>
 
       {/* Not in the task: on a phone its floating bar owns the bottom of the screen. */}
-      {screen.name !== "task" && <Footer page={screen.name} />}
+      {screen.name !== "task" && <Footer page={screen.name} onOpenReleaseNotes={() => setScreen({ name: "releaseNotes" })} />}
 
       {showSavedNote && (
         <p

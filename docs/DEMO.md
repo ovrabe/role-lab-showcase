@@ -10,7 +10,7 @@ Nespoléhej na živé volání Clauda. Měj připravené dva hotové běhy (slab
 
 **Úkol (50 s).** Otevři úkol category managera. Zadání je reálná práce: tři produkty posílit před Black Friday, dvě zásoby snížit. Ukaž asistenta a přiložení dat. Řekni jednu věc: asistent odpovídá na to, na co se člověk ptá, a data sám neprověřuje. Hodnotí se, jestli se člověk zeptá.
 
-**Výsledek (60 s).** Otevři silný běh. Ukaž jednu dimenzi, klikni na citaci a nech záznam sjet na daný tah. Pak rozbor záludností, které byly schované v datech. Tady se hodnocení mění v učení. Na konci další krok s mikro-cvičením.
+**Výsledek (60 s).** Otevři silný běh. Ukaž jednu dimenzi, klikni na citaci a nech záznam sjet na daný krok. Pak rozbor záludností, které byly schované v datech. Tady se hodnocení mění v učení. Na konci další krok s mikro-cvičením.
 
 **Srovnání (20 s).** Přepni na slabý běh. Stejný úkol, jiná úroveň, a u každého skóre je vidět proč.
 

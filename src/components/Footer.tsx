@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ArrowUpRight, MessageSquare } from "lucide-react";
-import { isWebBuild } from "../buildFlags";
+import { appVersion, isWebBuild } from "../buildFlags";
 import { FeedbackDialog } from "./FeedbackDialog";
 
 // Author credit, in English on purpose (the author's choice). A visible LinkedIn link, so
@@ -9,7 +9,9 @@ const linkedInUrl = "https://www.linkedin.com/in/ondrej-vrabel/";
 
 const linkClass = "inline-flex items-center gap-1.5 hover:text-ink underline-offset-4 hover:underline";
 
-export function Footer({ page }: { page: string }) {
+type FooterProps = { page: string; onOpenReleaseNotes: () => void };
+
+export function Footer({ page, onOpenReleaseNotes }: FooterProps) {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   return (
     <footer className="mx-auto w-full max-w-7xl px-4 pb-8 pt-2 text-sm text-ink-muted">
@@ -24,6 +26,11 @@ export function Footer({ page }: { page: string }) {
         </a>
         <span aria-hidden="true">·</span>
         <span>Built with Claude Code</span>
+        <span aria-hidden="true">·</span>
+        <button type="button" onClick={onOpenReleaseNotes} className={linkClass}>
+          v{appVersion}
+          <span className="sr-only">: co je nového</span>
+        </button>
         {/* Feedback needs the project's server, which only the web version has. */}
         {isWebBuild && (
           <>

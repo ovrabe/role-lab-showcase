@@ -10,7 +10,7 @@ const sample = await window.claude?.use("sample"); // null nebo undefined = bez 
 
 - Mimo claude.ai `window.claude` vůbec neexistuje. Zjisti to hned při startu a přepni do náhledového režimu, nečekej.
 - Uvnitř claude.ai se výsledek `use()` vrátí až později, nikdy během prvního běhu skriptu. Stránku vykresli bez něj a AI funkce zapni, až dorazí.
-- `sample` dostane buď text, nebo pole tahů `{ role: "user" | "assistant", content }`, které začíná i končí tahem `user`. Systémová role neexistuje.
+- `sample` dostane buď text, nebo pole zpráv `{ role: "user" | "assistant", content }`, které začíná i končí zprávou `user`. Systémová role neexistuje.
 - `sample.json(...)` vrátí rovnou rozparsovaný JSON. V promptu přesně popiš tvar odpovědi.
 
 ## Volby

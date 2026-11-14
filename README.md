@@ -71,6 +71,10 @@ npm test
 
 Testy hlídají výpočet úrovně, kontrolu citací, platnost konfigurace rolí, shodu promptů s dokumentací, limity a serverové funkce.
 
+## Verze
+
+Aktuální verze je v patičce aplikace, přehled změn v `CHANGELOG.md`.
+
 ## Co v této kopii záměrně není
 
 Tohle je veřejná kopie soukromého repozitáře. Chybí v ní:

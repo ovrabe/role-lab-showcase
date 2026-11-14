@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 // The Markdown library uses the replacement character U+FFFD on purpose, but
 // the artifact publisher rejects any raw U+FFFD as a sign of a broken file.
@@ -91,6 +91,9 @@ function localApi(): Plugin {
 // and role data get inlined, nothing is fetched at runtime.
 // Mode "participant" (npm run build:resitel) builds the page for people taking the task,
 // without the author's tools; see src/buildFlags.ts. It goes to its own folder.
+// The version shown in the footer comes from package.json, so a release changes it in one place.
+const appVersion: string = JSON.parse(readFileSync("package.json", "utf8")).version;
+
 const hasPrivateData = existsSync("evaluator-data") && existsSync("fixtures");
 
 export default defineConfig(({ mode }) => ({
@@ -106,6 +109,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     __PARTICIPANT_BUILD__: JSON.stringify(mode === "participant" || mode === "web"),
     __WEB_BUILD__: JSON.stringify(mode === "web"),
+    __APP_VERSION__: JSON.stringify(appVersion),
   },
   build: { outDir: mode === "participant" ? "dist-resitel" : mode === "web" ? "dist-web" : "dist" },
   // The public copy of the code leaves out the evaluator keys and the sample evaluations,

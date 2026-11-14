@@ -26,7 +26,7 @@ function mockReply(input: MockInput): string {
   return [
     "**Simulovaná odpověď** (jen pro vývoj, nejde o Clauda).",
     "",
-    `Dostal jsem ${turnCount} tahů a ${attachedBlocks} bloků s podklady (${allText.length} znaků). Pokyny začínají slovy: „${firstTurn.slice(0, 60)}…“`,
+    `Počet zpráv: ${turnCount}, bloků s podklady: ${attachedBlocks}, znaků: ${allText.length}. Pokyny začínají slovy: „${firstTurn.slice(0, 60)}…“`,
     "",
     "| Produkt | Kusy | Marže |",
     "|---|---:|---:|",

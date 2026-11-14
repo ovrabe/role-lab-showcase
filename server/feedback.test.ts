@@ -61,7 +61,7 @@ describe("POST /api/feedback", () => {
       kind: "evaluation",
       rating: "rather_no",
       disagree: ["verification"],
-      comment: "Ověřoval jsem data v tahu 3.",
+      comment: "Ověřoval jsem data ve zprávě 3.",
       roleId: "category-manager",
       level: 2,
       scores: { framing: 3, decomposition: 2, verification: 1, iteration: 2, judgment: 2 },

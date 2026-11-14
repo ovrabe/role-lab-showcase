@@ -13,3 +13,8 @@ export const isParticipantBuild: boolean = __PARTICIPANT_BUILD__;
 declare const __WEB_BUILD__: boolean;
 
 export const isWebBuild: boolean = __WEB_BUILD__;
+
+// From package.json at build time (vite.config.ts). Release notes for it are in CHANGELOG.md.
+declare const __APP_VERSION__: string;
+
+export const appVersion: string = __APP_VERSION__;

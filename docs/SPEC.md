@@ -33,7 +33,7 @@ Mimo MVP:
 3. **Odevzdání.** Potvrzovací krok, pak vyhodnocení se stavem načítání (může trvat desítky sekund).
 4. **Výsledek.**
    - Úroveň a jednovětné shrnutí.
-   - Pět dimenzí: skóre 1 až 4, odůvodnění, citace. Kliknutí na citaci posune záznam na daný tah a citaci v něm zvýrazní.
+   - Pět dimenzí: skóre 1 až 4, odůvodnění, citace. Kliknutí na citaci posune záznam na daný krok a citaci v něm zvýrazní.
    - Záludnosti v datech: po skončení se odhalí, co v datech bylo, a zda to člověk zachytil. Tahle část má učit, ne soudit.
    - Silné stránky a jeden až dva další kroky s mikro-cvičením.
    - Jistota hodnocení a příznaky pro lidskou kontrolu.
@@ -151,11 +151,11 @@ Hotovo, když: `npm run dev` otevře aplikaci s pruhem „Náhled bez AI“, `np
 **M1 — Úkol bez AI.** Úvod, výběr role, obrazovka úkolu category managera se zadáním, podklady a polem pro odevzdání. Záznam událostí a localStorage. Vše řízené konfigurací role, nic natvrdo pro jednu roli.
 Hotovo, když: tabulka se dá číst na telefonu, obnovení stránky nic nesmaže.
 
-**M2 — Asistent.** Chat přes `sample` se streamováním, tlačítko Zastavit, přiložení podkladů, limit zpráv, záznam tahů, srozumitelné hlášky pro každý kód chyby.
+**M2 — Asistent.** Chat přes `sample` se streamováním, tlačítko Zastavit, přiložení podkladů, limit zpráv, záznam kroků, srozumitelné hlášky pro každý kód chyby.
 Hotovo, když: v náhledu se asistent chová podle bodu 8, a po publikaci v claude.ai odpovídá česky, pracuje s přiloženými podklady a sám je neprověřuje. Testuje se až po publikaci (viz `NAVOD.md`).
 
 **M3 — Hodnocení.** Volání hodnotitele přes `sample.json`, validace zod, ověření citací, výpočet úrovně v kódu, obrazovka výsledku se zvýrazněnými citacemi a rozborem záludností.
-Hotovo, když: každá dimenze má citaci nebo „nedostatek podkladů“, úroveň odpovídá pravidlům z konfigurace, kliknutí na citaci najde tah v záznamu. V náhledu to jde otestovat na ukázkovém hodnocení.
+Hotovo, když: každá dimenze má citaci nebo „nedostatek podkladů“, úroveň odpovídá pravidlům z konfigurace, kliknutí na citaci najde krok v záznamu. V náhledu to jde otestovat na ukázkovém hodnocení.
 
 **M3.5 — Kalibrace hodnotitele.** Tři syntetické záznamy ve `fixtures/`: slabý, střední a silný (liší se tím, jak systematicky člověk postupuje a kolik záludností zachytí). Skrytý panel „Kalibrace“ (otevře se parametrem `?kalibrace` v adrese nebo přepínačem v Jak hodnotíme) spustí hodnocení každého záznamu třikrát, postupně, ne naráz, a vypíše tabulku.
 Hotovo, když: pořadí je slabý < střední < silný ve všech bězích, stav záludností odpovídá záměru a celková úroveň mezi běhy kolísá nejvýš o jednu. Když ne, uprav prompt hodnotitele, ne fixtures. Běží jen v publikované verzi a spotřebovává limit autora.
