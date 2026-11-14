@@ -1,6 +1,6 @@
 # Architektura
 
-Role Lab běží ve dvou podobách z jednoho kódu. Veřejná webová verze má vlastní server na Vercelu. Verze v claude.ai je jeden HTML soubor bez serveru, který volá Clauda přes účet toho, kdo stránku otevře. Schémata níž GitHub vykreslí sám (Mermaid).
+Role Lab běží ve dvou podobách z jednoho kódu. Veřejná webová verze má vlastní server na Vercelu. Verze v claude.ai je jeden HTML soubor bez serveru, který volá Clauda přes účet toho, kdo stránku otevře. Schémata níž GitHub vykreslí sám (Mermaid). Přehledové schéma v README jsou obrázky `docs/architecture-light.svg` a `docs/architecture-dark.svg`. Kreslí je `node scripts/build-architecture-diagram.mjs`, po změně infrastruktury je potřeba upravit obojí.
 
 ## Webová verze
 
