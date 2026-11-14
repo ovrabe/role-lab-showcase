@@ -27,6 +27,34 @@ V podkladech jsou schované záludnosti, které asistent sám neprozradí. Kdo v
 
 ## Architektura
 
+```mermaid
+flowchart LR
+    browser["Prohlížeč<br/>stránka Role Lab<br/>pokrok a odznaky v localStorage"]
+
+    subgraph vercel["Vercel"]
+        page["Statická stránka<br/>jeden index.html<br/>s Content Security Policy"]
+        chat["/api/chat"]
+        evaluate["/api/evaluate"]
+        feedback["/api/feedback"]
+        content["Podklady, pokyny<br/>a klíče hodnotitele<br/>jen na serveru"]
+    end
+
+    anthropic["Anthropic API<br/>asistent: Claude Sonnet<br/>hodnotitel: Claude Opus"]
+    upstash["Upstash Redis<br/>denní limity, osoba = otisk IP<br/>zpětná vazba"]
+    fonts["Google Fonts"]
+
+    browser -- "načtení" --> page
+    browser -- "zprávy a ID podkladů" --> chat
+    browser -- "záznam a výsledek" --> evaluate
+    browser -- "zpětná vazba" --> feedback
+    content -. "skládá pokyny" .-> chat & evaluate
+    chat & evaluate --> anthropic
+    chat & evaluate & feedback --> upstash
+    browser -.-> fonts
+```
+
+Všechna tři schémata (webová verze, verze v claude.ai, vývoj a vydání) s vysvětlivkami jsou v [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
 - **Frontend:** Vite, React, TypeScript, Tailwind, zod. Celá stránka se sestaví do jednoho HTML souboru.
 - **Tři buildy z jednoho kódu:**
   - `npm run build` a `npm run build:resitel` dělají stránku pro claude.ai. Clauda volá přes účet toho, kdo ji otevře, bez serveru a bez klíče.
