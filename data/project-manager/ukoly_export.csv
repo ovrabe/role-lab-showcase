@@ -1,0 +1,28 @@
+klic,nazev,milnik,stav,odpovedna_role,termin,zavisi_na,vytvoreno,posledni_zmena,poznamka
+PK-101,Výběr dodavatele helpdesku,M1 Výběr a smlouva,Hotovo,Vedení projektu,2026-05-29,,2026-04-06,2026-05-28,
+PK-102,Podpis smlouvy s dodavatelem Tikeo,M1 Výběr a smlouva,Hotovo,Nákup,2026-06-19,PK-101,2026-05-29,2026-06-17,
+PK-103,Schválení rozpočtu projektu,M1 Výběr a smlouva,Hotovo,Finance,2026-06-12,,2026-05-15,2026-06-10,"Schváleno 4,2 mil. Kč"
+PK-151,Nastavení front a pravidel směrování,M2 Konfigurace systému,Hotovo,Dodavatel,2026-08-14,PK-102,2026-06-22,2026-08-12,
+PK-152,Šablony odpovědí ve čtyřech jazycích,M2 Konfigurace systému,Hotovo,Vedoucí podpory,2026-08-28,PK-151,2026-06-22,2026-08-27,
+PK-153,Nastavení SLA a eskalací,M2 Konfigurace systému,Hotovo,Vedoucí podpory,2026-08-28,PK-151,2026-06-22,2026-08-26,
+PK-154,Napojení e-mailu a chatu,M2 Konfigurace systému,Hotovo,IT integrace,2026-09-04,PK-151,2026-06-22,2026-09-03,
+PK-155,Role a oprávnění uživatelů,M2 Konfigurace systému,Hotovo,IT integrace,2026-09-11,PK-151,2026-06-22,2026-09-09,
+PK-201,Návrh rozhraní pro objednávky,M3 Integrace s objednávkovým systémem,Hotovo,IT integrace,2026-08-21,PK-102,2026-06-22,2026-08-20,
+PK-205,Vývoj napojení v testovacím prostředí,M3 Integrace s objednávkovým systémem,Hotovo,IT integrace,2026-09-18,PK-201,2026-06-22,2026-09-17,
+PK-208,Testy napojení v testovacím prostředí,M3 Integrace s objednávkovým systémem,Hotovo,Testování,2026-09-25,PK-205,2026-06-22,2026-09-24,
+PK-212,Nasazení napojení do produkce,M3 Integrace s objednávkovým systémem,Blokováno,IT integrace,2026-09-30,PK-208; PK-219,2026-06-22,2026-09-29,Čeká na produkční přístupy
+PK-219,Bezpečnostní schválení produkčního přístupu k API,M3 Integrace s objednávkovým systémem,Čeká na schválení,Bezpečnost IT,2026-09-25,,2026-09-10,2026-09-24,Žádost podána 24. 9.
+PK-251,Export historických tiketů ze starého systému,M4 Migrace dat,Hotovo,Data,2026-09-18,,2026-07-01,2026-09-16,
+PK-254,Mapování polí ze starého do nového systému,M4 Migrace dat,Hotovo,Dodavatel,2026-09-25,PK-251,2026-07-01,2026-09-23,
+PK-257,Zkušební migrace vzorku 10 %,M4 Migrace dat,Hotovo,Dodavatel,2026-09-30,PK-254,2026-07-01,2026-09-30,Chybovost 7 %
+PK-259,"Plná migrace historických tiketů (1,4 mil.)",M4 Migrace dat,K zahájení,Dodavatel,2026-10-23,PK-257; PK-261,2026-07-01,2026-10-01,
+PK-261,Čištění dat před migrací (CR-03),M4 Migrace dat,K zahájení,Dodavatel,2026-11-06,PK-257,2026-10-01,2026-10-01,Podle schůzky s dodavatelem 1. 10.
+PK-263,Kontrola kvality migrovaných dat,M4 Migrace dat,K zahájení,Data,2026-10-28,PK-259,2026-07-01,2026-07-01,
+PK-301,Příprava školicích materiálů,M5 Školení,Probíhá,L&D,2026-10-16,PK-152,2026-08-03,2026-09-28,
+PK-303,Školení školitelů (8 lidí),M5 Školení,K zahájení,L&D,2026-10-21,PK-301,2026-08-03,2026-08-03,
+PK-305,Školení agentů CZ a SK (70 lidí),M5 Školení,K zahájení,Vedoucí podpory,2026-10-28,PK-303,2026-08-03,2026-08-03,
+PK-306,Školení agentů PL a HU (50 lidí),M5 Školení,K zahájení,Vedoucí podpory,2026-10-30,PK-303,2026-08-03,2026-08-03,
+PK-351,Plán přechodu a návratu na starý systém,M6 Spuštění,Probíhá,Vedení projektu,2026-10-23,,2026-09-01,2026-09-25,
+PK-353,Objednávka prodloužení licence starého systému,M6 Spuštění,K zahájení,Nákup,2026-10-20,,2026-10-01,2026-10-01,Čeká na rozhodnutí o termínu spuštění
+PK-355,Spuštění nového systému,M6 Spuštění,K zahájení,Vedení projektu,2026-11-02,PK-212; PK-263; PK-305; PK-306,2026-06-22,2026-06-22,
+PK-357,Zvýšená podpora po spuštění (2 týdny),M6 Spuštění,K zahájení,Dodavatel,2026-11-13,PK-355,2026-06-22,2026-06-22,

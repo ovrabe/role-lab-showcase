@@ -1,0 +1,182 @@
+{
+  "id": "project-manager",
+  "title": "Projektový manažer",
+  "context": "Středně velká firma, zavedení nového systému pro zákaznickou podporu ve čtyřech zemích",
+  "assistantContext": "zaměstnanci středně velké firmy",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Dnes je pondělí 5. 10. 2026. Minulý týden ti kolega předal projekt Kompas a přešel na jiný projekt. Firma zavádí nový systém pro zákaznickou podporu ve čtyřech zemích (CZ, SK, PL, HU) pro 120 agentů. Ve středu 7. 10. zasedá řídicí výbor a čeká od tebe podklad.",
+    "task": "Z podkladů připrav pro řídicí výbor podklad na jednu stranu: skutečný stav projektu, tři největší rizika a rozhodnutí, která od výboru potřebuješ.",
+    "deliverable": "Podklad na jednu stranu, nejvýš 2 500 znaků. Členové výboru ho budou číst pět minut před jednáním.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním tak, jak bys pracoval v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "ukoly",
+      "title": "Export úkolů z projektového nástroje",
+      "file": "data/project-manager/ukoly_export.csv",
+      "type": "csv",
+      "rows": 27,
+      "dictionary": [
+        {
+          "column": "klic",
+          "meaning": "Kód úkolu"
+        },
+        {
+          "column": "nazev",
+          "meaning": "Název úkolu"
+        },
+        {
+          "column": "milnik",
+          "meaning": "Milník, ke kterému úkol patří"
+        },
+        {
+          "column": "stav",
+          "meaning": "Hotovo, Probíhá, K zahájení, Blokováno, Čeká na schválení"
+        },
+        {
+          "column": "odpovedna_role",
+          "meaning": "Kdo za úkol odpovídá"
+        },
+        {
+          "column": "termin",
+          "meaning": "Plánovaný termín dokončení"
+        },
+        {
+          "column": "zavisi_na",
+          "meaning": "Úkoly, které musí být hotové dřív"
+        },
+        {
+          "column": "vytvoreno",
+          "meaning": "Kdy úkol vznikl"
+        },
+        {
+          "column": "posledni_zmena",
+          "meaning": "Kdy se úkol naposledy změnil"
+        },
+        {
+          "column": "poznamka",
+          "meaning": "Krátká poznámka"
+        }
+      ]
+    },
+    {
+      "id": "status39",
+      "title": "Týdenní status, týden 39 (25. 9.)",
+      "file": "data/project-manager/status_report_tyden_39.md",
+      "type": "markdown"
+    },
+    {
+      "id": "status40",
+      "title": "Týdenní status, týden 40 (2. 10.)",
+      "file": "data/project-manager/status_report_tyden_40.md",
+      "type": "markdown"
+    },
+    {
+      "id": "zapis",
+      "title": "Zápis ze schůzky s dodavatelem (1. 10.)",
+      "file": "data/project-manager/zapis_schuzka_dodavatel_2026-10-01.md",
+      "type": "markdown"
+    }
+  ],
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, podklady a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží podklady bez vysvětlení nebo píše jednoslovné dotazy.",
+        "2": "Řekne, co chce, ale chybí kontext: kdo je adresát, jaký je termín, co má výstup rozhodnout.",
+        "3": "Dá cíl, podklady a omezení: výbor, jedna strana, stav, rizika, rozhodnutí.",
+        "4": "Navíc vysvětlí situaci (převzatý projekt, vytížené období) a řekne, podle čeho se mají rizika řadit."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce hotový podklad jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout za sebe.",
+        "3": "Logický postup: shrnutí podkladů, porovnání, rizika, rozhodnutí.",
+        "4": "Nejdřív nechá podklady porovnat mezi sebou, z rozporů odvodí rizika a varianty. Doporučení si drží sám."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI a porovnává zdroje mezi sebou?",
+      "anchors": {
+        "1": "Převezme stav z posledního statusu bez kontroly.",
+        "2": "Obecně se ujišťuje, ale zdroje mezi sebou neporovná.",
+        "3": "Porovná zdroje a odhalí část rozporů.",
+        "4": "Systematicky porovná všechny zdroje, odhalí podstatné rozpory a upraví podle nich stav projektu."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní riziko, nechá přepočítat rozpočet nebo termín.",
+        "4": "Oponuje, chce varianty a jejich dopady a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Dostane výbor věrohodný stav a jasná rozhodnutí?",
+      "anchors": {
+        "1": "Podklad opakuje nepravdivý stav nebo nedává výboru nic k rozhodnutí.",
+        "2": "Stav je věrohodný, ale rizika nemají dopad a rozhodnutí chybí nebo jsou vágní.",
+        "3": "Věrohodný stav, rizika s dopadem a konkrétní rozhodnutí.",
+        "4": "Navíc varianty s náklady a dopady, termíny, do kdy musí rozhodnutí padnout, vlastníci a vlastní doporučení. Odliší fakta od předpokladů."
+      }
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "label": "Začíná",
+      "minAverage": 0,
+      "description": "AI používá nahodile a výsledek nekontroluje."
+    },
+    {
+      "level": 2,
+      "label": "Používá",
+      "minAverage": 1.75,
+      "description": "AI mu pomáhá, ale nevede ji a systematicky nekontroluje."
+    },
+    {
+      "level": 3,
+      "label": "Pracuje s AI",
+      "minAverage": 2.5,
+      "description": "AI vede, ověřuje ji a jeho výsledek je obhajitelný."
+    },
+    {
+      "level": 4,
+      "label": "Může učit ostatní",
+      "minAverage": 3.25,
+      "description": "S AI pracuje systematicky a jeho postup se dá předat dál."
+    }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI v obchodním rozhodnutí je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": [
+      "verification",
+      "judgment"
+    ],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby obsahoval adresáta, účel a formát: kdo podklad čte, co má rozhodnout a na kolik řádků.",
+    "decomposition": "Rozděl přípravu podkladu do čtyř kroků a zadej je zvlášť: shrnutí zdrojů, porovnání, rizika, rozhodnutí.",
+    "verification": "Požádej AI o tabulku: tvrzení ze statusu proti tomu, co říká export úkolů a zápis. U každého rozporu rozhodni, čemu věříš a proč.",
+    "iteration": "Požádej AI o tři varianty řešení největšího rizika s náklady a dopadem. Vyber jednu a napiš, proč ne ty další.",
+    "judgment": "Ke každému rozhodnutí pro výbor připiš, do kdy musí padnout a co se stane, když nepadne."
+  }
+}

@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Styles split by purpose; each file says what it holds. */
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/components.css";
+@import "./styles/markdown.css";
+@import "./styles/motion.css";

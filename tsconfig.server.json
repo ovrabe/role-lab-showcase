@@ -1,0 +1,10 @@
+{
+  // Type check for the web server code (server/, later api/). Node types for the server;
+  // Vite's too, because the tests compare the server with the page's Vite-loaded content.
+  // That the server itself uses no Vite-only code is checked by server/content.test.ts.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client"]
+  },
+  "include": ["server", "api", "docs/claude-runtime"]
+}

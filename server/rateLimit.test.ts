@@ -1,0 +1,150 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { handleChat, handleEvaluate } from "./handlers";
+import { loadServerContent } from "./content";
+import { memoryCounter, upstashCounter, type Counter, type RateLimiter } from "./rateLimit";
+import type { ClaudeClient } from "./claudeClient";
+import { loadPreviewSamples } from "../src/evaluation/previewFixture";
+
+const content = loadServerContent();
+const role = content.roles.activeRoles[0];
+const session = loadPreviewSamples(role).find((sample) => sample.id === "strong")!.session;
+
+// Small limits so the tests stay short; the real numbers are in dailyLimits.
+const smallLimits = { perPerson: { chat: 2, evaluate: 1, feedback: 1 }, total: { chat: 3, evaluate: 2, feedback: 2 } };
+
+function countingClaude() {
+  const calls = { chat: 0, evaluate: 0 };
+  const claude: ClaudeClient = {
+    async chat(_turns, { onDelta }) {
+      calls.chat += 1;
+      onDelta("ok");
+      return { truncated: false };
+    },
+    async evaluate() {
+      calls.evaluate += 1;
+      return JSON.stringify(session.evaluation!.output);
+    },
+  };
+  return { claude, calls };
+}
+
+function setup(counter: Counter = memoryCounter(), now = () => new Date("2026-11-11T10:00:00Z")) {
+  const { claude, calls } = countingClaude();
+  const limiter: RateLimiter = { counter, secret: "test-secret", limits: smallLimits, now };
+  return { deps: { content, claude, limiter }, calls, limiter };
+}
+
+const chatFrom = (ip: string) =>
+  new Request("http://localhost/api/chat", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-real-ip": ip, origin: "http://localhost" },
+    body: JSON.stringify({ roleId: role.id, transcript: [{ turn: 1, kind: "user", content: "Ahoj", ts: "2026-11-11T10:00:00.000Z" }] }),
+  });
+
+const evaluateFrom = (ip: string) =>
+  new Request("http://localhost/api/evaluate", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-real-ip": ip, origin: "http://localhost" },
+    body: JSON.stringify({ roleId: role.id, session }),
+  });
+
+async function errorCode(response: Response): Promise<string | undefined> {
+  return ((await response.json()) as { error?: { code?: string } }).error?.code;
+}
+
+describe("daily limits", () => {
+  it("stops one person after their chat limit, without calling Claude", async () => {
+    const { deps, calls } = setup();
+    expect((await handleChat(chatFrom("1.1.1.1"), deps)).status).toBe(200);
+    expect((await handleChat(chatFrom("1.1.1.1"), deps)).status).toBe(200);
+    const third = await handleChat(chatFrom("1.1.1.1"), deps);
+    expect(third.status).toBe(429);
+    expect(await errorCode(third)).toBe("limit_person");
+    expect(calls.chat).toBe(2);
+  });
+
+  it("counts each person separately, up to the shared daily ceiling", async () => {
+    const { deps } = setup();
+    await handleChat(chatFrom("1.1.1.1"), deps);
+    await handleChat(chatFrom("1.1.1.1"), deps);
+    expect((await handleChat(chatFrom("2.2.2.2"), deps)).status).toBe(200);
+    // Total chat limit is 3: the fourth message of the day is refused for anyone.
+    const fourth = await handleChat(chatFrom("3.3.3.3"), deps);
+    expect(fourth.status).toBe(429);
+    expect(await errorCode(fourth)).toBe("limit_daily");
+  });
+
+  it("limits evaluations per person and in total", async () => {
+    const { deps, calls } = setup();
+    expect((await handleEvaluate(evaluateFrom("1.1.1.1"), deps)).status).toBe(200);
+    expect(await errorCode(await handleEvaluate(evaluateFrom("1.1.1.1"), deps))).toBe("limit_person");
+    expect((await handleEvaluate(evaluateFrom("2.2.2.2"), deps)).status).toBe(200);
+    expect(await errorCode(await handleEvaluate(evaluateFrom("3.3.3.3"), deps))).toBe("limit_daily");
+    expect(calls.evaluate).toBe(2);
+  });
+
+  it("starts again the next day in Czech time", async () => {
+    let now = new Date("2026-11-11T22:30:00Z"); // 23:30 in Prague
+    const { deps } = setup(memoryCounter(), () => now);
+    await handleChat(chatFrom("1.1.1.1"), deps);
+    await handleChat(chatFrom("1.1.1.1"), deps);
+    expect((await handleChat(chatFrom("1.1.1.1"), deps)).status).toBe(429);
+    now = new Date("2026-11-11T23:05:00Z"); // 00:05 in Prague, still the 11th in UTC
+    expect((await handleChat(chatFrom("1.1.1.1"), deps)).status).toBe(200);
+  });
+
+  it("does not count requests that fail the input checks", async () => {
+    const { deps } = setup();
+    const broken = () => new Request("http://localhost/api/chat", { method: "POST", headers: { "x-real-ip": "1.1.1.1", origin: "http://localhost" }, body: "{nope" });
+    for (let i = 0; i < 5; i++) expect((await handleChat(broken(), deps)).status).toBe(400);
+    expect((await handleChat(chatFrom("1.1.1.1"), deps)).status).toBe(200);
+  });
+
+  it("refuses to call Claude when the counter store is down", async () => {
+    const failing: Counter = { increment: async () => Promise.reject(new Error("store down")) };
+    const { deps, calls } = setup(failing);
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const response = await handleChat(chatFrom("1.1.1.1"), deps);
+    expect(response.status).toBe(503);
+    expect(calls.chat).toBe(0);
+  });
+
+  it("never stores the IP address itself", async () => {
+    const keys: string[] = [];
+    const recording: Counter = {
+      async increment(key) {
+        keys.push(key);
+        return 1;
+      },
+    };
+    const { deps } = setup(recording);
+    await handleChat(chatFrom("203.0.113.7"), deps);
+    expect(keys.length).toBeGreaterThan(0);
+    expect(keys.join(" ")).not.toContain("203.0.113.7");
+  });
+});
+
+describe("upstashCounter", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("sends INCR and EXPIRE as one transaction and returns the count", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: 3 }, { result: 1 }])));
+    vi.stubGlobal("fetch", fetchMock);
+    const value = await upstashCounter("https://example.upstash.io/", "token-123").increment("rl:key");
+    expect(value).toBe(3);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://example.upstash.io/multi-exec");
+    expect((init.headers as Record<string, string>).authorization).toBe("Bearer token-123");
+    expect(JSON.parse(String(init.body))).toEqual([
+      ["INCR", "rl:key"],
+      ["EXPIRE", "rl:key", "172800"],
+    ]);
+  });
+
+  it("throws when the store answers with an error", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: "ERR" }))));
+    await expect(upstashCounter("https://example.upstash.io", "t").increment("k")).rejects.toThrow();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 401 })));
+    await expect(upstashCounter("https://example.upstash.io", "t").increment("k")).rejects.toThrow();
+  });
+});

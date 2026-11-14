@@ -1,0 +1,173 @@
+{
+  "id": "category-manager",
+  "title": "Category manager",
+  "context": "E-shop s kosmetikou, kategorie pánské vůně, trh CZ",
+  "assistantContext": "zaměstnanci e-shopu s kosmetikou",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Jsi category manager pro pánské vůně na českém e-shopu s kosmetikou. Za šest týdnů je Black Friday a tvoje vedoucí chce do pátku krátké doporučení, kam dát peníze a pozornost.",
+    "task": "Na základě dat za posledních 12 týdnů doporuč tři produkty, které před Black Friday posílit (víc marketingu, víc zboží na skladě nebo lepší umístění na webu), a dva produkty, u kterých snížit zásobu. Ke každému doporučení připoj krátké zdůvodnění.",
+    "deliverable": "Doporučení pro vedoucí na jednu stranu, nejvýš 2 500 znaků. Musí být srozumitelné i bez tabulky.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním tak, jak bys pracoval v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "prodeje",
+      "title": "Prodeje pánských vůní, posledních 12 týdnů",
+      "file": "data/category-manager/prodeje_panske_vune_cz.csv",
+      "type": "csv",
+      "rows": 145,
+      "period": "12 týdnů, 2026-07-06 až 2026-09-27",
+      "dictionary": [
+        {
+          "column": "tyden_od",
+          "meaning": "První den týdne (pondělí)"
+        },
+        {
+          "column": "sku",
+          "meaning": "Kód produktu"
+        },
+        {
+          "column": "znacka",
+          "meaning": "Značka"
+        },
+        {
+          "column": "nazev",
+          "meaning": "Název produktu"
+        },
+        {
+          "column": "kanal",
+          "meaning": "Prodejní kanál (eshop, B2B)"
+        },
+        {
+          "column": "promo",
+          "meaning": "Byl produkt ten týden v akci (ano/ne)"
+        },
+        {
+          "column": "prodane_ks",
+          "meaning": "Prodané kusy"
+        },
+        {
+          "column": "obrat_czk",
+          "meaning": "Tržby bez DPH v Kč"
+        },
+        {
+          "column": "naklady_czk",
+          "meaning": "Nákupní náklady prodaného zboží v Kč"
+        },
+        {
+          "column": "marze_czk",
+          "meaning": "Obrat minus náklady v Kč"
+        },
+        {
+          "column": "marze_pct",
+          "meaning": "Marže v procentech z obratu"
+        },
+        {
+          "column": "sklad_ks_konec_tydne",
+          "meaning": "Zásoba na konci týdne v kusech"
+        }
+      ]
+    }
+  ],
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, data a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží úkol bez kontextu nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Uvede cíl, ale chybí data nebo omezení, třeba formát, délka nebo adresát.",
+        "3": "Dá cíl, relevantní data a hlavní omezení. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí obchodní souvislosti (Black Friday, marže proti objemu) a řekne, podle čeho se má rozhodovat."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce celý výsledek jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile. Nechá AI rozhodovat tam, kde by měl rozhodnout sám, nebo ji nevyužije na výpočty.",
+        "3": "Logický postup: přehled dat, metriky, kandidáti, doporučení.",
+        "4": "Postup upravuje podle mezivýsledků. AI nechá počítat metriky jako trend nebo týdny zásoby, rozhodnutí si drží sám."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI i samotná data?",
+      "anchors": {
+        "1": "Přebírá výstup bez kontroly.",
+        "2": "Obecně se ujišťuje („jsi si jistý?“), ale nic konkrétního neověří.",
+        "3": "Konkrétně ověří aspoň jedno číslo nebo si nechá ukázat výpočet. Odhalí část neobvyklých hodnot v datech.",
+        "4": "Systematicky hledá neobvyklé hodnoty, odhalí ty podstatné a upraví podle nich závěr."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní chybějící kritérium, nechá přepočítat.",
+        "4": "Aktivně oponuje, chce alternativy a rizika a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je finální doporučení obhajitelné a je zřejmé, za čím stojí člověk?",
+      "anchors": {
+        "1": "Doporučení odporuje datům nebo je převzaté bez vlastního zdůvodnění.",
+        "2": "Rozumné, ale stojí na zkreslených číslech nebo chybí zdůvodnění.",
+        "3": "Obhajitelné. Bere v úvahu marži i objem a zmíní riziko.",
+        "4": "Obhajitelné. Bere v úvahu trend, závislost na slevách a zásobu, odliší fakta od předpokladů a je psané pro adresáta."
+      }
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "label": "Začíná",
+      "minAverage": 0,
+      "description": "AI používá nahodile a výsledek nekontroluje."
+    },
+    {
+      "level": 2,
+      "label": "Používá",
+      "minAverage": 1.75,
+      "description": "AI mu pomáhá, ale nevede ji a systematicky nekontroluje."
+    },
+    {
+      "level": 3,
+      "label": "Pracuje s AI",
+      "minAverage": 2.5,
+      "description": "AI vede, ověřuje ji a jeho výsledek je obhajitelný."
+    },
+    {
+      "level": 4,
+      "label": "Může učit ostatní",
+      "minAverage": 3.25,
+      "description": "S AI pracuje systematicky a jeho postup se dá předat dál."
+    }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI v obchodním rozhodnutí je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": [
+      "verification",
+      "judgment"
+    ],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz podle šablony cíl, kontext, data, omezení, formát. Pošli obě verze a porovnej odpovědi.",
+    "decomposition": "Rozepiš úkol do čtyř kroků a každý zadej zvlášť. U každého kroku si poznamenej, jestli ho dělala AI, nebo rozhodnutí bylo na tobě.",
+    "verification": "Požádej AI, ať v datech najde tři nejpodezřelejší hodnoty. U každé rozhodni, jestli je to chyba, nebo realita, a proč.",
+    "iteration": "Požádej AI o nejsilnější protiargument ke svému doporučení. Rozhodni, jestli ho přijmeš, a doplň jednu větu do doporučení.",
+    "judgment": "Ke každému doporučení připiš jednu větu: fakt z dat, ze kterého vycházíš, a předpoklad, který se může ukázat jako špatný."
+  }
+}

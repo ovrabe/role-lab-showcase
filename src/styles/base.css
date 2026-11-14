@@ -1,0 +1,124 @@
+/* Page base: background, body, the type scale, scrollbars, form field borders, focus. */
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* The pastel wash sits on a fixed layer instead of background-attachment: fixed,
+   which iPhones ignore. The body stays transparent so the layer shows through. */
+body {
+  background: transparent;
+  color: var(--color-ink);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 0% 0%, var(--color-wash-1) 0%, transparent 70%),
+    radial-gradient(55% 50% at 100% 5%, var(--color-wash-3) 0%, transparent 70%),
+    radial-gradient(70% 60% at 60% 100%, var(--color-wash-2) 0%, transparent 70%),
+    var(--color-paper);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  /* Airy lines for reading, the same on every screen. */
+  line-height: 1.625;
+  /* Keeps content clear of notches and rounded corners on phones. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+/* One type scale for the whole app (docs/SPEC.md, section 9): page title, section,
+   card, then body text 16px and secondary text 14px (text-sm). 14px is only for side
+   information: counters, timer, captions under a heading, the data table, small buttons;
+   explanatory sentences, notices and errors use the body size. Headings get their size
+   here, so components only add spacing. In the base layer, so a class can still override. */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  h1 {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  @media (min-width: 640px) {
+    h1 {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+  }
+  h2 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  h3 {
+    font-size: 1.125rem;
+    line-height: 1.625rem;
+  }
+  /* Bold text in sentences matches the heading weight instead of the heavier browser default. */
+  b,
+  strong {
+    font-weight: 600;
+  }
+  /* The open list of a dropdown is drawn by the browser; ask it to use the page font.
+     Chrome and Edge follow this, Safari and phones always show their own picker. */
+  option {
+    font: inherit;
+  }
+}
+
+/* Windows draws bulky scrollbars with arrows. A thin one in the page colors keeps
+   text fields and the data table calm. Chrome and Edge ignore ::-webkit-scrollbar
+   once scrollbar-width is set, so the standard properties are for Firefox only. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-ink-muted);
+  /* The transparent border insets the thumb, so it looks 6px wide with a gap around it. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+@supports (-moz-appearance: none) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink-muted) transparent;
+  }
+}
+
+/* An empty field is recognisable only by its border, so form fields get the stronger one.
+   Dividers keep the quiet --color-line: they are decoration, not controls.
+   !important because the components set border-line through utility classes, which would win. */
+textarea,
+select,
+input {
+  border-color: var(--color-control-border) !important;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+/* The chat field sits inside a rounded box that draws the focus ring for both. */
+.rl-chat-input:focus-visible {
+  outline: none;
+}

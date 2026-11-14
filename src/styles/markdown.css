@@ -1,0 +1,47 @@
+/* Markdown from the assistant: quiet, readable, tables with aligned numbers. */
+.markdown > * + * {
+  margin-top: 0.6em;
+}
+.markdown ul {
+  list-style: disc;
+  padding-left: 1.4em;
+}
+.markdown ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+}
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  font-weight: 600;
+}
+.markdown code {
+  font-size: 0.9em;
+  background: var(--color-paper);
+  padding: 0 0.25em;
+  border-radius: 3px;
+}
+.markdown pre {
+  overflow-x: auto;
+  background: var(--color-paper);
+  padding: 0.6em;
+  border-radius: 4px;
+}
+.markdown table {
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9em;
+}
+.markdown th,
+.markdown td {
+  border: 1px solid var(--color-line);
+  padding: 0.25em 0.6em;
+  white-space: nowrap;
+}
+.markdown th {
+  font-weight: 600;
+  background: var(--color-paper);
+  /* Browsers center header cells by default; left aligns them with the column text. */
+  text-align: left;
+}

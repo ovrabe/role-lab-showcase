@@ -1,0 +1,77 @@
+/* Motion: fill-in of data marks, the evaluation spinner, rising messages, thinking dots.
+   Everything stops for people who ask the system for reduced motion. */
+
+/* Data marks fill in once when they appear: the level ring turns to its value, the bars of
+   the five dimensions grow from the left. Switched off by the reduced-motion rule. */
+@keyframes rl-ring-in {
+  from {
+    stroke-dashoffset: var(--rl-ring-length);
+  }
+}
+.rl-ring-in {
+  animation: rl-ring-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@keyframes rl-bar-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+.rl-bar-in {
+  transform-origin: left center;
+  animation: rl-bar-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+@keyframes rl-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+.rl-spin {
+  animation: rl-spin 1.1s linear infinite;
+}
+
+/* Gentle motion (docs/SPEC.md, section 9): new chat messages and the task tiles rise
+   into place. The reduced-motion rule below switches it off. */
+@keyframes rl-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rl-rise {
+  animation: rl-rise 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+/* "Thinking" dots in the chat. */
+@keyframes rl-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+.rl-dots span {
+  animation: rl-dot 1.2s infinite both;
+}
+.rl-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.rl-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

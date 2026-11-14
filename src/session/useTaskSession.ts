@@ -1,0 +1,154 @@
+import { useCallback, useEffect, useState } from "react";
+import type { RoleConfig } from "../roles/roleSchema";
+import type { ReviewerReview, TaskSession, TranscriptEvent } from "./sessionSchema";
+import { deleteSession, loadSession, saveSession } from "./sessionStorage";
+import type { StoredEvaluation } from "../evaluation/evaluationSchema";
+
+function createSession(roleId: string): TaskSession {
+  const now = new Date().toISOString();
+  return {
+    version: 1,
+    roleId,
+    startedAt: now,
+    transcript: [{ turn: 1, kind: "event", event: "task_opened", content: "Úkol otevřen", ts: now }],
+    submission: "",
+    reflection: "",
+    lastSavedSubmission: "",
+  };
+}
+
+function withEvent(session: TaskSession, event: TranscriptEvent, content: string, materialId?: string): TaskSession {
+  const item = {
+    turn: session.transcript.length + 1,
+    kind: "event" as const,
+    event,
+    content,
+    ts: new Date().toISOString(),
+    ...(materialId ? { materialId } : {}),
+  };
+  return { ...session, transcript: [...session.transcript, item] };
+}
+
+/**
+ * The user's message plus one data_attached event per attached material, placed
+ * right before it. Pure, so the assistant panel can build the call from the same result.
+ */
+export function withUserMessage(
+  session: TaskSession,
+  role: RoleConfig,
+  text: string,
+  materialIds: string[],
+): TaskSession {
+  let updated = session;
+  for (const materialId of materialIds) {
+    const title = role.materials.find((material) => material.id === materialId)?.title ?? materialId;
+    updated = withEvent(updated, "data_attached", `Přiložen podklad: ${title}`, materialId);
+  }
+  const message = { turn: updated.transcript.length + 1, kind: "user" as const, content: text, ts: new Date().toISOString() };
+  return { ...updated, transcript: [...updated.transcript, message] };
+}
+
+/**
+ * Locks the task: records the final text and the submitted event (docs/SPEC.md, section 6).
+ * Pure, so the evaluation can start from exactly the state that gets stored.
+ */
+export function withSubmission(session: TaskSession): TaskSession {
+  if (session.submittedAt) return session;
+  const submitted = withEvent(session, "submitted", `Odevzdáno (${session.submission.length} znaků)`);
+  return { ...submitted, lastSavedSubmission: session.submission, submittedAt: new Date().toISOString() };
+}
+
+export function useTaskSession(role: RoleConfig) {
+  const [session, setSession] = useState<TaskSession>(() => loadSession(role.id) ?? createSession(role.id));
+  // False when the browser refuses to store data; the task still works, but a reload would lose it.
+  const [isStored, setIsStored] = useState(true);
+
+  useEffect(() => {
+    setIsStored(saveSession(session));
+  }, [session]);
+
+  const materialTitle = (materialId: string) =>
+    role.materials.find((material) => material.id === materialId)?.title ?? materialId;
+
+  // Stable identity, because material views use it as an effect dependency.
+  const markMaterialViewed = useCallback(
+    (materialId: string) => {
+      const title = role.materials.find((material) => material.id === materialId)?.title ?? materialId;
+      setSession((current) => {
+        const alreadyViewed = current.transcript.some(
+          (item) => item.event === "material_viewed" && item.materialId === materialId,
+        );
+        if (alreadyViewed) return current;
+        return withEvent(current, "material_viewed", `Podklad zobrazen: ${title}`, materialId);
+      });
+    },
+    [role],
+  );
+
+  return {
+    session,
+    isStored,
+    markMaterialViewed,
+
+    markMaterialDownloaded(materialId: string) {
+      setSession((current) =>
+        withEvent(current, "material_downloaded", `Podklad stažen: ${materialTitle(materialId)}`, materialId),
+      );
+    },
+
+    addUserMessage(text: string, materialIds: string[]) {
+      setSession((current) => withUserMessage(current, role, text, materialIds));
+    },
+
+    addAssistantMessage(content: string) {
+      setSession((current) => {
+        const item = { turn: current.transcript.length + 1, kind: "assistant" as const, content, ts: new Date().toISOString() };
+        return { ...current, transcript: [...current.transcript, item] };
+      });
+    },
+
+    setSubmission(text: string) {
+      setSession((current) => ({ ...current, submission: text }));
+    },
+
+    setReflection(text: string) {
+      setSession((current) => ({ ...current, reflection: text }));
+    },
+
+    // Called when the person leaves the submission field; logs only real changes.
+    commitSubmission() {
+      setSession((current) => {
+        if (current.submission === current.lastSavedSubmission) return current;
+        const saved = withEvent(
+          current,
+          "submission_saved",
+          `Odevzdání uloženo (${current.submission.length} znaků)`,
+        );
+        return { ...saved, lastSavedSubmission: current.submission };
+      });
+    },
+
+    submit() {
+      setSession(withSubmission);
+    },
+
+    saveEvaluation(evaluation: StoredEvaluation) {
+      setSession((current) => ({ ...current, evaluation }));
+    },
+
+    // null removes the review: the AI evaluation applies again as it was.
+    saveReview(review: ReviewerReview | null) {
+      setSession((current) => {
+        const { review: _previous, ...rest } = current;
+        return review ? { ...rest, review } : rest;
+      });
+    },
+
+    restart() {
+      deleteSession(role.id);
+      setSession(createSession(role.id));
+    },
+  };
+}
+
+export type TaskSessionControls = ReturnType<typeof useTaskSession>;

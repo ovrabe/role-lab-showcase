@@ -1,0 +1,215 @@
+/* Task screen on a phone: control patterns from current phone apps. A floating glass tab
+   bar within thumb reach and the submit button always at hand. */
+
+/* Icons and progress badges appear only in the bottom bar. */
+.rl-tab-icon,
+.rl-tab-badge {
+  display: none;
+}
+
+/* --shadow-floating, --color-bar-sheen and --color-bar-shadow live in styles/tokens.css. */
+:root {
+  /* The floating bar with its gap from the screen edge; content and the submit button
+     keep clear of it. */
+  --bottom-bar-space: calc(5.25rem + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 1023px) {
+  .rl-phone-tabs {
+    padding-bottom: var(--bottom-bar-space);
+  }
+
+  /* Content fades into the page colour along the bottom edge, so it slips away gently
+     behind the floating bar instead of being cut off under it. Only as tall as the bar
+     space, so it never covers the message field or the submit button above it. */
+  .rl-phone-tabs::after {
+    content: "";
+    position: fixed;
+    z-index: 19;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--bottom-bar-space);
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--color-paper) 70%);
+    transition: opacity 0.3s ease;
+  }
+  :root[data-bottom-bar="hidden"] .rl-phone-tabs::after {
+    opacity: 0;
+  }
+
+  /* A floating glass capsule with a gap from the screen edges, as in current phone systems
+     (docs/SPEC.md, section 9). It slides away while the person scrolls down and returns on
+     scrolling up (TabBar). */
+  .rl-bottom-tabs {
+    --rl-bar-pad: 0.375rem;
+    position: fixed;
+    z-index: 20;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: repeat(var(--rl-tab-count), minmax(0, 1fr));
+    padding: var(--rl-bar-pad);
+    border: 1px solid var(--color-glass-border);
+    border-radius: 999px;
+    /* Airy glass: a light sheen on top, a wide soft shadow and a fine highlight edge. */
+    background: linear-gradient(to bottom, var(--color-bar-sheen), var(--color-glass));
+    -webkit-backdrop-filter: blur(28px) saturate(1.6);
+    backdrop-filter: blur(28px) saturate(1.6);
+    box-shadow: 0 10px 36px var(--color-bar-shadow);
+    overflow: visible;
+    /* Slides away and back with the soft deceleration phone systems use. */
+    transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  :root[data-bottom-bar="hidden"] .rl-bottom-tabs {
+    transform: translateY(calc(100% + 1.5rem + env(safe-area-inset-bottom)));
+  }
+
+  /* One white pill that glides to the chosen tab with a slight spring. */
+  .rl-tab-glider {
+    position: absolute;
+    top: var(--rl-bar-pad);
+    bottom: var(--rl-bar-pad);
+    left: var(--rl-bar-pad);
+    width: calc((100% - 2 * var(--rl-bar-pad)) / var(--rl-tab-count));
+    border-radius: 999px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card), 0 1px 2px rgb(15 25 40 / 0.06);
+    transform: translateX(calc(var(--rl-tab-index) * 100%));
+    transition: transform 0.5s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+  /* With the bar away, sticky fields drop to the screen edge instead of leaving a gap. */
+  :root[data-bottom-bar="hidden"] {
+    --bottom-bar-space: env(safe-area-inset-bottom);
+  }
+  .rl-bottom-tabs .rl-tab {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.125rem;
+    margin: 0;
+    padding: 0.375rem 0.25rem;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-ink-muted);
+  }
+  /* The pill itself is the glider; the chosen tab only gets darker text and an icon that
+     lifts a little. Only translateY, never scale: iPhones draw a scaled icon from a bitmap,
+     which made the icons and labels look blurry. */
+  .rl-bottom-tabs .rl-tab,
+  .rl-bottom-tabs .rl-tab[aria-selected="true"] {
+    background: transparent;
+    box-shadow: none;
+    transition: color 0.2s ease;
+  }
+  .rl-bottom-tabs .rl-tab[aria-selected="true"] {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .rl-bottom-tabs .rl-tab-icon {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .rl-bottom-tabs .rl-tab[aria-selected="true"] .rl-tab-icon {
+    transform: translateY(-2px);
+  }
+  .rl-bottom-tabs .rl-tab:active .rl-tab-icon {
+    transform: translateY(1px);
+  }
+  .rl-bottom-tabs .rl-tab-icon {
+    display: block;
+  }
+
+  /* Task progress on the tabs: a small tick on done steps, a dot on the next one. The ring
+     in the bar colour keeps them apart from the icon. */
+  .rl-bottom-tabs .rl-tab-badge {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    border-radius: 999px;
+    background: var(--progress-sweep);
+    color: #ffffff;
+    box-shadow: 0 0 0 2px var(--color-surface);
+  }
+  .rl-bottom-tabs .rl-tab-badge-done {
+    top: -5px;
+    right: -10px;
+    width: 14px;
+    height: 14px;
+  }
+  .rl-bottom-tabs .rl-tab-badge-next {
+    top: -1px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Switching tabs slides the new content in from the side it lies on, so the change reads
+     as moving within one task, not as a jump to another screen. "backwards" leaves no
+     transform behind after the slide, which would break the sticky message field. */
+  .rl-slide-from-right {
+    animation: rl-slide-from-right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  .rl-slide-from-left {
+    animation: rl-slide-from-left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+  @keyframes rl-slide-from-right {
+    from {
+      opacity: 0;
+      transform: translateX(28px);
+    }
+  }
+  @keyframes rl-slide-from-left {
+    from {
+      opacity: 0;
+      transform: translateX(-28px);
+    }
+  }
+
+  /* The submit button sticks just above the bar while the person scrolls through the text. */
+  .rl-submit-bar {
+    position: sticky;
+    bottom: var(--bottom-bar-space);
+    border-top: none;
+    padding-bottom: 0.75rem;
+    background: var(--color-surface);
+  }
+
+  /* The chat has no fixed height: the claude.ai app shows the page under its own header,
+     so the screen height does not tell how much is visible. Messages flow in the page and
+     the message field sticks just above the bar. */
+  .rl-chat {
+    height: auto;
+    min-height: 0;
+  }
+  .rl-chat-messages {
+    flex: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+  .rl-composer-bar {
+    position: sticky;
+    z-index: 10;
+    bottom: var(--bottom-bar-space);
+    padding-bottom: 0.5rem;
+    background: var(--color-surface);
+  }
+
+  /* A submission field moved to the top when focused (SubmissionPanel) stops below the
+     claude.ai header, which the app passes as the top safe area, and keeps its label in view. */
+  .rl-submission-field {
+    scroll-margin-top: calc(env(safe-area-inset-top) + 2.25rem);
+  }
+
+  /* While typing, the bar steps aside as in common phone apps: the phone lifts fixed
+     elements above the keyboard, where the bar would cover the field being typed in. */
+  :root:has(textarea:focus, input:focus) {
+    --bottom-bar-space: env(safe-area-inset-bottom);
+  }
+  :root:has(textarea:focus, input:focus) .rl-bottom-tabs {
+    display: none;
+  }
+}

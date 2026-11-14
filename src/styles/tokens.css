@@ -1,0 +1,102 @@
+/* Design tokens (docs/SPEC.md, section 9). Each colour is written once as
+   light-dark(light value, dark value): the browser picks the side from color-scheme,
+   so the light and dark palettes can never drift apart. Dark follows the system unless
+   the page forces a theme through data-theme on <html> (ThemeToggle). */
+:root {
+  color-scheme: light dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root {
+  --color-ink: light-dark(#1f2a3a, #e6e9ef);
+  --color-ink-muted: light-dark(#4d5869, #a9b1bf);
+  --color-paper: light-dark(#f6f7f9, #14181f);
+  --color-surface: light-dark(#ffffff, #1d232c);
+  --color-line: light-dark(#dde1e7, #333b47);
+  /* Borders of text fields and selects: at least 3:1 against page and panel (WCAG 1.4.11). */
+  --color-control-border: light-dark(#858f9e, #6b7585);
+  /* The one memorable thing: quotes look like a highlighter pen. */
+  --color-marker: light-dark(#ffe58a, #6b5a1c);
+  /* Navy blue only for links, focus and the selected tab; never on buttons or data. */
+  --color-accent: light-dark(#1d4a9e, #5ca8ff);
+  --color-accent-contrast: light-dark(#ffffff, #0b1a2e);
+  --color-notice: light-dark(#fff4cc, #3a3216);
+  --color-notice-ink: light-dark(#5a4a12, #f1e2a6);
+
+  /* Buttons: a dark pill, a light one in dark mode. */
+  --color-action: light-dark(#1f2a3a, #f2f4f8);
+  --color-action-contrast: light-dark(#ffffff, #14181f);
+
+  /* Data and progress: violet into indigo. The gradient only on the level ring, the bars of
+     the five dimensions and the progress ticks; the solid violet on score dots and scale
+     numbers. Never a colour that depends on how high a score is. */
+  --progress-sweep: linear-gradient(135deg, #8a5cf6 0%, #5b6cff 100%);
+  /* #5b52f0 keeps 5:1 against white and the grey tiles, enough for the small scale numbers. */
+  --color-progress: light-dark(#5b52f0, #a49bff);
+  --color-track: light-dark(#efeef7, #2c3140);
+
+  /* The warm AI sweep: home banner, assistant icon, role badges and the submit button. */
+  --ai-sweep: linear-gradient(120deg, #ff7a45 0%, #e5489b 35%, #8a5cf6 70%, #3d7bff 100%);
+  /* The same sweep a few shades deeper for the submit button, so its white label keeps
+     at least 4.5:1 along the whole button (the light orange start gave only 2.6:1). */
+  --action-sweep: linear-gradient(120deg, #cf4520 0%, #c8327f 38%, #7a4ef0 72%, #3366e0 100%);
+
+  /* Airy page: a pastel wash behind everything, glass only for the header and floating parts. */
+  --color-wash-1: light-dark(#fbe6f0, #2a1a2e);
+  --color-wash-2: light-dark(#ece8fa, #1e1b38);
+  --color-wash-3: light-dark(#e4edfb, #13213a);
+  --color-glass: light-dark(rgb(255 255 255 / 0.65), rgb(29 35 44 / 0.6));
+  --color-glass-border: light-dark(rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.08));
+  /* The phone tab bar: a light sheen at its top edge and a wide soft shadow upwards. */
+  --color-bar-sheen: light-dark(rgb(255 255 255 / 0.92), rgb(40 46 58 / 0.7));
+  --color-bar-shadow: light-dark(rgb(60 50 120 / 0.1), rgb(0 0 0 / 0.45));
+
+  /* Shadows take their colour from light-dark() too; the shape stays the same. */
+  --shadow-card: 0 8px 30px light-dark(rgb(31 42 58 / 0.06), rgb(0 0 0 / 0.3));
+  --shadow-floating:
+    0 6px 24px light-dark(rgb(15 25 40 / 0.14), rgb(0 0 0 / 0.5)),
+    0 1px 3px light-dark(rgb(15 25 40 / 0.08), transparent);
+
+  /* Three corner sizes for the whole app; buttons and chips are full pills. */
+  --corner-card: 24px;
+  --corner-control: 16px;
+  --corner-chip: 10px;
+
+  /* One mid-grey chevron that reads on both a light and a dark field. */
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%238a93a3' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");
+
+  /* Plus Jakarta Sans from Google Fonts (linked in index.html), with Czech diacritics.
+     If the font cannot load, the device system font takes over and nothing breaks. */
+  --font-ui: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Expose the variables to Tailwind so classes like bg-paper or text-ink work. */
+@theme inline {
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-paper: var(--color-paper);
+  --color-surface: var(--color-surface);
+  --color-line: var(--color-line);
+  --color-marker: var(--color-marker);
+  --color-accent: var(--color-accent);
+  --color-accent-contrast: var(--color-accent-contrast);
+  --color-action: var(--color-action);
+  --color-progress: var(--color-progress);
+  --color-track: var(--color-track);
+  --color-action-contrast: var(--color-action-contrast);
+  --radius-card: var(--corner-card);
+  --radius-control: var(--corner-control);
+  --radius-chip: var(--corner-chip);
+  --color-notice: var(--color-notice);
+  --color-notice-ink: var(--color-notice-ink);
+  --font-sans: var(--font-ui);
+  /* The size classes carry their own line height; keep them in line with the page. */
+  --text-base--line-height: 1.625;
+  --text-sm--line-height: 1.5;
+}
+
