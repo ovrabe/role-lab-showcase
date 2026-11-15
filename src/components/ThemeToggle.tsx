@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Moon, Sun, SunMoon, type LucideIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Moon, Sun, SunMoon, type LucideIcon } from "lucide-react";
 
 // "system" follows the operating system (prefers-color-scheme); the other two
 // force a theme through data-theme on <html>, which the color tokens in index.css read.
@@ -36,64 +36,81 @@ const themeOptions: { value: ThemeChoice; label: string; icon: LucideIcon }[] = 
   { value: "dark", label: "Tmavý", icon: Moon },
 ];
 
-// Three small icons in a pill, so the switch fits beside the title on a phone. The name of
-// a theme shows only for a moment right after it is chosen (and on hover with a mouse);
-// otherwise the chosen icon alone is enough. Real radio buttons underneath, so arrow keys
-// and screen readers work without extra code.
+// One round icon showing the current theme; a click opens a small menu with the three
+// choices. Lighter than three icons side by side, and the names are always visible in the menu.
 export function ThemeToggle() {
   const [choice, setChoice] = useState<ThemeChoice>(loadThemeChoice);
-  const [flashedLabel, setFlashedLabel] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
+  // Close on a click outside or on Escape, as menus usually do.
   useEffect(() => {
-    if (flashedLabel === null) return;
-    const timeout = window.setTimeout(() => setFlashedLabel(null), 1600);
-    return () => window.clearTimeout(timeout);
-  }, [flashedLabel]);
+    if (!isOpen) return;
+    function onPointerDown(event: PointerEvent) {
+      if (!wrapperRef.current?.contains(event.target as Node)) setIsOpen(false);
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setIsOpen(false);
+      buttonRef.current?.focus();
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen]);
 
   function select(next: ThemeChoice) {
     setChoice(next);
     applyThemeChoice(next);
     saveThemeChoice(next);
-    setFlashedLabel(themeOptions.find((option) => option.value === next)?.label ?? null);
+    setIsOpen(false);
+    buttonRef.current?.focus();
   }
 
+  const current = themeOptions.find((option) => option.value === choice) ?? themeOptions[0];
+  const CurrentIcon = current.icon;
+
   return (
-    <div className="relative">
-      <fieldset className="flex items-center rounded-full bg-paper p-0.5">
-        <legend className="sr-only">Vzhled</legend>
-        {themeOptions.map(({ value, label, icon: Icon }) => (
-          <label
-            key={value}
-            className="group relative grid place-items-center size-8 rounded-full text-ink-muted cursor-pointer hover:text-ink has-checked:bg-surface has-checked:text-ink has-checked:shadow-[var(--shadow-card)] has-focus-visible:outline-2 has-focus-visible:outline-accent"
-          >
-            <input
-              type="radio"
-              name="theme"
-              value={value}
-              checked={choice === value}
-              onChange={() => select(value)}
-              className="sr-only"
-            />
-            <Icon aria-hidden="true" size={16} strokeWidth={2} />
-            <span className="sr-only">{label}</span>
-            {/* Mouse hover only (Tailwind applies hover only on devices that have it); on a
-                phone the name shows after a tap instead. */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute top-full right-0 mt-2 z-40 whitespace-nowrap rounded-chip bg-action text-action-contrast px-2.5 py-1 text-xs opacity-0 transition-opacity duration-100 group-hover:opacity-100 group-has-checked:hidden"
-            >
-              {label}
-            </span>
-          </label>
-        ))}
-      </fieldset>
-      {flashedLabel && (
-        <p
-          role="status"
-          className="rl-rise absolute top-full right-0 mt-2 z-40 whitespace-nowrap rounded-full bg-action text-action-contrast px-3 py-1 text-xs font-semibold shadow-[var(--shadow-floating)]"
+    <div ref={wrapperRef} className="relative">
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => setIsOpen((open) => !open)}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label={`Vzhled: ${current.label}`}
+        title="Vzhled"
+        className="grid place-items-center size-10 rounded-full text-ink-muted hover:text-ink hover:bg-surface aria-expanded:bg-surface aria-expanded:text-ink"
+      >
+        <CurrentIcon aria-hidden="true" size={18} strokeWidth={2} />
+      </button>
+      {isOpen && (
+        <div
+          role="menu"
+          aria-label="Vzhled"
+          className="rl-rise absolute top-full right-0 mt-2 z-40 min-w-44 rounded-card border border-line bg-surface p-1 shadow-[var(--shadow-floating)]"
         >
-          {flashedLabel}
-        </p>
+          {themeOptions.map(({ value, label, icon: Icon }) => (
+            <button
+              key={value}
+              type="button"
+              role="menuitemradio"
+              aria-checked={choice === value}
+              onClick={() => select(value)}
+              // The chosen item gets focus, so arrow-free keyboard use still works with Tab.
+              autoFocus={choice === value}
+              className="w-full flex items-center gap-3 rounded-chip px-3 py-2 text-sm text-left text-ink hover:bg-paper focus-visible:bg-paper aria-checked:font-semibold"
+            >
+              <Icon aria-hidden="true" size={16} strokeWidth={2} />
+              <span className="flex-1 whitespace-nowrap">{label}</span>
+              {choice === value && <Check aria-hidden="true" size={16} strokeWidth={2.5} />}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );

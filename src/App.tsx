@@ -48,13 +48,19 @@ export default function App() {
             appearance and profile on the right. On a phone the middle part takes the space
             that is left, so the name never runs into the controls. */}
         <div className="mx-auto max-w-7xl px-4 py-3 grid grid-cols-[auto_1fr_auto] sm:grid-cols-[1fr_auto_1fr] items-center gap-3">
-          <nav aria-label="Historie" className="flex items-center gap-1">
-            <HistoryButton label="Zpět" onClick={goBack} disabled={!canGoBack}>
-              <ChevronLeft aria-hidden="true" size={22} />
-            </HistoryButton>
-            <HistoryButton label="Vpřed" onClick={forward} disabled={!canGoForward}>
-              <ChevronRight aria-hidden="true" size={22} />
-            </HistoryButton>
+          {/* An arrow shows only when there is somewhere to go, so the home page stays clean.
+              The nav itself stays, so the name keeps its place in the middle. */}
+          <nav aria-label="Historie" className="flex items-center gap-1 min-h-10">
+            {canGoBack && (
+              <HistoryButton label="Zpět" onClick={goBack}>
+                <ChevronLeft aria-hidden="true" size={22} />
+              </HistoryButton>
+            )}
+            {canGoForward && (
+              <HistoryButton label="Vpřed" onClick={forward}>
+                <ChevronRight aria-hidden="true" size={22} />
+              </HistoryButton>
+            )}
           </nav>
           <button
             type="button"
@@ -66,26 +72,22 @@ export default function App() {
           <div className="justify-self-end flex items-center gap-3">
             {status === "preview" && <PreviewPill />}
             {/* The theme switch only on the home page: it is a one-off setting, the default
-                follows the system, and inside the task every row of the screen counts. A divider
-                keeps it apart from the profile, so the two are not mistaken for each other. */}
-            {screen.name === "home" && (
-              <div className="pr-3 sm:pr-5 border-r border-line">
-                <ThemeToggle />
-              </div>
-            )}
-            {/* Profile in the header, as in phone apps; not inside a task, where the row is for leaving it. */}
+                follows the system, and inside the task every row of the screen counts. */}
+            {screen.name === "home" && <ThemeToggle />}
+            {/* Profile in the header, as in phone apps; not inside a task, where the row is for leaving it.
+                Just the avatar: the label appears on hover and is read out by screen readers. */}
             {screen.name !== "task" && (
               <button
                 type="button"
                 onClick={() => setScreen({ name: "profile" })}
                 aria-current={screen.name === "profile" ? "page" : undefined}
-                className="group flex items-center gap-2 font-medium text-ink-muted hover:text-ink"
+                aria-label="Můj profil"
+                title="Můj profil"
+                className="group rounded-full"
               >
-                <span className="hidden sm:inline">Můj profil</span>
-                <span className="rounded-full ring-offset-2 ring-offset-[var(--color-paper)] group-hover:ring-2 group-hover:ring-line group-aria-[current=page]:ring-2 group-aria-[current=page]:ring-[var(--color-progress)]">
+                <span className="block rounded-full ring-offset-2 ring-offset-[var(--color-paper)] group-hover:ring-2 group-hover:ring-line group-aria-[current=page]:ring-2 group-aria-[current=page]:ring-[var(--color-progress)]">
                   <AvatarMedal avatar={avatar} size={40} />
                 </span>
-                <span className="sr-only sm:hidden">Můj profil</span>
               </button>
             )}
           </div>
@@ -112,16 +114,15 @@ export default function App() {
   );
 }
 
-// A round arrow like a browser's; greyed out when there is nowhere to go.
-function HistoryButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled: boolean; children: React.ReactNode }) {
+// A round arrow like a browser's.
+function HistoryButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
       aria-label={label}
       title={label}
-      className="grid place-items-center size-10 rounded-full text-ink hover:bg-surface disabled:text-ink-muted disabled:opacity-40 disabled:hover:bg-transparent"
+      className="grid place-items-center size-10 rounded-full text-ink hover:bg-surface"
     >
       {children}
     </button>

@@ -2,6 +2,15 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.2.2 – 15. 11. 2026
+
+### Změněno
+
+- Šipky zpět a vpřed se v hlavičce ukážou, jen když je kam jít. Na úvodní stránce tedy nepřekážejí.
+- Na webu funguje i tlačítko zpět v prohlížeči a gesto zpět na telefonu: vrací na předchozí obrazovku a z aplikace neodvede.
+- Přepínač vzhledu je jedna ikona, která otevře malou nabídku se třemi možnostmi.
+- Profil v hlavičce je jen ikona, popisek „Můj profil“ se ukáže po najetí myší.
+
 ## 1.2.1 – 15. 11. 2026
 
 ### Změněno
