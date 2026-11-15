@@ -15,6 +15,7 @@ type HomeScreenProps = {
   errors: RoleLoadError[];
   onSelectRole: (roleId: string) => void;
   onOpenMethodology: () => void;
+  onOpenTour: () => void;
   // Only in the web version, which has the "O projektu" page.
   onOpenAbout?: () => void;
   onOpenProfile: () => void;
@@ -30,6 +31,7 @@ export function HomeScreen({
   errors,
   onSelectRole,
   onOpenMethodology,
+  onOpenTour,
   onOpenAbout,
   onOpenProfile,
   challenges,
@@ -40,7 +42,7 @@ export function HomeScreen({
   const roleCards = roleGroups(activeRoles);
   return (
     <section className="max-w-2xl mx-auto">
-      <HomeHero onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} />
+      <HomeHero onOpenTour={onOpenTour} onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} />
 
       {errors.length > 0 && <ConfigErrors errors={errors} />}
 
@@ -105,7 +107,7 @@ export function HomeScreen({
 // intro sit on the dark part; the coloured shapes are pinned to the bottom edge at a
 // fixed aspect ratio, so on any width they stay under the text, never behind it.
 // Inline SVG, so nothing is downloaded.
-function HomeHero({ onOpenMethodology, onOpenAbout }: { onOpenMethodology: () => void; onOpenAbout?: () => void }) {
+function HomeHero({ onOpenTour, onOpenMethodology, onOpenAbout }: { onOpenTour: () => void; onOpenMethodology: () => void; onOpenAbout?: () => void }) {
   return (
     <div className="relative overflow-hidden rounded-card mb-10 bg-linear-to-br from-[#241d5c] via-[#3a2a8a] to-[#5a37b8]">
       <svg
@@ -137,6 +139,10 @@ function HomeHero({ onOpenMethodology, onOpenAbout }: { onOpenMethodology: () =>
           skóre je doložené citací a konečné slovo má člověk.
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
+          {/* The one solid button: for anyone who wants to see how it works before spending 15 minutes. */}
+          <button type="button" onClick={onOpenTour} className="rounded-full bg-white text-[#241d5c] px-4 py-2 font-semibold hover:bg-white/90">
+            Prohlídka na 2 minuty
+          </button>
           <button type="button" onClick={onOpenMethodology} className={heroButtonClass}>
             Jak hodnotíme
           </button>

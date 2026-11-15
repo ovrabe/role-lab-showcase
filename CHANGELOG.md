@@ -2,6 +2,17 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.3.0 – 15. 11. 2026
+
+Prohlídka na dvě minuty.
+
+### Přidáno
+
+- Prohlídka pro každého, kdo chce vidět, jak Role Lab funguje, než se pustí do úkolu. Na vymyšleném příkladu s kávou do předplatného projdeš zadání, rozhovor s asistentem, odevzdání a hodnocení.
+- V rozhovoru klikáš na připravené zprávy a vysvětlivky ukazují, na co se dívat. AI v něm udělá chybu a uvidíš, jak ji odhalit.
+- Hodnocení na konci vypadá stejně jako po skutečném úkolu, včetně citací a režimu hodnotitele.
+- Prohlídka nevolá AI, nic neukládá a nepočítá se do limitu. Otevřeš ji tlačítkem „Prohlídka na 2 minuty“ na úvodu nebo odkazem s `?prohlidka` na konci adresy.
+
 ## 1.2.2 – 15. 11. 2026
 
 ### Změněno

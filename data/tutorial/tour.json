@@ -1,0 +1,109 @@
+{
+  "roleId": "category-manager",
+  "title": "Káva do předplatného",
+  "assistantContext": "zaměstnanci e-shopu s výběrovou kávou",
+  "brief": {
+    "situation": "Jsi category manager v e-shopu s výběrovou kávou. Předplatitelé dostávají každý měsíc 500 g jedné kávy a platí za to 450 Kč bez DPH. Vybíráš kávu na leden.",
+    "task": "Vyber jednu ze tří nabízených káv tak, aby byla kvalitní a vydělala.",
+    "deliverable": "Krátký e-mail pro vedoucí: kterou kávu a proč, s čísly."
+  },
+  "coach": {
+    "brief": "Takhle začíná každý úkol: situace, co máš udělat, a podklady. Data jsou vymyšlená, jako ve všech úkolech.",
+    "submission": "Výsledek se odevzdává zvlášť, ne v chatu. Tady je e-mail od AI ještě doplněný o zálohu pro případ, že pražírna nedodá. Hodnotí se výsledek i celý rozhovor.",
+    "result": "Tohle je hodnocení. Každé skóre dokládá citace: klikni na ni a záznam práce se posune na to místo. Celkovou úroveň počítá kód z pěti skóre, ne AI. Když s hodnocením nesouhlasíš, otevři režim hodnotitele a skóre uprav."
+  },
+  "material": {
+    "title": "Nabídka pražíren na leden 2027",
+    "note": "Nákupní ceny jsou bez DPH a platí za balení uvedené ve sloupci Balení. Body SCA hodnotí kvalitu kávy, nad 85 bodů je výjimečná.",
+    "columns": ["Káva", "Nákupní cena", "Balení", "Body SCA"],
+    "rows": [
+      ["Etiopie Yirgacheffe", "640 Kč", "1 kg", "87"],
+      ["Kolumbie Huila", "520 Kč", "1 kg", "84"],
+      ["Keňa AA", "230 Kč", "250 g", "88"]
+    ]
+  },
+  "steps": [
+    {
+      "coach": "Zadání má cíl i data. Jedna důležitá věc v něm ale chybí, za chvíli uvidíš jaká.",
+      "user": "Vybírám kávu do lednového předplatného. Zákazník dostane 500 g a platí 450 Kč bez DPH. V tabulce máš tři kávy s nákupní cenou a body kvality. Spočítej u každé marži na jeden balíček 500 g.",
+      "assistant": "Marže na balíček 500 g:\n\n- Etiopie Yirgacheffe: 450 − 320 = 130 Kč\n- Kolumbie Huila: 450 − 260 = 190 Kč\n- Keňa AA: 450 − 115 = 335 Kč\n\nKeňa má nejvyšší marži i nejvíc bodů (88), vychází jako jasná volba."
+    },
+    {
+      "coach": "Keňa je až podezřele levná. AI přehlédla, že se nakupuje v menším balení. Ověřit číslo, které vypadá příliš dobře, je přesně to, co hodnotíme.",
+      "user": "Keňa je podezřele levná. Zkontroluj sloupec Balení: Keňa je za 250 g, ostatní za 1 kg. Přepočítej to.",
+      "assistant": "Máš pravdu, u Keni chyběl přepočet balení. Správně:\n\n- Etiopie Yirgacheffe: 450 − 320 = 130 Kč\n- Kolumbie Huila: 450 − 260 = 190 Kč\n- Keňa AA: 450 − 460 = −10 Kč\n\nKeňa by se v předplatném prodávala se ztrátou. Zbývá volba mezi Etiopií (lepší kvalita, 87 bodů) a Kolumbií (vyšší marže, 84 bodů)."
+    },
+    {
+      "coach": "Volba mezi kvalitou a marží je na člověku, AI pomůže s textem. Odevzdaný e-mail je ještě upravený a doplněný o riziko.",
+      "user": "Beru Etiopii: předplatné je o kvalitě a 130 Kč na balíček nám stačí. Napiš krátký e-mail pro vedoucí s čísly z přepočtu.",
+      "assistant": "Ahoj, do lednového předplatného navrhuji Etiopii Yirgacheffe. Má 87 bodů kvality a marži 130 Kč na balíček 500 g. Keňa AA vypadala nejlépe, ale nakupuje se po 250 g, takže by byla ve ztrátě 10 Kč na balíček. Kolumbie by vydělala víc (190 Kč), ale je kvalitativně slabší. Díky!"
+    }
+  ],
+  "submission": "Ahoj, do lednového předplatného navrhuji Etiopii Yirgacheffe. Má 87 bodů kvality a marži 130 Kč na balíček 500 g. Keňa AA vypadala nejlépe, ale nakupuje se po 250 g, takže by byla ve ztrátě 10 Kč na balíček. Kolumbie by vydělala víc (190 Kč), ale je kvalitativně slabší. Kdyby pražírna Etiopii nestihla dodat, máme jako zálohu Kolumbii. Díky!",
+  "keyTraps": [
+    {
+      "id": "pack-size",
+      "title": "Keňa v menším balení",
+      "whatIsWrong": "Keňa se nakupuje po 250 g, ostatní kávy po 1 kg. Kdo ceny porovná bez přepočtu, vidí Keňu čtyřikrát levnější, než je.",
+      "naiveEffect": "Keňa v předplatném a ztráta 10 Kč na každém balíčku."
+    }
+  ],
+  "evaluation": {
+    "dimensions": [
+      {
+        "id": "framing",
+        "score": 2,
+        "rationale": "Zadání má cíl, cenu předplatného i data, ale neupozorní na různé velikosti balení. AI proto první výpočet udělala špatně.",
+        "evidence": [{ "turn": 2, "quote": "Spočítej u každé marži na jeden balíček 500 g." }]
+      },
+      {
+        "id": "decomposition",
+        "score": 3,
+        "rationale": "Logický postup: nejdřív výpočet marže, pak kontrola, pak rozhodnutí a nakonec e-mail. Počítá AI, rozhodnutí zůstává u člověka.",
+        "evidence": [{ "turn": 6, "quote": "Beru Etiopii" }]
+      },
+      {
+        "id": "verification",
+        "score": 3,
+        "rationale": "Podezřele dobré číslo je ověřené konkrétně a kontrola odhalila podstatnou chybu. Ostatní výpočty už ověřené nejsou.",
+        "evidence": [{ "turn": 4, "quote": "Keňa je podezřele levná." }]
+      },
+      {
+        "id": "iteration",
+        "score": 3,
+        "rationale": "Opravy jdou po obsahu, ne jen po formě: přepočet marže podle skutečné velikosti balení.",
+        "evidence": [{ "turn": 4, "quote": "Přepočítej to." }]
+      },
+      {
+        "id": "judgment",
+        "score": 3,
+        "rationale": "Obhajitelné: volba váží kvalitu proti marži a má zálohu. Chybí, kolik předplatitelů se čeká a jestli pražírna tolik kávy dodá.",
+        "evidence": [{ "turn": "submission", "quote": "máme jako zálohu Kolumbii" }]
+      }
+    ],
+    "traps": [
+      {
+        "id": "pack-size",
+        "status": "caught",
+        "evidence": [{ "turn": 4, "quote": "Zkontroluj sloupec Balení" }],
+        "note": "Chyba je odhalená hned po první odpovědi a doporučení se podle ní změnilo."
+      }
+    ],
+    "strengths": [
+      "Podezřele dobrý výsledek není převzatý bez kontroly.",
+      "Volba mezi kvalitou a marží je vědomá a zdůvodněná."
+    ],
+    "nextSteps": [
+      {
+        "dimension": "framing",
+        "title": "Řekni AI hned na začátku, co v datech není vidět na první pohled",
+        "why": "Jedna věta o velikosti balení by ušetřila celý opravný krok.",
+        "exercise": "Než příště vložíš tabulku, napiš k ní jednu větu, co znamenají sloupce a v jakých jednotkách jsou."
+      }
+    ],
+    "insufficientEvidence": [],
+    "humanReviewFlags": [],
+    "confidence": "high",
+    "summary": "Solidní práce s AI: chyba v balení je odhalená, volba mezi kvalitou a marží zůstává u člověka a výsledek stojí na správných číslech. Příště stačí dát AI potřebné souvislosti hned na začátku."
+  }
+}

@@ -10,6 +10,7 @@ import { TaskScreen } from "./screens/TaskScreen";
 import { CalibrationScreen } from "./screens/CalibrationScreen";
 import { SamplesScreen } from "./screens/SamplesScreen";
 import { RoleTasksScreen } from "./screens/RoleTasksScreen";
+import { TourScreen } from "./screens/TourScreen";
 import { roleGroups } from "./roles/roleGroups";
 import { isParticipantBuild, isWebBuild } from "./buildFlags";
 import { loadRoles } from "./roles/loadRoles";
@@ -31,6 +32,7 @@ export type Screen =
   | { name: "challengeMap" }
   | { name: "calibration" }
   | { name: "samples" }
+  | { name: "tour" }
   | { name: "role"; roleId: string }
   | { name: "task"; roleId: string };
 
@@ -52,6 +54,8 @@ export function initialScreen(): Screen {
   if (!isParticipantBuild && params.has("kalibrace")) return { name: "calibration" };
   // ?ukazky opens the sample evaluations for demos (docs/DEMO.md).
   if (!isParticipantBuild && params.has("ukazky")) return { name: "samples" };
+  // ?prohlidka opens the guided tour, so a link can send someone straight to it.
+  if (params.has("prohlidka")) return { name: "tour" };
   const lastRoleId = loadLastRoleId();
   return lastRoleId && activeRoles.some((role) => role.id === lastRoleId)
     ? { name: "task", roleId: lastRoleId }
@@ -82,6 +86,7 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
           errors={errors}
           onSelectRole={(roleId) => setScreen({ name: "role", roleId })}
           onOpenMethodology={() => setScreen({ name: "methodology" })}
+          onOpenTour={() => setScreen({ name: "tour" })}
           onOpenAbout={isWebBuild ? () => setScreen({ name: "about" }) : undefined}
           onOpenProfile={() => setScreen({ name: "profile" })}
           challenges={challenges}
@@ -123,6 +128,12 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
       {isWebBuild && screen.name === "about" && <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} />}
       {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={aiStatus} backend={backend} />}
       {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}
+      {screen.name === "tour" && (
+        <TourScreen
+          onChooseTask={() => setScreen({ name: "home" })}
+          onTryChallenge={todaysChallenge ? () => openChallenge(todaysChallenge.id) : undefined}
+        />
+      )}
       {screen.name === "task" && selectedRole && (
         // key: switching roles must start a fresh component with that role's own session.
         <TaskScreen
