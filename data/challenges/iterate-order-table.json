@@ -1,0 +1,16 @@
+{
+  "id": "iterate-order-table",
+  "skill": "iteration",
+  "order": 2,
+  "title": "Tabulka pro import",
+  "minutes": 5,
+  "situation": "Z e-mailů máš 30 objednávek a potřebuješ z nich tabulku pro import do účetního systému. Import přijme jen tři sloupce v tomto pořadí: *Datum* ve tvaru 3. 11. 2026, *Zákazník* a *Částka* s desetinnou čárkou, třeba 12450,00. Žádné další řádky ani sloupce.\n\nAI vrátila tabulku, tady je její začátek a konec:",
+  "aiOutput": "| Objednávka | Datum a čas | Zákazník | Částka |\n|---|---|---|---:|\n| 1 | 2026-11-03 09:14 | Novák s.r.o. | 12450.00 |\n| 2 | 2026-11-03 11:02 | Dvořáková Jana | 3890.50 |\n| 3 | 2026-11-04 08:47 | Stavby Kladno a.s. | 45200.00 |\n| … | … | … | … |\n| 30 | 2026-11-12 16:20 | Pekárna U Mlýna | 7650.00 |\n| **Celkem** | | | **187320.50** |",
+  "task": "Napiš další zprávu pro AI, se kterou dostaneš tabulku, která se dá rovnou importovat.",
+  "rubric": {
+    "1": "Napíše jen „to není ono, zkus to znovu“ bez konkrétní výtky.",
+    "2": "Pojmenuje jednu věc, která nesedí, ostatní nechá na AI.",
+    "3": "Konkrétně pojmenuje, co nesedí, a řekne, jak to má vypadat.",
+    "4": "Konkrétně pojmenuje, co nesedí, přesně řekne, jak to má vypadat, a navede AI tak, aby se další verze dala použít."
+  }
+}

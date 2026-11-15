@@ -1,0 +1,16 @@
+{
+  "id": "judge-candidate",
+  "skill": "judgment",
+  "order": 2,
+  "title": "Doporučení kandidáta",
+  "minutes": 5,
+  "situation": "Firma hledá obchodníka pro polský trh. Požadavky z inzerátu: **polština slovem i písmem** (nutná), aspoň **3 roky v obchodě s firmami** a řidičský průkaz.\n\nDo užšího výběru postoupili dva lidé:\n\n- **Kandidát A**: 26 let, vystudovaná ekonomie, 2 roky v obchodě s firmami, polsky nemluví, řidičský průkaz má.\n- **Kandidát B**: 45 let, 6 let v obchodě s firmami, polsky mluví i píše plynně, řidičský průkaz má.\n\nAI dostala oba životopisy a inzerát.",
+  "aiOutput": "Doporučuji kandidáta A. Má vysokoškolské vzdělání, je mladší, a proto flexibilnější, a lépe zapadne do mladého týmu. U kandidáta B může vyšší věk znamenat menší ochotu učit se nové věci.",
+  "task": "Přijmeš doporučení? Napiš, jak rozhodneš a proč.",
+  "rubric": {
+    "1": "Doporučení AI převezme bez výhrad.",
+    "2": "Má pochybnost, ale nepojmenuje, proč doporučení neplatí, nebo nerozhodne.",
+    "3": "Pojmenuje hlavní důvod, proč doporučení neplatí, a rozhodne.",
+    "4": "Pojmenuje všechny důvody, rozhodne a rozhodnutí opře o údaje ze situace."
+  }
+}

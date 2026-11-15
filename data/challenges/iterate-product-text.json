@@ -1,0 +1,16 @@
+{
+  "id": "iterate-product-text",
+  "skill": "iteration",
+  "order": 1,
+  "title": "Text na web je mimo",
+  "minutes": 5,
+  "situation": "Chystáš krátký popis aplikace Kalkul na úvodní stránku webu. Zadání pro AI znělo: text pro majitele malých živností, kteří nemají účetní vzdělání, nejvýš 40 slov, s cenou 290 Kč měsíčně a s tím, že první měsíc je zdarma. AI vrátila tohle:",
+  "aiOutput": "Kalkul je moderní cloudové řešení pro správu účetnictví, které využívá pokročilou OCR technologii pro automatické vytěžování dokladů a nabízí API integraci s bankovními systémy prostřednictvím standardu PSD2. Díky redundantní infrastruktuře a šifrování AES-256 jsou vaše data vždy v bezpečí. Systém podporuje vícefiremní režim, párování plateb pomocí variabilních symbolů a export do formátů XML a ISDOC. Uživatelské rozhraní je responzivní a funguje na všech zařízeních. Kalkul je ideální volbou pro každého, kdo hledá spolehlivý a škálovatelný nástroj pro efektivní správu financí v souladu s aktuální legislativou.",
+  "task": "Napiš další zprávu pro AI, se kterou dostaneš text, který můžeš dát na web.",
+  "rubric": {
+    "1": "Napíše jen „to není ono, zkus to znovu“ bez konkrétní výtky.",
+    "2": "Pojmenuje jednu věc, která nesedí, ostatní nechá na AI.",
+    "3": "Konkrétně pojmenuje, co nesedí, a řekne, jak to má vypadat.",
+    "4": "Konkrétně pojmenuje, co nesedí, přesně řekne, jak to má vypadat, a navede AI tak, aby se další verze dala použít."
+  }
+}

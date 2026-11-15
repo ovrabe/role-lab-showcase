@@ -8,6 +8,10 @@ import { HomeScreen } from "./screens/HomeScreen";
 import { MethodologyScreen } from "./screens/MethodologyScreen";
 import { AboutScreen } from "./screens/AboutScreen";
 import { ReleaseNotesScreen } from "./screens/ReleaseNotesScreen";
+import { ChallengeScreen } from "./screens/ChallengeScreen";
+import { loadChallenges } from "./challenges/loadChallenges";
+import { dailyChallenge, pragueDay } from "./challenges/dailyChallenge";
+import { ChallengeMapScreen } from "./screens/ChallengeMapScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { Footer } from "./components/Footer";
 import { isParticipantBuild, isWebBuild } from "./buildFlags";
@@ -27,12 +31,15 @@ type Screen =
   | { name: "about" }
   | { name: "profile" }
   | { name: "releaseNotes" }
+  | { name: "challenge"; challengeId: string }
+  | { name: "challengeMap" }
   | { name: "calibration" }
   | { name: "samples" }
   | { name: "task"; roleId: string };
 
 // Role configs are bundled into the page, so loading them once at start is enough.
 const { activeRoles, upcomingRoleTitles, errors } = loadRoles();
+const { challenges } = loadChallenges();
 
 // After a reload, go straight back to the task that was open, if that role still exists.
 function initialScreen(): Screen {
@@ -70,6 +77,9 @@ export default function App() {
     saveLastRoleId(screen.name === "task" ? screen.roleId : null);
   }, [screen]);
   const selectedRole = screen.name === "task" ? activeRoles.find((role) => role.id === screen.roleId) : undefined;
+  // Worked out on every render, so a page left open past midnight offers the new day's challenge.
+  const todaysChallenge = dailyChallenge(challenges, pragueDay(new Date()));
+  const selectedChallenge = screen.name === "challenge" ? challenges.find((challenge) => challenge.id === screen.challengeId) : undefined;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -135,6 +145,10 @@ export default function App() {
             onOpenMethodology={() => setScreen({ name: "methodology" })}
             onOpenAbout={isWebBuild ? () => setScreen({ name: "about" }) : undefined}
             onOpenProfile={() => setScreen({ name: "profile" })}
+            challenges={challenges}
+            dailyChallenge={todaysChallenge}
+            onSelectChallenge={(challengeId) => setScreen({ name: "challenge", challengeId })}
+            onOpenChallengeMap={() => setScreen({ name: "challengeMap" })}
           />
         )}
         {screen.name === "methodology" && (
@@ -148,6 +162,23 @@ export default function App() {
           <ProfileScreen roles={activeRoles} onSelectRole={(roleId) => setScreen({ name: "task", roleId })} />
         )}
         {screen.name === "releaseNotes" && <ReleaseNotesScreen />}
+        {screen.name === "challenge" && selectedChallenge && (
+          // key: another challenge starts with an empty answer.
+          <ChallengeScreen
+            key={selectedChallenge.id}
+            challenge={selectedChallenge}
+            aiStatus={status}
+            backend={backend}
+            onBack={() => setScreen({ name: "challengeMap" })}
+          />
+        )}
+        {screen.name === "challengeMap" && (
+          <ChallengeMapScreen
+            challenges={challenges}
+            dailyChallengeId={todaysChallenge?.id ?? null}
+            onSelect={(challengeId) => setScreen({ name: "challenge", challengeId })}
+          />
+        )}
         {isWebBuild && screen.name === "about" && <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} />}
         {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={status} backend={backend} />}
         {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}

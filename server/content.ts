@@ -2,6 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { parseRoles, type LoadedRoles } from "../src/roles/parseRoles.js";
 import { findEvaluatorKey, type EvaluatorKey } from "../src/evaluation/evaluatorKeySchema.js";
+import { findChallengeKey, parseChallenges, type LoadedChallenges } from "../src/challenges/parseChallenges.js";
+import type { ChallengeKey } from "../src/challenges/challengeSchema.js";
 
 /**
  * The web server's view of the role content (docs/SPEC.md, section 13): the same role
@@ -16,6 +18,8 @@ export type ServerContent = {
   roles: LoadedRoles;
   getMaterialText: (file: string) => string | undefined;
   getEvaluatorKey: (roleId: string) => EvaluatorKey | null;
+  challenges: LoadedChallenges;
+  getChallengeKey: (challengeId: string) => ChallengeKey | null;
 };
 
 function readJsonFiles(directory: string, suffix: string): Record<string, unknown> {
@@ -51,10 +55,13 @@ export function loadServerContent(root: string = process.cwd()): ServerContent {
     ]),
   );
   const keyFiles = readJsonFiles(join(root, "evaluator-data"), ".key.json");
+  const challengeKeyFiles = readJsonFiles(join(root, "evaluator-data", "challenges"), ".key.json");
 
   return {
     roles: parseRoles(roleFiles, getMaterialText),
     getMaterialText,
     getEvaluatorKey: (roleId) => findEvaluatorKey(keyFiles, roleId),
+    challenges: parseChallenges(readJsonFiles(join(dataDir, "challenges"), ".json")),
+    getChallengeKey: (challengeId) => findChallengeKey(challengeKeyFiles, challengeId),
   };
 }

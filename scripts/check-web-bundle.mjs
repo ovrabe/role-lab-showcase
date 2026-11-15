@@ -9,7 +9,8 @@ const problems = [];
 
 // Every trap explanation from every evaluator key.
 // The public copy of the code has no evaluator keys, so there is nothing of them to leak.
-const keyFiles = existsSync("evaluator-data") ? readdirSync("evaluator-data") : [];
+// Role keys sit in evaluator-data/, challenge keys in evaluator-data/challenges/.
+const keyFiles = existsSync("evaluator-data") ? readdirSync("evaluator-data", { recursive: true }) : [];
 for (const name of keyFiles.filter((file) => file.endsWith(".key.json"))) {
   const key = JSON.parse(readFileSync(join("evaluator-data", name), "utf8"));
   for (const trap of key.traps ?? []) {
@@ -25,6 +26,12 @@ const evaluatorBlock = promptsDoc.slice(promptsDoc.indexOf("## 2. Hodnotitel")).
 const firstLine = evaluatorBlock.split("\n").find((line) => line.trim().length > 30)?.trim();
 if (!firstLine) problems.push("Could not read the evaluator instructions from docs/PROMPTS.md");
 else if (page.includes(firstLine)) problems.push("Evaluator instructions found in the page");
+
+// The challenge evaluator's instructions (docs/PROMPTS.md, section 4), built only on the server.
+const challengeBlock = promptsDoc.slice(promptsDoc.indexOf("### Pokyny hodnotitele výzev")).match(/```[a-z]*\n([\s\S]*?)\n```/)?.[1] ?? "";
+const challengeLine = challengeBlock.split("\n").find((line) => line.trim().length > 30)?.trim();
+if (!challengeLine) problems.push("Could not read the challenge evaluator instructions from docs/PROMPTS.md");
+else if (page.includes(challengeLine)) problems.push("Challenge evaluator instructions found in the page");
 
 // Anything that looks like an Anthropic API key.
 if (/sk-ant-[A-Za-z0-9_-]{10,}/.test(page)) problems.push("Something like an Anthropic API key found in the page");

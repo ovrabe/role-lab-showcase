@@ -1,0 +1,16 @@
+{
+  "id": "framing-price-email",
+  "skill": "framing",
+  "order": 1,
+  "title": "E-mail o zdražení",
+  "minutes": 5,
+  "situation": "Od 1. 3. zdražuje firma měsíční servisní paušál z 2 500 Kč na 2 700 Kč, tedy o 8 %. Stávající zákazníci se to mají dozvědět e-mailem do konce týdne. Dotazy vyřizuje zákaznická linka 800 123 456.\n\nKolega zadal AI jedinou větu:\n\n> Napiš e-mail zákazníkům o zdražení.",
+  "aiOutput": "Vážení zákazníci,\n\nrádi bychom vás informovali, že se brzy mění naše ceny. Důvodem je rostoucí kvalita našich služeb a nové výhody, které pro vás chystáme.\n\nVěříme, že i nadále budete s našimi službami spokojeni. Děkujeme za vaši věrnost!\n\nS přátelským pozdravem\nVáš tým",
+  "task": "Napiš zadání, podle kterého ti AI napíše e-mail, který můžeš rovnou poslat zákazníkům.",
+  "rubric": {
+    "1": "Zopakuje obecné zadání nebo přidá jen zdvořilosti, AI nedostane nic nového.",
+    "2": "Doplní jednu nebo dvě důležité věci, třeba částku, ale ostatní chybí.",
+    "3": "Dá AI fakta, adresáta i požadovaný tón, chybí jen drobnost.",
+    "4": "Zadání obsahuje fakta, adresáta, tón i to, co AI nesmí vymýšlet, takže e-mail jde rovnou poslat."
+  }
+}

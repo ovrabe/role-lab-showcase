@@ -1,0 +1,16 @@
+{
+  "id": "verify-quarterly-sales",
+  "skill": "verification",
+  "order": 1,
+  "title": "Shrnutí čtvrtletních tržeb",
+  "minutes": 5,
+  "situation": "Šéfová chce do hodiny krátké srovnání tržeb za 2. a 3. čtvrtletí podle regionů. Máš export tabulky a AI ti z něj připravila shrnutí.\n\n**Tvůj export (tržby v tis. Kč)**\n\n| Region | 2. čtvrtletí | 3. čtvrtletí |\n|---|---:|---:|\n| Praha | 4 820 | 5 110 |\n| Brno | 2 150 | 2 390 |\n| Ostrava | 1 640 | 1 590 |\n| Plzeň | 1 210 | 1 380 |",
+  "aiOutput": "| Region | 2. čtvrtletí | 3. čtvrtletí | Změna |\n|---|---:|---:|---:|\n| Praha | 4 820 | 5 110 | +6,0 % |\n| Brno | 2 150 | 2 390 | +11,2 % |\n| Ostrava | 1 640 | 1 590 | +3,0 % |\n| Plzeň | 1 210 | 1 380 | +14,0 % |\n| **Celkem** | **9 820** | **10 740** | **+9,4 %** |\n\nVšechny regiony ve 3. čtvrtletí rostly. Nejrychleji rostlo Brno (+11,2 %) a celkově firma vyrostla o 9,4 %.",
+  "task": "Než shrnutí pošleš šéfové, co v něm zkontroluješ a jak? Napiš konkrétně, co je špatně a co s výstupem uděláš.",
+  "rubric": {
+    "1": "Výstup převezme, nebo napíše jen obecně „zkontroluju čísla“ bez konkrétního místa.",
+    "2": "Jmenuje konkrétní kontroly nebo najde jednu chybu, ostatní přehlédne.",
+    "3": "Najde aspoň dvě chyby a ověří je, třeba přepočtem nebo srovnáním s exportem.",
+    "4": "Najde všechny chyby, ověří je proti exportu a řekne, co opraví, než shrnutí pošle."
+  }
+}

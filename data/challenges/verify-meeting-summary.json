@@ -1,0 +1,16 @@
+{
+  "id": "verify-meeting-summary",
+  "skill": "verification",
+  "order": 2,
+  "title": "Shrnutí porady",
+  "minutes": 5,
+  "situation": "AI ti po poradě shrnula tvoje poznámky. Shrnutí chceš rozeslat všem účastníkům.\n\n**Tvoje poznámky z porady k novému docházkovému systému, 3. 11.**\n\n- Jana: dodavatel potvrdil spuštění nejdřív 1. 2., spíš později.\n- Petr připraví srovnání nákladů do pátku 7. 11.\n- Školení pro vedoucí: termín zatím není, Martina zjistí volné místnosti.\n- Rozpočet: schválený strop 380 tis. Kč, víc jen se souhlasem ředitele.\n- Otevřené: jestli přecházejí i externisté. Rozhodne se příště.",
+  "aiOutput": "**Shrnutí porady k novému docházkovému systému (3. 11.)**\n\n- Nový systém se spustí 1. 2.\n- Srovnání nákladů připraví Martina do pátku 7. 11.\n- Martina zjistí volné místnosti pro školení vedoucích.\n- Rozpočet je schválený ve výši 380 tis. Kč, vyšší částku musí schválit ředitel.\n- Na nový systém přecházejí všichni zaměstnanci včetně externistů.",
+  "task": "Než shrnutí rozešleš, co v něm zkontroluješ a co opravíš? Napiš konkrétně.",
+  "rubric": {
+    "1": "Shrnutí převezme, nebo napíše jen obecně „projdu to“ bez konkrétní chyby.",
+    "2": "Porovná shrnutí s poznámkami, ale najde jen jednu chybu.",
+    "3": "Najde aspoň dvě chyby a ukáže, kde se shrnutí rozchází s poznámkami.",
+    "4": "Najde všechny chyby, ke každé uvede, co stojí v poznámkách, a opraví shrnutí, než ho rozešle."
+  }
+}

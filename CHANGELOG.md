@@ -2,6 +2,21 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.1.0 – 15. 11. 2026
+
+Krátké výzvy na každý den.
+
+### Přidáno
+
+- 15 krátkých výzev, tři na každou z pěti dovedností. Každá má situaci, výstup AI a úkol, na který napíšeš jednu odpověď. Hodnocení přijde za pár sekund, skóre je doložené citacemi z odpovědi a ukáže se i rozbor toho, co výzva skrývala.
+- Výzva dne na úvodu. Je stejná pro všechny a každý den jiná.
+- Mapa výzev s nejlepším skóre u každé výzvy. Výsledky výzev se ukládají jen v tomto prohlížeči a úroveň dovedností v profilu nemění, tu určují celé úkoly.
+
+### Bezpečnost
+
+- Webová verze: výzvy hodnotí rychlejší model na serveru a klíč výzvy prohlížeč dostane až s hodnocením.
+- Webová verze: vlastní denní limit pro výzvy na osobu i celkem.
+
 ## 1.0.0 – 14. 11. 2026 · MVP
 
 První veřejná verze.

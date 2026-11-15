@@ -5,6 +5,9 @@ import { buildAssistantTurns } from "../prompts/assistant";
 import { getMaterialText } from "../materials/materialFiles";
 import { fitTurnsToBudget } from "../assistant/promptBudget";
 import { runEvaluator, type EvaluatorOutcome } from "../evaluation/runEvaluator";
+import { runChallengeEvaluator } from "../challenges/runChallengeEvaluator";
+import type { ChallengeConfig } from "../challenges/challengeSchema";
+import type { ChallengeOutcome } from "../challenges/challengeResult";
 
 export type ChatOptions = {
   signal: AbortSignal;
@@ -25,6 +28,8 @@ export type ChatOptions = {
 export type AiBackend = {
   chat(role: RoleConfig, transcript: TranscriptItem[], options: ChatOptions): Promise<{ text: string; truncated: boolean }>;
   evaluate(role: RoleConfig, session: TaskSession, signal: AbortSignal): Promise<EvaluatorOutcome>;
+  // A short challenge: one answer, one evaluation by the quick model.
+  evaluateChallenge(challenge: ChallengeConfig, answer: string, signal: AbortSignal): Promise<ChallengeOutcome>;
 };
 
 /** Backend for the claude.ai builds: everything in the page, Claude via claude.use("sample"). */
@@ -44,6 +49,9 @@ export function claudeAiBackend(sample: SampleFunction): AiBackend {
     },
     evaluate(role, session, signal) {
       return runEvaluator(sample, role, session, signal);
+    },
+    evaluateChallenge(challenge, answer, signal) {
+      return runChallengeEvaluator(sample, challenge, answer, signal);
     },
   };
 }

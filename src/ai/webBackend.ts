@@ -1,4 +1,5 @@
 import { StoredEvaluation } from "../evaluation/evaluationSchema";
+import { ChallengeResult } from "../challenges/challengeResult";
 import { handleSampleError } from "../assistant/sampleErrors";
 import type { AiBackend } from "./aiBackend";
 
@@ -88,6 +89,32 @@ export const webBackend: AiBackend = {
         // The server checked it already; this guards the shape the page stores.
         const parsed = StoredEvaluation.safeParse(body.evaluation);
         return parsed.success ? { kind: "ok", evaluation: parsed.data } : { kind: "invalid", problems: ["unexpected_shape"] };
+      }
+      if (body.kind === "error") return { kind: "error", handling: handleSampleError(body) };
+      return body;
+    } catch (error) {
+      if (isAbort(error)) return { kind: "error", handling: handleSampleError({ code: "cancelled" }) };
+      return { kind: "error", handling: handleSampleError({ code: "upstream_error" }) };
+    }
+  },
+
+  async evaluateChallenge(challenge, answer, signal) {
+    try {
+      const response = await fetch("/api/challenge", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ challengeId: challenge.id, answer }),
+        signal,
+      });
+      if (!response.ok) return { kind: "error", handling: handleSampleError(await errorFrom(response)) };
+      const body = (await response.json()) as
+        | { kind: "ok"; result: unknown }
+        | { kind: "invalid"; problems: string[] }
+        | { kind: "error"; code: string; message: string }
+        | { kind: "missing_key" };
+      if (body.kind === "ok") {
+        const parsed = ChallengeResult.safeParse(body.result);
+        return parsed.success ? { kind: "ok", result: parsed.data } : { kind: "invalid", problems: ["unexpected_shape"] };
       }
       if (body.kind === "error") return { kind: "error", handling: handleSampleError(body) };
       return body;

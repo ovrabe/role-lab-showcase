@@ -21,6 +21,9 @@ function fakeClaude(evaluationReply = JSON.stringify(strong.session.evaluation!.
       onDelta("pomůžu.");
       return { truncated: false };
     },
+    async evaluateChallenge() {
+      return "";
+    },
     async evaluate(prompt) {
       sent.prompt = prompt;
       return evaluationReply;
@@ -72,6 +75,7 @@ describe("POST /api/chat", () => {
     const claude: ClaudeClient = {
       chat: async () => Promise.reject({ code: "rate_limited", message: "Busy" }),
       evaluate: async () => "",
+      evaluateChallenge: async () => "",
     };
     const response = await handleChat(post("/api/chat", { roleId: role.id, transcript: [userMessage(1, "Ahoj")] }), deps(claude));
     expect(await readEvents(response)).toEqual([{ type: "error", code: "rate_limited", message: "Busy" }]);
@@ -167,6 +171,7 @@ describe("POST /api/evaluate", () => {
     const claude: ClaudeClient = {
       chat: async () => ({ truncated: false }),
       evaluate: async () => Promise.reject({ code: "rate_limited", message: "Busy" }),
+      evaluateChallenge: async () => "",
     };
     const body = (await (await handleEvaluate(post("/api/evaluate", { roleId: role.id, session }), deps(claude))).json()) as EvaluateResponse;
     expect(body).toEqual({ kind: "error", code: "rate_limited", message: "Busy" });

@@ -42,7 +42,8 @@ copyFileSync("scripts/public/README.md", join(target, "README.md"));
 rmSync(join(target, "scripts/public"), { recursive: true, force: true });
 
 // Final check against the real keys: no trap title may appear anywhere in the copy.
-const trapTitles = readdirSync("evaluator-data")
+// Role keys and challenge keys (evaluator-data/challenges/) alike.
+const trapTitles = readdirSync("evaluator-data", { recursive: true })
   .filter((name) => name.endsWith(".key.json"))
   .flatMap((name) => JSON.parse(readFileSync(join("evaluator-data", name), "utf8")).traps.map((trap) => trap.title.toLowerCase()));
 if (trapTitles.length === 0) throw new Error("No trap titles found in evaluator-data/; cannot verify the copy");

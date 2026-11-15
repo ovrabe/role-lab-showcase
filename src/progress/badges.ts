@@ -1,4 +1,5 @@
 import { dimensionIds, type DimensionId } from "../roles/roleSchema";
+import { skillNames } from "../roles/skillNames";
 import { recommendedSkill, skillLevels, type ProgressAttempt } from "./progress";
 
 /**
@@ -35,13 +36,6 @@ const masteryTitles: Record<DimensionId, string> = {
   verification: "Mistr ověřování",
   iteration: "Mistr iterace",
   judgment: "Mistr úsudku",
-};
-const skillNames: Record<DimensionId, string> = {
-  framing: "Zadání a kontext",
-  decomposition: "Rozklad úkolu",
-  verification: "Ověřování",
-  iteration: "Iterace",
-  judgment: "Úsudek a výsledek",
 };
 
 const rules: BadgeRule[] = [

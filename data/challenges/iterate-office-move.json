@@ -1,0 +1,16 @@
+{
+  "id": "iterate-office-move",
+  "skill": "iteration",
+  "order": 3,
+  "title": "Plán stěhování kanceláře",
+  "minutes": 5,
+  "situation": "Firma se 15. 4. stěhuje do nové kanceláře v jiné budově. Stěhuje se 18 lidí, server, síťové tiskárny a archiv. Nájem staré kanceláře končí 30. 4. Na prosbu „Napiš plán stěhování kanceláře.“ vrátila AI tohle:",
+  "aiOutput": "**Plán stěhování**\n\n1. Naplánujte stěhování.\n2. Informujte zaměstnance.\n3. Zajistěte stěhovací firmu.\n4. Přesuňte IT vybavení.\n5. Vybalte a zabydlete se v nových prostorách.",
+  "task": "Napiš další zprávu pro AI, se kterou z obecného seznamu uděláš plán, podle kterého se dá postupovat.",
+  "rubric": {
+    "1": "Napíše jen „to není ono, zkus to znovu“ bez konkrétní výtky.",
+    "2": "Pojmenuje jednu věc, která nesedí, ostatní nechá na AI.",
+    "3": "Konkrétně pojmenuje, co nesedí, a řekne, jak to má vypadat.",
+    "4": "Konkrétně pojmenuje, co nesedí, přesně řekne, jak to má vypadat, a navede AI tak, aby se další verze dala použít."
+  }
+}

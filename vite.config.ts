@@ -54,6 +54,7 @@ function localApi(): Plugin {
           "/api/chat": ["/server/handlers.ts", "handleChat"],
           "/api/evaluate": ["/server/handlers.ts", "handleEvaluate"],
           "/api/feedback": ["/server/feedback.ts", "handleFeedback"],
+          "/api/challenge": ["/server/challengeHandler.ts", "handleChallenge"],
         };
         const route = routes[req.url ?? ""];
         if (!route) return next();
@@ -121,10 +122,12 @@ export default defineConfig(({ mode }) => ({
       ...(hasPrivateData
         ? []
         : [
+            "server/challengeHandler.test.ts",
             "server/content.test.ts",
             "server/handlers.test.ts",
             "server/injection.test.ts",
             "server/rateLimit.test.ts",
+            "src/challenges/challengeKeys.test.ts",
             "src/evaluation/validateEvaluation.test.ts",
             "src/progress/progress.test.ts",
             "src/prompts/prompts.test.ts",

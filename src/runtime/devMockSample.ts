@@ -1,3 +1,4 @@
+import { mockChallengeReply } from "../challenges/mockChallengeReply.js";
 import type { SampleFunction } from "./useAiAvailability.js";
 
 // Development-only stand-in for claude.use("sample"), opened with ?simulace.
@@ -87,6 +88,7 @@ async function mockJson(input: MockInput, options: MockOptions = {}) {
   const errorCode = submission.match(/#chyba:(\w+)/)?.[1] ?? devWindow.mockNextEvaluatorError;
   devWindow.mockNextEvaluatorError = undefined;
   if (errorCode) throw { code: errorCode, message: `Mock error ${errorCode}` };
+  if (prompt.includes("<odpoved_na_vyzvu>")) return mockChallengeReply(prompt);
   if (submission.includes("#spatny-tvar")) return { hodnoceni: "nevím" };
 
   const firstUserLine = prompt.match(/^\[(\d+)\] user \([^)]*\): (.+)$/m);

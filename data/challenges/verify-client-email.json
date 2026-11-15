@@ -1,0 +1,16 @@
+{
+  "id": "verify-client-email",
+  "skill": "verification",
+  "order": 3,
+  "title": "E-mail klientovi o reklamaci",
+  "minutes": 5,
+  "situation": "Klient se ptá, dokdy může reklamovat vadnou dodávku. Zboží převzal 15. 2. 2027. AI ti připravila návrh odpovědi.\n\n**Ze smlouvy s klientem**\n\n> Reklamaci vady dodávky lze uplatnit do 30 dnů ode dne převzetí zboží.",
+  "aiOutput": "Dobrý den,\n\nreklamaci můžete uplatnit do 15. 3. 2027, tedy 30 dnů od převzetí zboží. Lhůta se počítá v pracovních dnech, takže máte ještě rezervu.\n\nPodle průzkumu Asociace dodavatelů z roku 2025 vyřizujeme reklamace o 40 % rychleji než konkurence, takže se nemusíte ničeho obávat.\n\nS pozdravem",
+  "task": "Než e-mail odešleš, co v něm zkontroluješ a co změníš? Napiš konkrétně.",
+  "rubric": {
+    "1": "E-mail odešle tak, jak je, nebo upraví jen styl.",
+    "2": "Zkontroluje některé údaje, ale najde jen jednu chybu.",
+    "3": "Najde aspoň dvě chyby a ověří je, třeba podle smlouvy nebo kalendáře.",
+    "4": "Najde všechny chyby, ověří je proti smlouvě a kalendáři a e-mail opraví, než ho pošle."
+  }
+}

@@ -8,9 +8,10 @@ import { upstashTransaction } from "./upstash.js";
  */
 export const dailyLimits = {
   // Per person: two full attempts (25 messages each), two evaluations, a few feedback notes.
-  perPerson: { chat: 50, evaluate: 2, feedback: 5 },
+  // Short challenges use the cheap model: enough for every challenge once a day.
+  perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15 },
   // For everyone together: a ceiling on what one day can cost (and on feedback spam).
-  total: { chat: 150, evaluate: 5, feedback: 100 },
+  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300 },
 };
 
 export type LimitedAction = keyof typeof dailyLimits.perPerson;

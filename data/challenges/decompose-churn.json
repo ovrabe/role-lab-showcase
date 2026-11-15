@@ -1,0 +1,16 @@
+{
+  "id": "decompose-churn",
+  "skill": "decomposition",
+  "order": 1,
+  "title": "Proč odcházejí zákazníci",
+  "minutes": 5,
+  "situation": "Šéf chce do čtvrtka vědět, proč letos odešlo víc zákazníků a co s tím. Máš export 2 300 zrušených smluv za poslední dva roky (datum zrušení, tarif, důvod vybraný ze seznamu, volný komentář) a aktuální ceník.\n\nKolega dal AI všechno najednou:\n\n> Tady jsou data o odchodech zákazníků a ceník. Zanalyzuj, proč odcházejí, a navrhni opatření.",
+  "aiOutput": "Na základě dat lze identifikovat několik hlavních důvodů odchodu zákazníků:\n\n1. Cena – zákazníci jsou citliví na cenu.\n2. Kvalita služeb – část zákazníků není spokojena.\n3. Konkurence – na trhu jsou alternativy.\n\n**Doporučená opatření:** zlepšit zákaznický servis, zvážit slevy pro věrné zákazníky a posílit marketing.",
+  "task": "Rozděl úkol na kroky: napiš, v jakém pořadí budeš s AI postupovat a co v každém kroku od AI chceš.",
+  "rubric": {
+    "1": "Pošle úkol znovu celý najednou, jen jinými slovy.",
+    "2": "Rozdělí úkol na pár kroků, ale kroky jsou obecné nebo chybí kontrola mezivýsledku.",
+    "3": "Kroky jdou v rozumném pořadí a u většiny je jasné, co má AI vrátit.",
+    "4": "Kroky jdou v rozumném pořadí, každý má jasný výstup, mezi kroky je kontrola a závěr stojí na mezivýsledcích."
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "decompose-tender",
+  "skill": "decomposition",
+  "order": 3,
+  "title": "Nabídka do výběrového řízení",
+  "minutes": 5,
+  "situation": "Firma podává nabídku do veřejné zakázky na správu IT. Zadávací dokumentace má 40 stran, termín je za deset dní. Zadavatel hodnotí cenu (60 %) a kvalitu řešení (40 %) a vyžaduje přesnou osnovu nabídky.\n\nKolegyně poslala AI celou dokumentaci s prosbou:\n\n> Napiš nabídku.",
+  "aiOutput": "**Nabídka na správu IT**\n\nNaše společnost má dlouholeté zkušenosti se správou IT infrastruktury. Nabízíme komplexní služby, profesionální přístup a moderní technologie. Náš tým tvoří zkušení odborníci, kteří zajistí bezproblémový chod vašich systémů. Garantujeme vysokou kvalitu a konkurenceschopnou cenu.\n\nTěšíme se na spolupráci.",
+  "task": "Rozděl přípravu nabídky na kroky: napiš, v jakém pořadí budeš s AI postupovat a co v každém kroku od AI chceš.",
+  "rubric": {
+    "1": "Požádá o delší nebo lepší nabídku, ale úkol nerozdělí.",
+    "2": "Rozdělí úkol na pár kroků, ale kroky jsou obecné nebo chybí kontrola mezivýsledku.",
+    "3": "Kroky jdou v rozumném pořadí a u většiny je jasné, co má AI vrátit.",
+    "4": "Kroky jdou v rozumném pořadí, každý má jasný výstup, mezi kroky je kontrola a závěr stojí na mezivýsledcích."
+  }
+}

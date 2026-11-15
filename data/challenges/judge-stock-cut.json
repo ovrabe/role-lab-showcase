@@ -1,0 +1,16 @@
+{
+  "id": "judge-stock-cut",
+  "skill": "judgment",
+  "order": 1,
+  "title": "Snížit objednávku bund?",
+  "minutes": 5,
+  "situation": "Za týden se objednává zboží na zimní sezónu. Prodeje zimní bundy Nordic v kusech:\n\n| Měsíc | Letos | Loni |\n|---|---:|---:|\n| červenec | 120 | 110 |\n| srpen | 135 | 128 |\n| září | 40 | 145 |\n| říjen | 35 | 190 |\n| listopad | – | 310 |\n| prosinec | – | 420 |\n\nPoznámka ze skladu: *Nordic byla od 5. 9. do 28. 10. vyprodaná, doplněno 29. 10.*",
+  "aiOutput": "Prodeje bundy Nordic za poslední dva měsíce klesly o 70 %. Zájem zákazníků zjevně opadá. Doporučuji snížit objednávku na zimní sezónu o 40 % a uvolnit tím místo ve skladu.",
+  "task": "Přijmeš doporučení? Napiš, jak rozhodneš a proč.",
+  "rubric": {
+    "1": "Doporučení AI převezme bez výhrad.",
+    "2": "Má pochybnost, ale nepojmenuje, proč doporučení neplatí, nebo nerozhodne.",
+    "3": "Pojmenuje hlavní důvod, proč doporučení neplatí, a rozhodne.",
+    "4": "Pojmenuje všechny důvody, rozhodne a rozhodnutí opře o údaje ze situace."
+  }
+}

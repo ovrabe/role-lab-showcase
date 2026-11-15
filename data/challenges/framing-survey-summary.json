@@ -1,0 +1,16 @@
+{
+  "id": "framing-survey-summary",
+  "skill": "framing",
+  "order": 2,
+  "title": "Podklad z průzkumu pro vedení",
+  "minutes": 5,
+  "situation": "Zítra ráno má vedení poradu o tom, jestli posílit zákaznickou podporu. Máš export průzkumu spokojenosti: 412 odpovědí, sloupce *region*, *spokojenost* (1–5) a *komentář*. Potřebuješ jednostránkový podklad.\n\nPrvní pokus vypadal takhle:\n\n> Shrň mi ten průzkum.",
+  "aiOutput": "Průzkum ukazuje, že zákazníci jsou s vašimi službami většinou spokojeni, ale existuje prostor pro zlepšení. Někteří zákazníci zmiňují delší čekací doby, jiní oceňují vstřícnost personálu. Doporučuji pravidelně sledovat zpětnou vazbu a pracovat na zlepšení komunikace. Celkově lze říci, že spokojenost zákazníků je klíčová pro úspěch firmy a měla by zůstat prioritou.",
+  "task": "Napiš nové zadání pro AI, se kterým dostaneš podklad, který se dá na poradě použít.",
+  "rubric": {
+    "1": "Zopakuje obecné zadání, třeba „shrň to líp“.",
+    "2": "Doplní jednu důležitou věc, třeba délku, ale AI pořád neví, k čemu podklad je.",
+    "3": "Řekne, pro koho a k čemu podklad je, jaký má mít tvar a co má AI z dat spočítat.",
+    "4": "Zadání obsahuje účel, tvar, konkrétní výpočty z dat a pokyn uvádět čísla a nic neodhadovat."
+  }
+}

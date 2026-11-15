@@ -1,4 +1,5 @@
 import { devMockSample } from "../src/runtime/devMockSample.js";
+import { mockChallengeReply } from "../src/challenges/mockChallengeReply.js";
 import type { ClaudeClient } from "./claudeClient.js";
 
 /**
@@ -14,5 +15,8 @@ export const mockClaude: ClaudeClient = {
   async evaluate(prompt, { signal }) {
     const parsed = await devMockSample.json(prompt, { signal });
     return JSON.stringify(parsed);
+  },
+  async evaluateChallenge(prompt) {
+    return JSON.stringify(mockChallengeReply(prompt));
   },
 };

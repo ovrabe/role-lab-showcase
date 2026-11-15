@@ -4,6 +4,8 @@ import { RoleBadge, sweepPositionFor } from "../components/RoleBadge";
 import { loadSession } from "../session/sessionStorage";
 import { roleStatus, taskProgress, type RoleStatus } from "../task/taskProgress";
 import { ProgressTeaser } from "../progress/ProgressTeaser";
+import { DailyChallengeCard } from "../challenges/DailyChallengeCard";
+import type { ChallengeConfig } from "../challenges/challengeSchema";
 
 type HomeScreenProps = {
   activeRoles: RoleConfig[];
@@ -14,6 +16,10 @@ type HomeScreenProps = {
   // Only in the web version, which has the "O projektu" page.
   onOpenAbout?: () => void;
   onOpenProfile: () => void;
+  challenges: ChallengeConfig[];
+  dailyChallenge: ChallengeConfig | null;
+  onSelectChallenge: (challengeId: string) => void;
+  onOpenChallengeMap: () => void;
 };
 
 export function HomeScreen({
@@ -24,6 +30,10 @@ export function HomeScreen({
   onOpenMethodology,
   onOpenAbout,
   onOpenProfile,
+  challenges,
+  dailyChallenge,
+  onSelectChallenge,
+  onOpenChallengeMap,
 }: HomeScreenProps) {
   return (
     <section className="max-w-2xl mx-auto">
@@ -32,6 +42,13 @@ export function HomeScreen({
       {errors.length > 0 && <ConfigErrors errors={errors} />}
 
       <ProgressTeaser roles={activeRoles} onOpenProfile={onOpenProfile} />
+
+      <DailyChallengeCard
+        challenge={dailyChallenge}
+        totalCount={challenges.length}
+        onStart={onSelectChallenge}
+        onOpenMap={onOpenChallengeMap}
+      />
 
       <h2 className="mb-3">Vyber si roli</h2>
       {activeRoles.length === 0 && (

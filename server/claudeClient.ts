@@ -13,6 +13,8 @@ export type ClaudeClient = {
   chat(turns: ChatTurn[], options: { signal: AbortSignal; onDelta: (text: string) => void }): Promise<{ truncated: boolean }>;
   // The evaluator: one long answer, returned as text (expected to hold JSON).
   evaluate(prompt: string, options: { signal: AbortSignal }): Promise<string>;
+  // The short-challenge evaluator: a short JSON answer from the cheaper model.
+  evaluateChallenge(prompt: string, options: { signal: AbortSignal }): Promise<string>;
 };
 
 export type ClaudeError = { code: string; message: string; text?: string };
@@ -21,6 +23,9 @@ export type ClaudeError = { code: string; message: string; text?: string };
 // ("default" for the assistant, "complex" for the evaluator).
 export const assistantModel = "claude-sonnet-5-5";
 export const evaluatorModel = "claude-opus-5-5";
+// Short challenges (docs/PRODUCTION.md, part 10): one answer of a few sentences against a
+// short key. A small, fast model is enough and costs a fraction of a crown per evaluation.
+export const challengeModel = "claude-haiku-5-5";
 
 // A policy decline is retried on a fallback model chosen by the API itself (server-side
 // fallback, "default" form), so a rare false refusal does not end the person's turn.
@@ -91,6 +96,23 @@ export function anthropicClient(apiKey: string): ClaudeClient {
           { signal },
         );
         const message = await stream.finalMessage();
+        if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined." } satisfies ClaudeError;
+        return message.content.map((block) => (block.type === "text" ? block.text : "")).join("");
+      } catch (error) {
+        if (typeof error === "object" && error !== null && "code" in error && !(error instanceof Error)) throw error;
+        throw toClaudeError(error);
+      }
+    },
+
+    async evaluateChallenge(prompt, { signal }) {
+      try {
+        const message = await client.messages.create(
+          // The model thinks before it answers and the thinking counts toward max_tokens
+          // (about 1,000 tokens in calibration). 2,000 cut the longer replies short; the
+          // price is per token used, so a generous ceiling costs nothing extra.
+          { model: challengeModel, max_tokens: 8000, messages: [{ role: "user", content: prompt }] },
+          { signal },
+        );
         if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined." } satisfies ClaudeError;
         return message.content.map((block) => (block.type === "text" ? block.text : "")).join("");
       } catch (error) {

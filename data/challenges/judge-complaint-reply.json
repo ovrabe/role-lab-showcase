@@ -1,0 +1,16 @@
+{
+  "id": "judge-complaint-reply",
+  "skill": "judgment",
+  "order": 3,
+  "title": "Odpověď na stížnost",
+  "minutes": 5,
+  "situation": "Zákazníkovi přišla sedačka za 24 900 Kč o 14 dní později, než bylo slíbeno. Píše rozčileně a chce kompenzaci.\n\nInterní pravidla pro stížnosti:\n\n- Bez schválení můžeš nabídnout slevu nejvýš 10 % ceny. Vyšší kompenzaci schvaluje vedoucí.\n- Dopravce zákazníkovi nejmenujeme, dokud se jeho odpovědnost neprošetří.\n\nAI připravila návrh odpovědi:",
+  "aiOutput": "Dobrý den,\n\nmoc se omlouváme. Zpoždění zavinila přepravní společnost RychloTrans, která opakovaně selhává. Jako kompenzaci vám vracíme 50 % ceny, tedy 12 450 Kč, a uznáváme plnou odpovědnost za veškeré vzniklé škody.\n\nS pozdravem",
+  "task": "Pošleš odpověď tak, jak je? Napiš, jak rozhodneš a co v ní změníš.",
+  "rubric": {
+    "1": "Návrh odpovědi převezme bez výhrad.",
+    "2": "Má pochybnost, ale nepojmenuje, co je na návrhu špatně, nebo nerozhodne.",
+    "3": "Pojmenuje hlavní problém návrhu a rozhodne.",
+    "4": "Pojmenuje všechny problémy návrhu, rozhodne a rozhodnutí opře o pravidla ze situace."
+  }
+}

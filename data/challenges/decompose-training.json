@@ -1,0 +1,16 @@
+{
+  "id": "decompose-training",
+  "skill": "decomposition",
+  "order": 2,
+  "title": "Příprava školení",
+  "minutes": 5,
+  "situation": "Za tři týdny vedeš půldenní školení k novému CRM systému pro 25 lidí z obchodu. Většina z nich dosud používala tabulky v Excelu. Po školení mají umět založit zákazníka, zapsat schůzku a vytvořit nabídku.\n\nPrvní pokus:\n\n> Připrav školení na nový CRM.",
+  "aiOutput": "**Školení CRM systému**\n\n1. Úvod do CRM\n2. Výhody CRM pro firmu\n3. Hlavní funkce systému\n4. Praktické ukázky\n5. Otázky a odpovědi\n\nDoporučená délka: 2 hodiny.",
+  "task": "Rozděl přípravu školení na kroky: napiš, v jakém pořadí budeš s AI postupovat a co v každém kroku od AI chceš.",
+  "rubric": {
+    "1": "Požádá o lepší osnovu, ale úkol nerozdělí.",
+    "2": "Rozdělí úkol na pár kroků, ale kroky jsou obecné nebo chybí kontrola mezivýsledku.",
+    "3": "Kroky jdou v rozumném pořadí a u většiny je jasné, co má AI vrátit.",
+    "4": "Kroky jdou v rozumném pořadí, každý má jasný výstup, mezi kroky je kontrola a závěr stojí na mezivýsledcích."
+  }
+}

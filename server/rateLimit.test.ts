@@ -10,7 +10,7 @@ const role = content.roles.activeRoles[0];
 const session = loadPreviewSamples(role).find((sample) => sample.id === "strong")!.session;
 
 // Small limits so the tests stay short; the real numbers are in dailyLimits.
-const smallLimits = { perPerson: { chat: 2, evaluate: 1, feedback: 1 }, total: { chat: 3, evaluate: 2, feedback: 2 } };
+const smallLimits = { perPerson: { chat: 2, evaluate: 1, feedback: 1, challenge: 1 }, total: { chat: 3, evaluate: 2, feedback: 2, challenge: 1 } };
 
 function countingClaude() {
   const calls = { chat: 0, evaluate: 0 };
@@ -19,6 +19,9 @@ function countingClaude() {
       calls.chat += 1;
       onDelta("ok");
       return { truncated: false };
+    },
+    async evaluateChallenge() {
+      return "";
     },
     async evaluate() {
       calls.evaluate += 1;

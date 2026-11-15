@@ -34,6 +34,7 @@ try {
     { file: "api/chat.js", body: chatBody, expectedStatus: 200 },
     { file: "api/evaluate.js", body: { nope: true }, expectedStatus: 400 },
     { file: "api/feedback.js", body: { message: "" }, expectedStatus: 400 },
+    { file: "api/challenge.js", body: { challengeId: "x", answer: "" }, expectedStatus: 400 },
   ];
   for (const { file, body, expectedStatus } of checks) {
     try {

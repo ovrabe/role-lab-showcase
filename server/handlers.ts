@@ -63,7 +63,7 @@ function findRole(content: ServerContent, roleId: string): RoleConfig | undefine
   return content.roles.activeRoles.find((role) => role.id === roleId);
 }
 
-function asClaudeError(error: unknown): ClaudeError {
+export function asClaudeError(error: unknown): ClaudeError {
   if (typeof error === "object" && error !== null && "code" in error) {
     const { code, message, text } = error as Partial<ClaudeError>;
     return { code: String(code), message: String(message ?? ""), ...(text ? { text } : {}) };
@@ -156,7 +156,7 @@ export async function handleEvaluate(request: Request, { content, claude, limite
 }
 
 // The model is asked for JSON; tolerate a code fence or a sentence around it.
-function parseJsonReply(reply: string): unknown {
+export function parseJsonReply(reply: string): unknown {
   const start = reply.indexOf("{");
   const end = reply.lastIndexOf("}");
   if (start < 0 || end <= start) return undefined;

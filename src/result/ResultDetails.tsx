@@ -203,7 +203,7 @@ export function TrapReview({ evaluation, keyData, citations, onSelectCitation }:
   );
 }
 
-function TrapStatusIcon({ status }: { status: keyof typeof trapStatusIcons }) {
+export function TrapStatusIcon({ status }: { status: keyof typeof trapStatusIcons }) {
   const Icon = trapStatusIcons[status];
   return (
     <span
