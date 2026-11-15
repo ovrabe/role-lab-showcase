@@ -2,6 +2,12 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.1.1 – 15. 11. 2026
+
+### Opraveno
+
+- Výzva „Text na web je mimo“ se teď jmenuje „Popis aplikace na web“. V kartě výzvy dne původní název vypadal jako chybová hláška.
+
 ## 1.1.0 – 15. 11. 2026
 
 Krátké výzvy na každý den.

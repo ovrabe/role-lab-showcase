@@ -2,7 +2,7 @@
   "id": "iterate-product-text",
   "skill": "iteration",
   "order": 1,
-  "title": "Text na web je mimo",
+  "title": "Popis aplikace na web",
   "minutes": 5,
   "situation": "Chystáš krátký popis aplikace Kalkul na úvodní stránku webu. Zadání pro AI znělo: text pro majitele malých živností, kteří nemají účetní vzdělání, nejvýš 40 slov, s cenou 290 Kč měsíčně a s tím, že první měsíc je zdarma. AI vrátila tohle:",
   "aiOutput": "Kalkul je moderní cloudové řešení pro správu účetnictví, které využívá pokročilou OCR technologii pro automatické vytěžování dokladů a nabízí API integraci s bankovními systémy prostřednictvím standardu PSD2. Díky redundantní infrastruktuře a šifrování AES-256 jsou vaše data vždy v bezpečí. Systém podporuje vícefiremní režim, párování plateb pomocí variabilních symbolů a export do formátů XML a ISDOC. Uživatelské rozhraní je responzivní a funguje na všech zařízeních. Kalkul je ideální volbou pro každého, kdo hledá spolehlivý a škálovatelný nástroj pro efektivní správu financí v souladu s aktuální legislativou.",

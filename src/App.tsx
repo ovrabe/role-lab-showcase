@@ -3,57 +3,11 @@ import { PreviewPill } from "./components/PreviewPill";
 import { ArrowLeft } from "lucide-react";
 import { AvatarMedal, useAvatar } from "./profile/AvatarMedal";
 import { ThemeToggle } from "./components/ThemeToggle";
-import { sweepPositionFor } from "./components/RoleBadge";
-import { HomeScreen } from "./screens/HomeScreen";
-import { MethodologyScreen } from "./screens/MethodologyScreen";
-import { AboutScreen } from "./screens/AboutScreen";
-import { ReleaseNotesScreen } from "./screens/ReleaseNotesScreen";
-import { ChallengeScreen } from "./screens/ChallengeScreen";
-import { loadChallenges } from "./challenges/loadChallenges";
-import { dailyChallenge, pragueDay } from "./challenges/dailyChallenge";
-import { ChallengeMapScreen } from "./screens/ChallengeMapScreen";
-import { ProfileScreen } from "./screens/ProfileScreen";
 import { Footer } from "./components/Footer";
-import { isParticipantBuild, isWebBuild } from "./buildFlags";
-import { TaskScreen } from "./screens/TaskScreen";
-import { CalibrationScreen } from "./screens/CalibrationScreen";
-import { SamplesScreen } from "./screens/SamplesScreen";
 import { useAiAvailability } from "./runtime/useAiAvailability";
-import { loadRoles } from "./roles/loadRoles";
-import { loadLastRoleId, loadSession, saveLastRoleId } from "./session/sessionStorage";
+import { loadSession, saveLastRoleId } from "./session/sessionStorage";
 import { roleStatus, taskProgress } from "./task/taskProgress";
-
-// Plain state instead of a router: the page runs inside claude.ai and from a
-// local file, where URL-based routing is unreliable.
-type Screen =
-  | { name: "home" }
-  | { name: "methodology" }
-  | { name: "about" }
-  | { name: "profile" }
-  | { name: "releaseNotes" }
-  | { name: "challenge"; challengeId: string }
-  | { name: "challengeMap" }
-  | { name: "calibration" }
-  | { name: "samples" }
-  | { name: "task"; roleId: string };
-
-// Role configs are bundled into the page, so loading them once at start is enough.
-const { activeRoles, upcomingRoleTitles, errors } = loadRoles();
-const { challenges } = loadChallenges();
-
-// After a reload, go straight back to the task that was open, if that role still exists.
-function initialScreen(): Screen {
-  // ?kalibrace opens the author's calibration panel (docs/SPEC.md, M3.5).
-  const params = new URLSearchParams(window.location.search);
-  // Neither exists in the page for people taking the task (src/buildFlags.ts).
-  if (!isParticipantBuild && params.has("kalibrace")) return { name: "calibration" };
-  // ?ukazky opens the sample evaluations for demos (docs/DEMO.md).
-  if (!isParticipantBuild && params.has("ukazky")) return { name: "samples" };
-  const lastRoleId = loadLastRoleId();
-  return lastRoleId && activeRoles.some((role) => role.id === lastRoleId)
-    ? { name: "task", roleId: lastRoleId }
-    : { name: "home" };
-}
+import { initialScreen, ScreenContent, type Screen } from "./AppScreens";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>(initialScreen);
@@ -76,10 +30,6 @@ export default function App() {
   useEffect(() => {
     saveLastRoleId(screen.name === "task" ? screen.roleId : null);
   }, [screen]);
-  const selectedRole = screen.name === "task" ? activeRoles.find((role) => role.id === screen.roleId) : undefined;
-  // Worked out on every render, so a page left open past midnight offers the new day's challenge.
-  const todaysChallenge = dailyChallenge(challenges, pragueDay(new Date()));
-  const selectedChallenge = screen.name === "challenge" ? challenges.find((challenge) => challenge.id === screen.challengeId) : undefined;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -136,62 +86,7 @@ export default function App() {
       </header>
 
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8">
-        {screen.name === "home" && (
-          <HomeScreen
-            activeRoles={activeRoles}
-            upcomingRoleTitles={upcomingRoleTitles}
-            errors={errors}
-            onSelectRole={(roleId) => setScreen({ name: "task", roleId })}
-            onOpenMethodology={() => setScreen({ name: "methodology" })}
-            onOpenAbout={isWebBuild ? () => setScreen({ name: "about" }) : undefined}
-            onOpenProfile={() => setScreen({ name: "profile" })}
-            challenges={challenges}
-            dailyChallenge={todaysChallenge}
-            onSelectChallenge={(challengeId) => setScreen({ name: "challenge", challengeId })}
-            onOpenChallengeMap={() => setScreen({ name: "challengeMap" })}
-          />
-        )}
-        {screen.name === "methodology" && (
-          <MethodologyScreen
-            roles={activeRoles}
-            onOpenCalibration={() => setScreen({ name: "calibration" })}
-            onOpenSamples={() => setScreen({ name: "samples" })}
-          />
-        )}
-        {screen.name === "profile" && (
-          <ProfileScreen roles={activeRoles} onSelectRole={(roleId) => setScreen({ name: "task", roleId })} />
-        )}
-        {screen.name === "releaseNotes" && <ReleaseNotesScreen />}
-        {screen.name === "challenge" && selectedChallenge && (
-          // key: another challenge starts with an empty answer.
-          <ChallengeScreen
-            key={selectedChallenge.id}
-            challenge={selectedChallenge}
-            aiStatus={status}
-            backend={backend}
-            onBack={() => setScreen({ name: "challengeMap" })}
-          />
-        )}
-        {screen.name === "challengeMap" && (
-          <ChallengeMapScreen
-            challenges={challenges}
-            dailyChallengeId={todaysChallenge?.id ?? null}
-            onSelect={(challengeId) => setScreen({ name: "challenge", challengeId })}
-          />
-        )}
-        {isWebBuild && screen.name === "about" && <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} />}
-        {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={status} backend={backend} />}
-        {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}
-        {screen.name === "task" && selectedRole && (
-          // key: switching roles must start a fresh component with that role's own session.
-          <TaskScreen
-            key={selectedRole.id}
-            role={selectedRole}
-            roleSweepPosition={sweepPositionFor(activeRoles.indexOf(selectedRole), activeRoles.length)}
-            aiStatus={status}
-            backend={backend}
-          />
-        )}
+        <ScreenContent screen={screen} setScreen={setScreen} aiStatus={status} backend={backend} />
       </main>
 
       {/* Not in the task: on a phone its floating bar owns the bottom of the screen. */}
