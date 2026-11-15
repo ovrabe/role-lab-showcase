@@ -41,12 +41,19 @@ replaceOnce(
 copyFileSync("scripts/public/README.md", join(target, "README.md"));
 rmSync(join(target, "scripts/public"), { recursive: true, force: true });
 
-// Final check against the real keys: no trap title may appear anywhere in the copy.
-// Role keys and challenge keys (evaluator-data/challenges/) alike.
-const trapTitles = readdirSync("evaluator-data", { recursive: true })
-  .filter((name) => name.endsWith(".key.json"))
-  .flatMap((name) => JSON.parse(readFileSync(join("evaluator-data", name), "utf8")).traps.map((trap) => trap.title.toLowerCase()));
-if (trapTitles.length === 0) throw new Error("No trap titles found in evaluator-data/; cannot verify the copy");
+// Final check against the real keys: nothing that gives a trap away may appear in the copy.
+// Role keys: the trap titles, which name the exact data ("Nulové náklady u …").
+// Challenge keys: their titles are short generic phrases that the public rubric uses too
+// ("Tvar odpovědi"), so the check looks for the long, specific texts instead: what is
+// wrong, when it counts as caught, and the strong answer.
+const keyFiles = readdirSync("evaluator-data", { recursive: true }).filter((name) => name.endsWith(".key.json"));
+const secrets = keyFiles.flatMap((name) => {
+  const key = JSON.parse(readFileSync(join("evaluator-data", name), "utf8"));
+  if (!name.startsWith("challenges")) return key.traps.map((trap) => trap.title);
+  return [...key.traps.flatMap((trap) => [trap.whatIsWrong, trap.caughtIf]), key.strongAnswer];
+});
+const trapTitles = secrets.filter((text) => typeof text === "string" && text.trim() !== "").map((text) => text.toLowerCase());
+if (trapTitles.length === 0) throw new Error("No key texts found in evaluator-data/; cannot verify the copy");
 
 function filesIn(folder) {
   return readdirSync(folder).flatMap((name) => {
@@ -58,6 +65,6 @@ const leaks = filesIn(target).flatMap((path) => {
   const text = readFileSync(path, "utf8").toLowerCase();
   return trapTitles.filter((title) => text.includes(title)).map((title) => `${path}: "${title}"`);
 });
-if (leaks.length > 0) throw new Error(`Trap titles found in the copy:\n${leaks.join("\n")}`);
+if (leaks.length > 0) throw new Error(`Key texts found in the copy:\n${leaks.join("\n")}`);
 
-console.log(`Public copy ready in ${target}: ${filesIn(target).length} files, no evaluator keys, samples or trap titles.`);
+console.log(`Public copy ready in ${target}: ${filesIn(target).length} files, no evaluator keys, samples or key texts.`);
