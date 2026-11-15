@@ -150,7 +150,8 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
       <div className="flex items-start gap-4 mb-4">
         <RoleBadge title={role.title} sweepPosition={roleSweepPosition} size="lg" />
         <div className="min-w-0">
-          <h1 className="mb-1">{role.title}</h1>
+          <p className="text-sm font-semibold text-accent">{role.title}</p>
+          <h1 className="mb-1">{role.taskTitle}</h1>
           <p className="text-ink-muted">{role.context}</p>
         </div>
       </div>

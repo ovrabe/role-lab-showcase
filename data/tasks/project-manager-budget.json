@@ -1,0 +1,61 @@
+{
+  "id": "project-manager-budget",
+  "roleId": "project-manager",
+  "title": "Čerpání rozpočtu pro finanční ředitelku",
+  "difficulty": 1,
+  "assistantContext": "zaměstnanci středně velké firmy",
+  "timeLimitMinutes": 15,
+  "brief": {
+    "situation": "Dnes je pondělí 12. 10. 2026 a vedeš projekt Kompas: firma zavádí nový systém pro zákaznickou podporu ve čtyřech zemích. Finanční ředitelka chystá čtvrtletní přehled a ptá se tě, jak je na tom projekt s penězi.",
+    "task": "Odpověz finanční ředitelce: kolik projekt zatím stál, kolik ho ještě bude stát a jestli se vejde do schváleného rozpočtu 4 200 000 Kč bez DPH. Vycházej z exportu faktur a z plánu zbývajících nákladů.",
+    "deliverable": "Krátký e-mail pro finanční ředitelku, nejvýš 800 znaků.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "faktury",
+      "title": "Export faktur projektu k 9. 10.",
+      "file": "data/project-manager/faktury_k_2026-10-09.csv",
+      "type": "csv",
+      "rows": 10,
+      "period": "faktury vystavené od 22. 6. do 5. 10. 2026",
+      "dictionary": [
+        {
+          "column": "cislo_faktury",
+          "meaning": "Číslo faktury dodavatele"
+        },
+        {
+          "column": "dodavatel",
+          "meaning": "Dodavatel"
+        },
+        {
+          "column": "popis",
+          "meaning": "Za co faktura je"
+        },
+        {
+          "column": "castka_bez_dph_czk",
+          "meaning": "Částka bez DPH v Kč"
+        },
+        {
+          "column": "datum_vystaveni",
+          "meaning": "Datum vystavení faktury"
+        },
+        {
+          "column": "datum_zaevidovani",
+          "meaning": "Kdy byla faktura zapsána do účetního systému"
+        },
+        {
+          "column": "stav",
+          "meaning": "„zaplaceno“, nebo „schváleno k úhradě“"
+        }
+      ]
+    },
+    {
+      "id": "plan-nakladu",
+      "title": "Plán zbývajících nákladů (9. 10.)",
+      "file": "data/project-manager/plan_zbyvajicich_nakladu.md",
+      "type": "markdown"
+    }
+  ]
+}

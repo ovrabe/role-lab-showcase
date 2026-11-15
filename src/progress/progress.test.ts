@@ -120,6 +120,15 @@ describe("badges", () => {
     expect(ids(earnedBadges(threeDays))).toContain("three-days");
   });
 
+  it("counts roles, not tasks: two tasks of one role are not both roles", () => {
+    const sameRole = [
+      attempt("category-manager", 1, [2, 2, 2, 2, 2], { caught: 2, total: 2 }),
+      attempt("category-manager-newsletter", 2, [2, 2, 2, 2, 2], { caught: 1, total: 1 }),
+    ];
+    expect(ids(earnedBadges(sameRole))).not.toContain("both-roles");
+    expect(ids(earnedBadges(sameRole))).not.toContain("detective-both-roles");
+  });
+
   it("needs all traps in both roles for the second detective badge", () => {
     const attempts = [
       attempt("category-manager", 1, [2, 2, 2, 2, 2], { caught: 2, total: 2 }),

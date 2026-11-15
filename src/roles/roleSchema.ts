@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Mirrors data/roles/*.json. A new role is only a new JSON file, so the schema
+// Mirrors data/roles/*.json and data/tasks/*.json. A new role or task is only a new JSON file, so the schema
 // is the contract: a typo in a config shows up as a readable error at start.
 
 export const dimensionIds = ["framing", "decomposition", "verification", "iteration", "judgment"] as const;
@@ -39,20 +39,11 @@ const Level = z.object({
   description: nonEmpty,
 });
 
-export const RoleConfig = z.object({
+/** What every task of a role shares (data/roles/<role>.json): who the person is and how work is judged. */
+export const RoleDefinition = z.object({
   id: nonEmpty,
   title: nonEmpty,
   context: nonEmpty,
-  assistantContext: nonEmpty,
-  timeLimitMinutes: z.number().positive(),
-  brief: z.object({
-    situation: nonEmpty,
-    task: nonEmpty,
-    deliverable: nonEmpty,
-    howToWork: nonEmpty,
-    dataNote: nonEmpty,
-  }),
-  materials: z.array(Material).min(1),
   // Exactly the five shared dimensions, each once; only the anchor texts differ per role.
   rubric: z
     .array(RubricDimension)
@@ -74,4 +65,38 @@ export const RoleConfig = z.object({
   }),
   microExercises: z.record(DimensionId, nonEmpty),
 });
-export type RoleConfig = z.infer<typeof RoleConfig>;
+export type RoleDefinition = z.infer<typeof RoleDefinition>;
+
+/** One task of a role (data/tasks/<task>.json): its situation, materials and difficulty. */
+export const TaskDefinition = z.object({
+  // The first task of each role keeps the role's id, so attempts saved before roles had
+  // several tasks (sessions, progress, evaluator keys, samples) still belong to it.
+  id: nonEmpty,
+  roleId: nonEmpty,
+  title: nonEmpty,
+  difficulty: z.number().int().min(1).max(3),
+  assistantContext: nonEmpty,
+  timeLimitMinutes: z.number().positive(),
+  brief: z.object({
+    situation: nonEmpty,
+    task: nonEmpty,
+    deliverable: nonEmpty,
+    howToWork: nonEmpty,
+    dataNote: nonEmpty,
+  }),
+  materials: z.array(Material).min(1),
+});
+export type TaskDefinition = z.infer<typeof TaskDefinition>;
+
+/**
+ * A task together with the shared parts of its role: what the rest of the app works with.
+ * `id` is the task's id; `title` and `context` stay the role's, the task's own name is `taskTitle`.
+ */
+export type RoleConfig = Omit<RoleDefinition, "id"> &
+  Omit<TaskDefinition, "id" | "title" | "roleId"> & { id: string; roleId: string; taskTitle: string };
+
+export function composeTask(role: RoleDefinition, task: TaskDefinition): RoleConfig {
+  const { id: _roleId, ...shared } = role;
+  const { id, title, roleId, ...own } = task;
+  return { ...shared, ...own, id, roleId, taskTitle: title };
+}

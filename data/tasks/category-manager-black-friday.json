@@ -1,0 +1,105 @@
+{
+  "id": "category-manager-black-friday",
+  "roleId": "category-manager",
+  "title": "Objednávka zboží na Black Friday",
+  "difficulty": 3,
+  "assistantContext": "zaměstnanci e-shopu s kosmetikou",
+  "timeLimitMinutes": 45,
+  "brief": {
+    "situation": "Dnes je pondělí 19. 10. 2026. Jsi category manager pro pánské vůně na českém e-shopu s kosmetikou. Black Friday je v týdnu od 23. 11. Vedoucí chce do středy 21. 10. návrh objednávky pánských vůní a marketing čeká na odpověď, jestli bude na jeho akce dost zboží.",
+    "task": "Navrhni, které produkty a kolik kusů objednat, aby zboží vystačilo do konce týdne Black Friday (neděle 29. 11.) Na nákup máš nejvýš 1 200 000 Kč v nákupních cenách. Objednávky odejdou ve středu 21. 10. Odpověz zároveň marketingu na jeho plán akcí.",
+    "deliverable": "Návrh pro vedoucí na jednu stranu, nejvýš 2 500 znaků: objednávka (produkt, kusy, částka), zdůvodnění, rizika a odpověď marketingu.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "zasoby",
+      "title": "Stav zásob a prodeje pánských vůní, 18. 10. 2026",
+      "file": "data/category-manager/stav_zasob_2026-10-18.csv",
+      "type": "csv",
+      "rows": 9,
+      "period": "1 týden, 2026-10-12 až 2026-10-18",
+      "dictionary": [
+        {
+          "column": "sku",
+          "meaning": "Kód produktu"
+        },
+        {
+          "column": "znacka",
+          "meaning": "Značka"
+        },
+        {
+          "column": "nazev",
+          "meaning": "Název produktu"
+        },
+        {
+          "column": "prodejni_cena_czk",
+          "meaning": "Běžná prodejní cena bez DPH v Kč"
+        },
+        {
+          "column": "nakupni_cena_czk",
+          "meaning": "Nákupní cena za kus bez DPH v Kč"
+        },
+        {
+          "column": "marze_pct",
+          "meaning": "Marže v procentech z prodejní ceny"
+        },
+        {
+          "column": "prodej_tyden_od_12_10_ks",
+          "meaning": "Prodané kusy v týdnu od 12. 10."
+        },
+        {
+          "column": "sklad_ks_18_10",
+          "meaning": "Zásoba v kusech k 18. 10."
+        }
+      ]
+    },
+    {
+      "id": "bf2025",
+      "title": "Black Friday 2025",
+      "file": "data/category-manager/black_friday_2025.csv",
+      "type": "csv",
+      "rows": 8,
+      "period": "týden Black Friday 2025 a průměr října 2025",
+      "dictionary": [
+        {
+          "column": "sku",
+          "meaning": "Kód produktu"
+        },
+        {
+          "column": "nazev",
+          "meaning": "Název produktu"
+        },
+        {
+          "column": "bezny_tyden_ks",
+          "meaning": "Průměrný týdenní prodej v říjnu 2025"
+        },
+        {
+          "column": "bf_tyden_objednano_ks",
+          "meaning": "Objednané kusy v týdnu Black Friday 2025"
+        },
+        {
+          "column": "storno_ks",
+          "meaning": "Z toho stornované kusy"
+        },
+        {
+          "column": "poznamka",
+          "meaning": "Poznámka"
+        }
+      ]
+    },
+    {
+      "id": "dodavatele",
+      "title": "Podmínky dodavatelů",
+      "file": "data/category-manager/dodavatele.md",
+      "type": "markdown"
+    },
+    {
+      "id": "marketing",
+      "title": "E-mail od marketingu: akce na Black Friday",
+      "file": "data/category-manager/marketing_akce_bf.md",
+      "type": "markdown"
+    }
+  ]
+}

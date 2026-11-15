@@ -1,0 +1,59 @@
+{
+  "id": "category-manager-newsletter",
+  "roleId": "category-manager",
+  "title": "Hlavní tip do newsletteru",
+  "difficulty": 1,
+  "assistantContext": "zaměstnanci e-shopu s kosmetikou",
+  "timeLimitMinutes": 15,
+  "brief": {
+    "situation": "Jsi category manager pro pánské vůně na českém e-shopu s kosmetikou. Marketing chystá listopadový newsletter a do zítřka od tebe chce jeden produkt, který v něm bude hlavním tipem.",
+    "task": "Vyber z pánských vůní jeden produkt pro hlavní tip v newsletteru a zdůvodni výběr. Newsletter odejde 2. 11. zhruba 40 000 zákazníkům. Z minulých kampaní víme, že hlavní tip prodá v prvním týdnu navíc asi 300 kusů. Doobjednání zboží trvá podle dodavatele dva až šest týdnů.",
+    "deliverable": "Krátký e-mail pro marketing: který produkt a proč, nejvýš 800 znaků.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "prodeje-rijen",
+      "title": "Prodeje pánských vůní, říjen 2026",
+      "file": "data/category-manager/prodeje_rijen_2026.csv",
+      "type": "csv",
+      "rows": 32,
+      "period": "4 týdny, 2026-10-05 až 2026-11-01",
+      "dictionary": [
+        {
+          "column": "tyden_od",
+          "meaning": "První den týdne (pondělí)"
+        },
+        {
+          "column": "sku",
+          "meaning": "Kód produktu"
+        },
+        {
+          "column": "znacka",
+          "meaning": "Značka"
+        },
+        {
+          "column": "nazev",
+          "meaning": "Název produktu"
+        },
+        {
+          "column": "prodane_ks",
+          "meaning": "Prodané kusy"
+        },
+        {
+          "column": "obrat_czk",
+          "meaning": "Tržby bez DPH v Kč"
+        },
+        {
+          "column": "marze_pct",
+          "meaning": "Marže v procentech z obratu"
+        },
+        {
+          "column": "sklad_ks_konec_tydne",
+          "meaning": "Zásoba na konci týdne v kusech"
+        }
+      ]
+    }
+  ]
+}

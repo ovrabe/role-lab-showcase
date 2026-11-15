@@ -28,7 +28,7 @@ export function SamplesScreen({ roles }: { roles: RoleConfig[] }) {
           >
             {roles.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>
-                {candidate.title}
+                {candidate.title} · {candidate.taskTitle}
               </option>
             ))}
           </select>

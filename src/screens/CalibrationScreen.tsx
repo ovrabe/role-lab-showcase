@@ -30,7 +30,7 @@ export function CalibrationScreen({ roles, aiStatus, backend }: CalibrationScree
           <select value={roleId} onChange={(event) => setRoleId(event.target.value)} className="rl-select">
             {roles.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>
-                {candidate.title}
+                {candidate.title} · {candidate.taskTitle}
               </option>
             ))}
           </select>

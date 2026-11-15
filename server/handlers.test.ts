@@ -8,7 +8,8 @@ import { loadPreviewSamples } from "../src/evaluation/previewFixture";
 import type { TranscriptItem } from "../src/session/sessionSchema";
 
 const content = loadServerContent();
-const role = content.roles.activeRoles[0];
+// The original task: it has sample evaluations, the newer tasks get theirs after calibration.
+const role = content.roles.activeRoles.find((task) => task.id === "category-manager")!;
 const strong = loadPreviewSamples(role).find((sample) => sample.id === "strong")!;
 
 // A fake Claude that records what it was sent and answers with a fixed reply.
@@ -179,7 +180,7 @@ describe("POST /api/evaluate", () => {
 
   it.each([
     ["an attempt that was not submitted", { roleId: role.id, session: { ...session, submittedAt: undefined } }],
-    ["a session of another role", { roleId: content.roles.activeRoles[1].id, session }],
+    ["a session of another task", { roleId: "project-manager", session }],
     ["a submission that is too long", { roleId: role.id, session: { ...session, submission: "x".repeat(10_001) } }],
     ["a broken session", { roleId: role.id, session: { transcript: "nope" } }],
   ])("rejects %s without calling Claude", async (_name, body) => {

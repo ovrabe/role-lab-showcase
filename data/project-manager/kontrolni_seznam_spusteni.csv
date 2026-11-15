@@ -1,0 +1,13 @@
+oblast,polozka,zeme,stav,vlastnik,poznamka
+Systém,Bezpečnostní schválení produkčního přístupu (PK-219),všechny,Hotovo,Bezpečnost IT,Schváleno 20. 10.
+Systém,Integrace s objednávkovým systémem v produkci (PK-212),všechny,Hotovo,IT integrace,Nasazeno 22. 10.
+Systém,Akceptační testy (UAT),všechny,Hotovo,Vedoucí podpory,Zpráva z testů 23. 10.
+Data,Migrace tiketů za posledních 12 měsíců,všechny,Hotovo,Tikeo,"Zkušební migrace 21. 10., chybovost 0,8 %"
+Data,Export starších tiketů do archivu,všechny,Hotovo,Tikeo,
+Lidé,Školení agentů,CZ,Hotovo,Vedoucí podpory CZ,
+Lidé,Školení agentů,SK,Hotovo,Vedoucí podpory SK,
+Lidé,Školení agentů,PL,Hotovo,Vedoucí podpory PL,
+Lidé,Školení agentů,HU,Hotovo,Vedoucí podpory HU,Termíny školení proběhly podle plánu
+Lidé,Zvýšená podpora dodavatele první dva týdny (PK-357),všechny,Hotovo,Tikeo,Objednáno 2.–13. 11.
+Komunikace,Oznámení zákazníkům o nových kontaktech,všechny,Hotovo,Marketing,Odejde 30. 10.
+Provoz,Návrat ke starému systému při vážném výpadku,všechny,Připraveno,IT provoz,Starý systém běží souběžně do konce licence 30. 11.

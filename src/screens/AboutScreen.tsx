@@ -5,8 +5,12 @@ type AboutScreenProps = { onOpenMethodology: () => void };
 // Calibration results (docs/SPEC.md, M3.5): average of the five areas, scale 1–4, from the
 // author's calibration runs. Update together with the samples in fixtures/ after a recalibration.
 const calibrationRows = [
-  { role: "Category manager", weak: "1,0–1,2", medium: "2,8", strong: "4,0" },
-  { role: "Projektový manažer", weak: "1,2", medium: "–", strong: "3,8" },
+  { task: "Hlavní tip do newsletteru", role: "Category manager", difficulty: 1, weak: "1,0", medium: "1,2", strong: "3,2–3,4" },
+  { task: "Doporučení před Black Friday", role: "Category manager", difficulty: 2, weak: "1,0–1,2", medium: "2,6–2,8", strong: "4,0" },
+  { task: "Objednávka zboží na Black Friday", role: "Category manager", difficulty: 3, weak: "1,2", medium: "2,4–2,6", strong: "3,6–3,8" },
+  { task: "Čerpání rozpočtu pro finanční ředitelku", role: "Projektový manažer", difficulty: 1, weak: "1,2", medium: "1,8", strong: "3,0–3,2" },
+  { task: "Skutečný stav projektu Kompas", role: "Projektový manažer", difficulty: 2, weak: "1,2", medium: "–", strong: "3,8" },
+  { task: "Rozhodnutí o spuštění 2. 11.", role: "Projektový manažer", difficulty: 3, weak: "1,2", medium: "2,4", strong: "3,6–3,8" },
 ];
 
 const fairness = [
@@ -38,7 +42,7 @@ export function AboutScreen({ onOpenMethodology }: AboutScreenProps) {
       <h2 className="mb-3">Jak projekt vznikl</h2>
       <p className="mb-8">
         Projekt vznikal postupně po milnících podle písemné specifikace. Každou změnu kontrolují automatické testy, dnes
-        jich je přes 120. Hodnotitel je zkalibrovaný na vzorových pokusech.
+        jich je přes 250. Hodnotitel je zkalibrovaný na vzorových pokusech.
       </p>
 
       <h2 className="mb-3">Kalibrace hodnotitele</h2>
@@ -53,7 +57,7 @@ export function AboutScreen({ onOpenMethodology }: AboutScreenProps) {
           </caption>
           <thead className="text-sm text-ink-muted">
             <tr>
-              <th className="py-2 pr-4 font-medium">Role</th>
+              <th className="py-2 pr-4 font-medium">Úkol</th>
               <th className="py-2 pr-4 font-medium">Slabý</th>
               <th className="py-2 pr-4 font-medium">Střední</th>
               <th className="py-2 font-medium">Silný</th>
@@ -61,11 +65,16 @@ export function AboutScreen({ onOpenMethodology }: AboutScreenProps) {
           </thead>
           <tbody>
             {calibrationRows.map((row) => (
-              <tr key={row.role} className="border-t border-line">
-                <td className="py-2 pr-4">{row.role}</td>
+              <tr key={row.task} className="border-t border-line">
+                <td className="py-2 pr-4">
+                  <span className="block">{row.task}</span>
+                  <span className="block text-sm text-ink-muted">
+                    {row.role} · obtížnost {row.difficulty}
+                  </span>
+                </td>
                 <td className="py-2 pr-4 whitespace-nowrap">{row.weak}</td>
-                <td className="py-2 pr-4">{row.medium}</td>
-                <td className="py-2">{row.strong}</td>
+                <td className="py-2 pr-4 whitespace-nowrap">{row.medium}</td>
+                <td className="py-2 whitespace-nowrap">{row.strong}</td>
               </tr>
             ))}
           </tbody>

@@ -9,6 +9,8 @@ import { ProfileScreen } from "./screens/ProfileScreen";
 import { TaskScreen } from "./screens/TaskScreen";
 import { CalibrationScreen } from "./screens/CalibrationScreen";
 import { SamplesScreen } from "./screens/SamplesScreen";
+import { RoleTasksScreen } from "./screens/RoleTasksScreen";
+import { roleGroups } from "./roles/roleGroups";
 import { isParticipantBuild, isWebBuild } from "./buildFlags";
 import { loadRoles } from "./roles/loadRoles";
 import { loadChallenges } from "./challenges/loadChallenges";
@@ -29,11 +31,18 @@ export type Screen =
   | { name: "challengeMap" }
   | { name: "calibration" }
   | { name: "samples" }
+  | { name: "role"; roleId: string }
   | { name: "task"; roleId: string };
 
 // Role configs and challenges are bundled into the page, so loading them once at start is enough.
 export const { activeRoles, upcomingRoleTitles, errors } = loadRoles();
 const { challenges } = loadChallenges();
+const groups = roleGroups(activeRoles);
+
+// The role's colour in the badge sweep, the same on the home page, the role page and in its tasks.
+function sweepPositionOfRole(roleId: string): number {
+  return sweepPositionFor(groups.findIndex((group) => group.role.roleId === roleId), groups.length);
+}
 
 // After a reload, go straight back to the task that was open, if that role still exists.
 export function initialScreen(): Screen {
@@ -71,7 +80,7 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
           activeRoles={activeRoles}
           upcomingRoleTitles={upcomingRoleTitles}
           errors={errors}
-          onSelectRole={(roleId) => setScreen({ name: "task", roleId })}
+          onSelectRole={(roleId) => setScreen({ name: "role", roleId })}
           onOpenMethodology={() => setScreen({ name: "methodology" })}
           onOpenAbout={isWebBuild ? () => setScreen({ name: "about" }) : undefined}
           onOpenProfile={() => setScreen({ name: "profile" })}
@@ -83,13 +92,21 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
       )}
       {screen.name === "methodology" && (
         <MethodologyScreen
-          roles={activeRoles}
+          // One entry per role: the rubric belongs to the role, not to a task.
+          roles={groups.map((group) => group.role)}
           onOpenCalibration={() => setScreen({ name: "calibration" })}
           onOpenSamples={() => setScreen({ name: "samples" })}
         />
       )}
       {screen.name === "profile" && <ProfileScreen roles={activeRoles} onSelectRole={(roleId) => setScreen({ name: "task", roleId })} />}
       {screen.name === "releaseNotes" && <ReleaseNotesScreen />}
+      {screen.name === "role" && (
+        <RoleTasksScreen
+          tasks={activeRoles.filter((task) => task.roleId === screen.roleId)}
+          sweepPosition={sweepPositionOfRole(screen.roleId)}
+          onSelectTask={(taskId) => setScreen({ name: "task", roleId: taskId })}
+        />
+      )}
       {screen.name === "challenge" && selectedChallenge && (
         // key: another challenge starts with an empty answer.
         <ChallengeScreen
@@ -111,7 +128,7 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
         <TaskScreen
           key={selectedRole.id}
           role={selectedRole}
-          roleSweepPosition={sweepPositionFor(activeRoles.indexOf(selectedRole), activeRoles.length)}
+          roleSweepPosition={sweepPositionOfRole(selectedRole.roleId)}
           aiStatus={aiStatus}
           backend={backend}
         />

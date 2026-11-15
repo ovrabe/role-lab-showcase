@@ -3,6 +3,8 @@ import type { RoleLoadError } from "../roles/loadRoles";
 import { RoleBadge, sweepPositionFor } from "../components/RoleBadge";
 import { loadSession } from "../session/sessionStorage";
 import { roleStatus, taskProgress, type RoleStatus } from "../task/taskProgress";
+import { ClockIcon, StatusChip } from "../components/TaskChips";
+import { roleGroups } from "../roles/roleGroups";
 import { ProgressTeaser } from "../progress/ProgressTeaser";
 import { DailyChallengeCard } from "../challenges/DailyChallengeCard";
 import type { ChallengeConfig } from "../challenges/challengeSchema";
@@ -35,6 +37,7 @@ export function HomeScreen({
   onSelectChallenge,
   onOpenChallengeMap,
 }: HomeScreenProps) {
+  const roleCards = roleGroups(activeRoles);
   return (
     <section className="max-w-2xl mx-auto">
       <HomeHero onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} />
@@ -57,23 +60,23 @@ export function HomeScreen({
         </p>
       )}
       <ul className="space-y-3 mb-10">
-        {activeRoles.map((role, index) => (
-          <li key={role.id}>
+        {roleCards.map(({ role, tasks }, index) => (
+          <li key={role.roleId}>
             <button
               type="button"
-              onClick={() => onSelectRole(role.id)}
+              onClick={() => onSelectRole(role.roleId)}
               className="soft-card w-full text-left p-5 flex items-start gap-4 transition-transform hover:-translate-y-0.5"
             >
-              <RoleBadge title={role.title} sweepPosition={sweepPositionFor(index, activeRoles.length)} />
+              <RoleBadge title={role.title} sweepPosition={sweepPositionFor(index, roleCards.length)} />
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-lg">{role.title}</span>
                 <span className="block text-ink-muted">{role.context}</span>
                 <span className="mt-3 flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-paper px-3 py-1 text-sm text-ink-muted">
                     <ClockIcon />
-                    Asi {role.timeLimitMinutes} minut
+                    {taskCountLabel(tasks.length)}
                   </span>
-                  <StatusChip status={roleStatus(taskProgress(loadSession(role.id)))} />
+                  <StatusChip status={combinedStatus(tasks)} />
                 </span>
               </span>
             </button>
@@ -151,26 +154,6 @@ function HomeHero({ onOpenMethodology, onOpenAbout }: { onOpenMethodology: () =>
 const heroButtonClass =
   "rounded-full bg-white/15 border border-white/30 px-4 py-2 text-white font-medium hover:bg-white/25";
 
-// Tells the person that unfinished work is waiting, so leaving a task never feels like losing it.
-function StatusChip({ status }: { status: RoleStatus }) {
-  if (status === "new") return null;
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)] px-3 py-1 text-sm font-semibold text-accent">
-      <span aria-hidden="true" className="size-1.5 rounded-full bg-accent" />
-      {status === "inProgress" ? "Rozpracováno" : "Odevzdáno"}
-    </span>
-  );
-}
-
-function ClockIcon() {
-  return (
-    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="8" cy="8" r="6.25" />
-      <path d="M8 4.75V8l2.25 1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function ConfigErrors({ errors }: { errors: RoleLoadError[] }) {
   return (
     <div role="alert" className="bg-notice text-notice-ink border border-line rounded-control p-4 mb-8">
@@ -189,4 +172,17 @@ function ConfigErrors({ errors }: { errors: RoleLoadError[] }) {
       </ul>
     </div>
   );
+}
+
+// Czech plural: 1 úkol, 2–4 úkoly, 5 and more úkolů.
+function taskCountLabel(count: number): string {
+  if (count === 1) return "1 úkol";
+  return count >= 2 && count <= 4 ? `${count} úkoly` : `${count} úkolů`;
+}
+
+// Unfinished work wins: one started task is enough to show "Rozpracováno" on the role.
+function combinedStatus(tasks: RoleConfig[]): RoleStatus {
+  const statuses = tasks.map((task) => roleStatus(taskProgress(loadSession(task.id))));
+  if (statuses.includes("inProgress")) return "inProgress";
+  return statuses.includes("submitted") ? "submitted" : "new";
 }

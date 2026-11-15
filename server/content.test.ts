@@ -5,6 +5,12 @@ import { loadRoles } from "../src/roles/loadRoles";
 import { getMaterialText } from "../src/materials/materialFiles";
 import { getEvaluatorKey } from "../src/evaluation/evaluatorKeys";
 import { loadPreviewSamples } from "../src/evaluation/previewFixture";
+import { loadCalibrationRuns } from "../src/calibration/calibrationFixtures";
+// A session to build prompts from: a sample evaluation if the task has one, otherwise its
+// first calibration run (new tasks get samples only after they are calibrated).
+const sessionFor = (task: Parameters<typeof loadPreviewSamples>[0]) =>
+  loadPreviewSamples(task)[0]?.session ?? loadCalibrationRuns(task)[0].session;
+
 import { buildAssistantTurns } from "../src/prompts/assistant";
 import { buildEvaluatorPrompt } from "../src/prompts/evaluator";
 import type { TranscriptItem } from "../src/session/sessionSchema";
@@ -54,7 +60,7 @@ describe("server content matches the page", () => {
     });
 
     it("builds the same evaluator prompt", () => {
-      const session = loadPreviewSamples(role)[0].session;
+      const session = sessionFor(role);
       expect(buildEvaluatorPrompt(role, server.getEvaluatorKey(role.id)!, session)).toBe(
         buildEvaluatorPrompt(role, getEvaluatorKey(role.id)!, session),
       );

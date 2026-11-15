@@ -22,7 +22,11 @@ export function ProfileScreen({ roles, onSelectRole }: ProfileScreenProps) {
   const levels = skillLevels(attempts);
   const focus = recommendedSkill(levels);
   const earned = new Set(earnedBadges(attempts).map((badge) => badge.id));
-  const roleTitle = (roleId: string) => roles.find((candidate) => candidate.id === roleId)?.title ?? roleId;
+  // Attempts name the task in the field "roleId" (src/roles/taskRoles.ts): show role and task.
+  const roleTitle = (taskId: string) => {
+    const task = roles.find((candidate) => candidate.id === taskId);
+    return task ? `${task.title} · ${task.taskTitle}` : taskId;
+  };
   const levelLabel = (roleId: string, level: number) =>
     roles.find((candidate) => candidate.id === roleId)?.levels.find((item) => item.level === level)?.label;
 

@@ -11,9 +11,11 @@ Výsledkem je **jedna samostatná HTML stránka**, kterou autor publikuje v clau
 - `docs/RUNTIME.md` a `docs/claude-runtime/*.d.ts` — jak stránka volá Clauda. Soubory `.d.ts` mají přednost před tvou pamětí.
 - `docs/DEMO.md` — jak prototyp ukázat za tři minuty
 - `docs/PRODUCTION.md` — plán produkční (webové) verze, bezpečnost API klíče, náklady
-- `data/roles/*.json` — konfigurace rolí: zadání, podklady, rubrika, úrovně, mikro-cvičení
+- `data/roles/*.json` — konfigurace rolí: rubrika, úrovně, strop, mikro-cvičení
+- `data/tasks/*.json` — úkoly rolí: zadání, seznam podkladů, obtížnost 1–3
+- `data/challenges/*.json` — krátké výzvy na jednotlivé dovednosti
 - `data/category-manager/`, `data/project-manager/` — podklady k úkolům
-- `evaluator-data/*.key.json` — klíče hodnotitele
+- `evaluator-data/*.key.json` — klíče hodnotitele k úkolům, `evaluator-data/challenges/*.key.json` k výzvám
 
 Role jsou dvě: category manager (staví se první) a projektový manažer (přidává se v milníku M4). Kód nesmí mít nic natvrdo pro jednu roli.
 

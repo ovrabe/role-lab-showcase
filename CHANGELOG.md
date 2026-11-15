@@ -2,6 +2,23 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.2.0 – 15. 11. 2026
+
+Tři obtížnosti v každé roli.
+
+### Přidáno
+
+- Každá role má teď tři úkoly: obtížnost 1 (základní, asi 15 minut), 2 (střední, původní úkol) a 3 (pokročilá, asi 45 minut s více podklady, které je potřeba dát dohromady).
+- Category manager: nové úkoly „Hlavní tip do newsletteru“ a „Objednávka zboží na Black Friday“.
+- Projektový manažer: nové úkoly „Čerpání rozpočtu pro finanční ředitelku“ a „Rozhodnutí o spuštění 2. 11.“.
+- Po výběru role se ukážou její úkoly s obtížností, stavem a nejlepší dosaženou úrovní.
+- Úkol obtížnosti 3 se odemkne, když v úkolu obtížnosti 2 téže role dosáhneš úrovně 3 (Pracuje s AI).
+
+### Změněno
+
+- Hlavička úkolu a historie pokusů v profilu ukazují i název úkolu, nejen roli.
+- Stránka O projektu ukazuje výsledky kalibrace hodnotitele pro všech šest úkolů.
+
 ## 1.1.1 – 15. 11. 2026
 
 ### Opraveno

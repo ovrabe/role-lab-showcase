@@ -1,0 +1,11 @@
+cislo_faktury,dodavatel,popis,castka_bez_dph_czk,datum_vystaveni,datum_zaevidovani,stav
+FA-TK-2026-0141,Tikeo s.r.o.,"Licence helpdesku, 2. pololetí 2026",312000,2026-06-22,2026-06-24,zaplaceno
+FA-TK-2026-0187,Tikeo s.r.o.,"Implementace, etapa 1: konfigurace",640000,2026-07-15,2026-07-16,zaplaceno
+FA-DI-2026-0093,Datovka Integrace s.r.o.,"Integrace s objednávkovým systémem, etapa 1",420000,2026-08-10,2026-08-11,zaplaceno
+FA-LT-2026-0412,Lingua Team s.r.o.,Překlady šablon odpovědí do polštiny a maďarštiny,96000,2026-08-24,2026-08-25,zaplaceno
+FA-PW-2026-0058,ProjectWise s.r.o.,"Projektové konzultace, červen až srpen",168000,2026-09-01,2026-09-02,zaplaceno
+FA-TK-2026-0141,Tikeo s.r.o.,"Licence helpdesku, 2. pololetí 2026",312000,2026-06-22,2026-09-03,zaplaceno
+FA-TK-2026-0233,Tikeo s.r.o.,"Implementace, etapa 2: konfigurace",560000,2026-09-14,2026-09-15,zaplaceno
+FA-DI-2026-0131,Datovka Integrace s.r.o.,"Integrace s objednávkovým systémem, etapa 2",380000,2026-09-28,2026-09-29,schváleno k úhradě
+FA-TK-2026-0251,Tikeo s.r.o.,"Migrace dat, záloha",260000,2026-09-30,2026-10-01,schváleno k úhradě
+FA-SC-2026-1022,Školicí centrum Vltava s.r.o.,Rezervace školicích místností,20000,2026-10-05,2026-10-06,schváleno k úhradě

@@ -1,0 +1,93 @@
+{
+  "id": "project-manager-go-live",
+  "roleId": "project-manager",
+  "title": "Rozhodnutí o spuštění 2. 11.",
+  "difficulty": 3,
+  "assistantContext": "zaměstnanci středně velké firmy",
+  "timeLimitMinutes": 45,
+  "brief": {
+    "situation": "Dnes je pondělí 26. 10. 2026 a vedeš projekt Kompas: firma zavádí nový systém pro zákaznickou podporu ve čtyřech zemích (CZ, SK, PL, HU) pro 120 agentů. Řídicí výbor 7. 10. rozhodl o spuštění 2. 11. s převodem tiketů za posledních 12 měsíců. Rezerva rozpočtu projektu je asi 130 000 Kč. Sponzor projektu chce v úterý 27. 10. rozhodnout, jestli se 2. 11. opravdu spouští.",
+    "task": "Připrav pro sponzora doporučení: spustit 2. 11., nebo ne, v jakém rozsahu a za jakých podmínek. Uveď, co se stane, když se spuštění posune, a jaká rozhodnutí od sponzora potřebuješ.",
+    "deliverable": "Doporučení pro sponzora na jednu stranu, nejvýš 2 500 znaků. Sponzor ho bude číst těsně před rozhodnutím.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "checklist",
+      "title": "Kontrolní seznam připravenosti ke spuštění (26. 10.)",
+      "file": "data/project-manager/kontrolni_seznam_spusteni.csv",
+      "type": "csv",
+      "rows": 12,
+      "period": "stav k 26. 10. 2026",
+      "dictionary": [
+        {
+          "column": "oblast",
+          "meaning": "Oblast připravenosti"
+        },
+        {
+          "column": "polozka",
+          "meaning": "Co musí být hotové"
+        },
+        {
+          "column": "zeme",
+          "meaning": "Země, které se položka týká"
+        },
+        {
+          "column": "stav",
+          "meaning": "Stav podle vlastníka položky"
+        },
+        {
+          "column": "vlastnik",
+          "meaning": "Kdo za položku odpovídá"
+        },
+        {
+          "column": "poznamka",
+          "meaning": "Poznámka vlastníka"
+        }
+      ]
+    },
+    {
+      "id": "skoleni",
+      "title": "Docházka na školení agentů",
+      "file": "data/project-manager/dochazka_skoleni.csv",
+      "type": "csv",
+      "rows": 4,
+      "period": "školení od 12. do 22. 10. 2026",
+      "dictionary": [
+        {
+          "column": "zeme",
+          "meaning": "Země"
+        },
+        {
+          "column": "agentu_celkem",
+          "meaning": "Počet agentů, kteří budou v novém systému pracovat"
+        },
+        {
+          "column": "proskoleno",
+          "meaning": "Počet agentů, kteří prošli školením"
+        },
+        {
+          "column": "posledni_termin",
+          "meaning": "Datum posledního školení, které proběhlo"
+        },
+        {
+          "column": "poznamka",
+          "meaning": "Poznámka"
+        }
+      ]
+    },
+    {
+      "id": "uat",
+      "title": "Zpráva z akceptačních testů (23. 10.)",
+      "file": "data/project-manager/zprava_uat_2026-10-23.md",
+      "type": "markdown"
+    },
+    {
+      "id": "licence",
+      "title": "E-mail od dodavatele starého systému (23. 10.)",
+      "file": "data/project-manager/email_licence_stary_system.md",
+      "type": "markdown"
+    }
+  ]
+}

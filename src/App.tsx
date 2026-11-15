@@ -8,6 +8,7 @@ import { useAiAvailability } from "./runtime/useAiAvailability";
 import { loadSession, saveLastRoleId } from "./session/sessionStorage";
 import { roleStatus, taskProgress } from "./task/taskProgress";
 import { initialScreen, ScreenContent, type Screen } from "./AppScreens";
+import { roleOfTask } from "./roles/taskRoles";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>(initialScreen);
@@ -20,9 +21,10 @@ export default function App() {
     return () => window.clearTimeout(timeout);
   }, [showSavedNote]);
 
-  function leaveTask(roleId: string) {
-    if (roleStatus(taskProgress(loadSession(roleId))) === "inProgress") setShowSavedNote(true);
-    setScreen({ name: "home" });
+  // Back to the role's tasks, where the person picked this one.
+  function leaveTask(taskId: string) {
+    if (roleStatus(taskProgress(loadSession(taskId))) === "inProgress") setShowSavedNote(true);
+    setScreen({ name: "role", roleId: roleOfTask(taskId) });
   }
   const { status, backend, isSimulation } = useAiAvailability();
   const avatar = useAvatar();
@@ -54,7 +56,7 @@ export default function App() {
               <span className="grid place-items-center size-9 rounded-full bg-surface text-ink shadow-[var(--shadow-card)]">
                 <ArrowLeft aria-hidden="true" size={18} />
               </span>
-              Výběr role
+              Výběr úkolu
             </button>
           ) : (
             <button

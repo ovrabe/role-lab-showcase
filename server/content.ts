@@ -54,11 +54,17 @@ export function loadServerContent(root: string = process.cwd()): ServerContent {
       content,
     ]),
   );
+  const taskFiles = Object.fromEntries(
+    Object.entries(readJsonFiles(join(dataDir, "tasks"), ".json")).map(([path, content]) => [
+      relative(root, path).split("\\").join("/"),
+      content,
+    ]),
+  );
   const keyFiles = readJsonFiles(join(root, "evaluator-data"), ".key.json");
   const challengeKeyFiles = readJsonFiles(join(root, "evaluator-data", "challenges"), ".key.json");
 
   return {
-    roles: parseRoles(roleFiles, getMaterialText),
+    roles: parseRoles(roleFiles, taskFiles, getMaterialText),
     getMaterialText,
     getEvaluatorKey: (roleId) => findEvaluatorKey(keyFiles, roleId),
     challenges: parseChallenges(readJsonFiles(join(dataDir, "challenges"), ".json")),

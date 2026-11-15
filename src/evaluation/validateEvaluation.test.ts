@@ -128,7 +128,14 @@ describe("validateEvaluation", () => {
 });
 
 describe("sample evaluations", () => {
-  it.each(activeRoles.map((candidate) => [candidate.id, candidate] as const))(
+  // Samples come from real evaluations, so a new task gets them only after calibration.
+  const withSamples = activeRoles.filter((candidate) => loadPreviewSamples(candidate).length > 0);
+
+  it("exist for the original task of each role", () => {
+    expect(withSamples.map((candidate) => candidate.id)).toEqual(expect.arrayContaining(["category-manager", "project-manager"]));
+  });
+
+  it.each(withSamples.map((candidate) => [candidate.id, candidate] as const))(
     "%s has a weak and a strong sample that pass the same checks as a real evaluation",
     (_id, candidate) => {
       const samples = loadPreviewSamples(candidate);

@@ -5,6 +5,12 @@ import { buildEvaluatorPrompt } from "./evaluator";
 import { loadRoles } from "../roles/loadRoles";
 import { getEvaluatorKey } from "../evaluation/evaluatorKeys";
 import { loadPreviewSamples } from "../evaluation/previewFixture";
+import { loadCalibrationRuns } from "../calibration/calibrationFixtures";
+// A session to build prompts from: a sample evaluation if the task has one, otherwise its
+// first calibration run (new tasks get samples only after they are calibrated).
+const sessionFor = (task: Parameters<typeof loadPreviewSamples>[0]) =>
+  loadPreviewSamples(task)[0]?.session ?? loadCalibrationRuns(task)[0].session;
+
 
 // docs/PROMPTS.md is the source of truth; the code must send exactly its wording.
 const promptsDoc = promptsDocRaw.replace(/\r\n/g, "\n");
@@ -33,7 +39,7 @@ describe.each(activeRoles.map((role) => [role.id, role] as const))("prompts matc
     const instructions = codeBlockAfter("## 2. Hodnotitel").trim();
     const schema = codeBlockAfter("### Výstupní schéma").trim();
 
-    const session = loadPreviewSamples(role)[0].session;
+    const session = sessionFor(role);
     const prompt = buildEvaluatorPrompt(role, getEvaluatorKey(role.id)!, session);
     expect(prompt.startsWith(`${instructions}\n\nVýstupní schéma:\n`)).toBe(true);
     expect(prompt).toContain(schema);

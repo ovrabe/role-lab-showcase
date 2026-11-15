@@ -38,7 +38,7 @@ Podrobná schémata webové verze, verze v claude.ai a vývoje s vysvětlivkami 
 - **Tři buildy z jednoho kódu:**
   - `npm run build` a `npm run build:resitel` dělají stránku pro claude.ai. Clauda volá přes účet toho, kdo ji otevře, bez serveru a bez klíče.
   - `npm run build:web` dělá veřejný web na Vercelu se serverovými funkcemi v `api/` a `server/`.
-- **Role jsou konfigurace, ne kód.** Zadání, podklady, rubrika, úrovně a cvičení jsou v `data/roles/*.json`. Obě role běží stejným kódem.
+- **Role jsou konfigurace, ne kód.** Rubrika, úrovně a cvičení role jsou v `data/roles/*.json`, zadání a podklady jednotlivých úkolů v `data/tasks/*.json`. Obě role běží stejným kódem.
 - **Prompty** asistenta a hodnotitele jsou v `docs/PROMPTS.md`. Test hlídá, že kód používá doslova stejný text.
 
 ## Bezpečnost

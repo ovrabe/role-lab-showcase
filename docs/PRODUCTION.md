@@ -151,8 +151,8 @@ První dva nápady pokrývá část 10 (fáze 1 a 2).
 | # | Co přibude | Hotovo, když | Náročnost |
 |---|---|---|---|
 | 1 ✅ | Pokrok v pěti dovednostech, posun a odznaky ve výsledku, doporučená dovednost, zpětná vazba k hodnocení (krok 5 z části 8) | Po druhém pokusu vidím „Ověřování 2 → 3“ a co mám trénovat dál | M |
-| 2 | Krátké výzvy na jednotlivé dovednosti (5 minut, levnější model), výzva dne, mapa výzev | Každá dovednost má aspoň tři výzvy a výzva dne se střídá | L |
-| 3 | Víc úkolů v každé roli ve třech obtížnostech, výroba úkolů s Claudem a kalibrace, odemykání | Každá role má úkol na úrovni 1–3 a těžší se odemkne podle úrovně | L |
+| 2 ✅ | Krátké výzvy na jednotlivé dovednosti (5 minut, levnější model), výzva dne, mapa výzev | Každá dovednost má aspoň tři výzvy a výzva dne se střídá | L |
+| 3 ✅ | Víc úkolů v každé roli ve třech obtížnostech, výroba úkolů s Claudem a kalibrace, odemykání | Každá role má úkol na úrovni 1–3 a těžší se odemkne podle úrovně | L |
 | 3b | Vlastní výzva: úkol podle vlastní situace a struktury vlastních dat | Z tabulky a popisu role vznikne úkol s vymyšlenými daty a záludnostmi | M–L |
 | 4 | Účty a přenos pokroku mezi zařízeními | Pokrok se po přihlášení přenese a jde smazat | M–L |
 
@@ -163,6 +163,19 @@ První dva nápady pokrývá část 10 (fáze 1 a 2).
 - **Avatar:** 18 emblémů z game-icons.net (CC BY 3.0, autoři uvedeni na stránkách Jak hodnotíme a O projektu), šest barev a nepovinná přezdívka. Část emblémů a zlatou barvu odemykají odznaky, Bránu všech 20. Názvy emblémů jsou jen v nápovědě po najetí myší.
 - Ve výsledku blok „Co se změnilo“ a ve webové verzi otázka „Odpovídá hodnocení tvé práci?“ (odpověď a skóre jdou do Upstash, bez záznamu práce).
 - Další úpravy: tlačítko Kopírovat u odpovědí asistenta, chat na celou výšku okna na širší obrazovce, „krok“ místo „tah“ (stránka, pokyny hodnotitele, ukázky).
+
+**Stav fáze 2 (hotovo, verze 1.1.0, listopad 2026)**
+- 15 krátkých výzev, tři na každou dovednost, společné pro obě role (`data/challenges/`, klíče v `evaluator-data/challenges/`).
+- Jedna odpověď a jedno hodnocení modelem Claude Haiku (`/api/challenge`, v claude.ai úroveň `quick`), skóre 1–4 s citacemi a rozborem. Pokyny jsou v `docs/PROMPTS.md`, část 4.
+- Výzva dne je stejná pro všechny a každý den jiná. Mapa výzev ukazuje nejlepší skóre.
+- Výsledky výzev se ukládají jen v prohlížeči a úroveň dovedností v profilu nemění.
+- Kalibrace: slabé odpovědi vždy 1, silné 4 (u Rozkladu úkolu 3).
+
+**Stav fáze 3 (hotovo, verze 1.2.0, listopad 2026)**
+- Role a úkoly jsou oddělené: `data/roles/` (rubrika, úrovně, cvičení) a `data/tasks/` (zadání, podklady, obtížnost). Původní úkoly mají id rolí, takže uložená data platí dál.
+- Každá role má úkol obtížnosti 1 (15 minut, jedna záludnost), 2 (původní úkol) a 3 (45 minut, čtyři podklady, tři záludnosti).
+- Obtížnost 1 a 2 je otevřená, obtížnost 3 se odemkne úrovní 3 v úkolu obtížnosti 2 téže role.
+- Podklady nových úkolů vyrábí skript (`evaluator-data/generators/`), texty a data prošly kontrolou a nové úkoly kalibrací (slabý, střední a silný běh, tři kola, všechna kritéria splněna).
 
 **Vlastní výzva (fáze 3b), pravidla bezpečnosti**
 - Prohlížeč ze souboru vytáhne jen strukturu: názvy sloupců a typy hodnot. Samotná data nikdy neopustí počítač.

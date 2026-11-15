@@ -6,7 +6,8 @@ import type { ClaudeClient } from "./claudeClient";
 import { loadPreviewSamples } from "../src/evaluation/previewFixture";
 
 const content = loadServerContent();
-const role = content.roles.activeRoles[0];
+// The original task: it has sample evaluations, the newer tasks get theirs after calibration.
+const role = content.roles.activeRoles.find((task) => task.id === "category-manager")!;
 const session = loadPreviewSamples(role).find((sample) => sample.id === "strong")!.session;
 
 // Small limits so the tests stay short; the real numbers are in dailyLimits.

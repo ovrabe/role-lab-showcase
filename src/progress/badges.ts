@@ -1,5 +1,6 @@
 import { dimensionIds, type DimensionId } from "../roles/roleSchema";
 import { skillNames } from "../roles/skillNames";
+import { roleOfTask } from "../roles/taskRoles";
 import { recommendedSkill, skillLevels, type ProgressAttempt } from "./progress";
 
 /**
@@ -70,7 +71,7 @@ const rules: BadgeRule[] = [
     group: "data",
     title: "Detektiv v obou rolích",
     description: "Všechny záludnosti odhaleny v obou rolích.",
-    heldAfter: (upTo) => new Set(upTo.filter(allTrapsCaught).map((attempt) => attempt.roleId)).size >= 2,
+    heldAfter: (upTo) => new Set(upTo.filter(allTrapsCaught).map((attempt) => roleOfTask(attempt.roleId))).size >= 2,
   },
 
   ...dimensionIds.map(
@@ -120,7 +121,7 @@ const rules: BadgeRule[] = [
     group: "overall",
     title: "Obě role",
     description: "Hodnocení v obou rolích.",
-    heldAfter: (upTo) => new Set(upTo.map((attempt) => attempt.roleId)).size >= 2,
+    heldAfter: (upTo) => new Set(upTo.map((attempt) => roleOfTask(attempt.roleId))).size >= 2,
   },
   {
     id: "no-weak-spot",
