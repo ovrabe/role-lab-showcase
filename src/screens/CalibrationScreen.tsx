@@ -26,7 +26,7 @@ export function CalibrationScreen({ roles, aiStatus, backend }: CalibrationScree
       </div>
       {roles.length > 1 && (
         <label className="block">
-          <span className="font-semibold mr-2">Role</span>
+          <span className="font-semibold mr-2">Úkol</span>
           <select value={roleId} onChange={(event) => setRoleId(event.target.value)} className="rl-select">
             {roles.map((candidate) => (
               <option key={candidate.id} value={candidate.id}>

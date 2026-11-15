@@ -128,11 +128,12 @@ describe("validateEvaluation", () => {
 });
 
 describe("sample evaluations", () => {
-  // Samples come from real evaluations, so a new task gets them only after calibration.
+  // Samples come from real evaluations: a new task gets them after its calibration (README,
+  // "Jak přidat roli nebo úkol"). Until then this test reminds that they are missing.
   const withSamples = activeRoles.filter((candidate) => loadPreviewSamples(candidate).length > 0);
 
-  it("exist for the original task of each role", () => {
-    expect(withSamples.map((candidate) => candidate.id)).toEqual(expect.arrayContaining(["category-manager", "project-manager"]));
+  it("exist for every task", () => {
+    expect(withSamples.map((candidate) => candidate.id)).toEqual(activeRoles.map((candidate) => candidate.id));
   });
 
   it.each(withSamples.map((candidate) => [candidate.id, candidate] as const))(

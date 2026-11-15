@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { PreviewPill } from "./components/PreviewPill";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AvatarMedal, useAvatar } from "./profile/AvatarMedal";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { Footer } from "./components/Footer";
 import { useAiAvailability } from "./runtime/useAiAvailability";
 import { loadSession, saveLastRoleId } from "./session/sessionStorage";
 import { roleStatus, taskProgress } from "./task/taskProgress";
-import { initialScreen, ScreenContent, type Screen } from "./AppScreens";
-import { roleOfTask } from "./roles/taskRoles";
+import { initialScreen, ScreenContent } from "./AppScreens";
+import { useScreenHistory } from "./useScreenHistory";
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>(initialScreen);
+  const { screen, open: setScreen, back, forward, canGoBack, canGoForward } = useScreenHistory(initialScreen);
   // A short note after leaving an unfinished task: the work is saved, not lost.
   const [showSavedNote, setShowSavedNote] = useState(false);
 
@@ -21,10 +21,10 @@ export default function App() {
     return () => window.clearTimeout(timeout);
   }, [showSavedNote]);
 
-  // Back to the role's tasks, where the person picked this one.
-  function leaveTask(taskId: string) {
-    if (roleStatus(taskProgress(loadSession(taskId))) === "inProgress") setShowSavedNote(true);
-    setScreen({ name: "role", roleId: roleOfTask(taskId) });
+  // Back to where the person came from; leaving an unfinished task says it stays saved.
+  function goBack() {
+    if (screen.name === "task" && roleStatus(taskProgress(loadSession(screen.roleId))) === "inProgress") setShowSavedNote(true);
+    back();
   }
   const { status, backend, isSimulation } = useAiAvailability();
   const avatar = useAvatar();
@@ -44,46 +44,51 @@ export default function App() {
       )}
 
       <header className="relative z-30 border-b glass">
-        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
-          {/* One top row per screen, as in phone apps: in the task the back button takes the
-              place of the name, so no extra row sits between the header and the content. */}
-          {screen.name === "task" ? (
-            <button
-              type="button"
-              onClick={() => leaveTask(screen.roleId)}
-              className="flex items-center gap-2 text-ink-muted hover:text-ink font-medium whitespace-nowrap shrink-0"
-            >
-              <span className="grid place-items-center size-9 rounded-full bg-surface text-ink shadow-[var(--shadow-card)]">
-                <ArrowLeft aria-hidden="true" size={18} />
-              </span>
-              Výběr úkolu
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setScreen({ name: "home" })}
-              className="text-lg font-semibold text-ink whitespace-nowrap shrink-0"
-            >
-              Role Lab
-            </button>
-          )}
-          <div className="ml-auto flex items-center">{status === "preview" && <PreviewPill />}</div>
-          {/* The theme switch only on the home page: it is a one-off setting, the default
-              follows the system, and inside the task every row of the screen counts. */}
-          {screen.name === "home" && <ThemeToggle />}
-          {/* Profile in the header, as in phone apps; not inside a task, where the row is for leaving it. */}
-          {screen.name !== "task" && (
-            <button
-              type="button"
-              onClick={() => setScreen({ name: "profile" })}
-              aria-label="Můj profil"
-              aria-current={screen.name === "profile" ? "page" : undefined}
-              title="Můj profil"
-              className="rounded-full ring-offset-2 ring-offset-[var(--color-paper)] hover:ring-2 hover:ring-line aria-[current=page]:ring-2 aria-[current=page]:ring-[var(--color-progress)]"
-            >
-              <AvatarMedal avatar={avatar} size={32} />
-            </button>
-          )}
+        {/* Three parts like a browser's toolbar: arrows on the left, the name in the middle,
+            appearance and profile on the right. On a phone the middle part takes the space
+            that is left, so the name never runs into the controls. */}
+        <div className="mx-auto max-w-7xl px-4 py-3 grid grid-cols-[auto_1fr_auto] sm:grid-cols-[1fr_auto_1fr] items-center gap-3">
+          <nav aria-label="Historie" className="flex items-center gap-1">
+            <HistoryButton label="Zpět" onClick={goBack} disabled={!canGoBack}>
+              <ChevronLeft aria-hidden="true" size={22} />
+            </HistoryButton>
+            <HistoryButton label="Vpřed" onClick={forward} disabled={!canGoForward}>
+              <ChevronRight aria-hidden="true" size={22} />
+            </HistoryButton>
+          </nav>
+          <button
+            type="button"
+            onClick={() => setScreen({ name: "home" })}
+            className="justify-self-center text-lg font-semibold text-ink whitespace-nowrap"
+          >
+            Role Lab
+          </button>
+          <div className="justify-self-end flex items-center gap-3">
+            {status === "preview" && <PreviewPill />}
+            {/* The theme switch only on the home page: it is a one-off setting, the default
+                follows the system, and inside the task every row of the screen counts. A divider
+                keeps it apart from the profile, so the two are not mistaken for each other. */}
+            {screen.name === "home" && (
+              <div className="pr-3 sm:pr-5 border-r border-line">
+                <ThemeToggle />
+              </div>
+            )}
+            {/* Profile in the header, as in phone apps; not inside a task, where the row is for leaving it. */}
+            {screen.name !== "task" && (
+              <button
+                type="button"
+                onClick={() => setScreen({ name: "profile" })}
+                aria-current={screen.name === "profile" ? "page" : undefined}
+                className="group flex items-center gap-2 font-medium text-ink-muted hover:text-ink"
+              >
+                <span className="hidden sm:inline">Můj profil</span>
+                <span className="rounded-full ring-offset-2 ring-offset-[var(--color-paper)] group-hover:ring-2 group-hover:ring-line group-aria-[current=page]:ring-2 group-aria-[current=page]:ring-[var(--color-progress)]">
+                  <AvatarMedal avatar={avatar} size={40} />
+                </span>
+                <span className="sr-only sm:hidden">Můj profil</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -104,5 +109,21 @@ export default function App() {
       )}
 
     </div>
+  );
+}
+
+// A round arrow like a browser's; greyed out when there is nowhere to go.
+function HistoryButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      title={label}
+      className="grid place-items-center size-10 rounded-full text-ink hover:bg-surface disabled:text-ink-muted disabled:opacity-40 disabled:hover:bg-transparent"
+    >
+      {children}
+    </button>
   );
 }

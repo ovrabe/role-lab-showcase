@@ -2,6 +2,15 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.2.1 – 15. 11. 2026
+
+### Změněno
+
+- Hlavička funguje jako v prohlížeči: šipky zpět a vpřed vracejí na předchozí obrazovku, takže se nemusíš vracet přes úvod.
+- Název Role Lab je uprostřed hlavičky a vede na úvod.
+- Profil má větší ikonu a na počítači i popisek „Můj profil“. Přepínač vzhledu je od profilu oddělený.
+- Ve verzi pro claude.ai jsou ukázková hodnocení i pro čtyři nové úkoly.
+
 ## 1.2.0 – 15. 11. 2026
 
 Tři obtížnosti v každé roli.
