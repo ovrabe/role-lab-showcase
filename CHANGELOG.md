@@ -2,6 +2,16 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.6.4 – 16. 11. 2026
+
+Vzdušnější banner na počítači.
+
+### Změněno
+
+- Text v úvodním banneru je na počítači širší: podnadpis se vejde na jeden řádek a tlačítka do jedné řady.
+- Nadpis a podnadpis banneru jsou na počítači o kus větší a mezi nadpisem, textem a tlačítky je víc místa. Na telefonu je banner vzdušnější jen v řádkování.
+- Přepínač motivu v hlavičce je dál od obrázku profilu.
+
 ## 1.6.3 – 16. 11. 2026
 
 Kratší testovací scénář.

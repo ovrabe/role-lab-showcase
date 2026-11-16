@@ -123,10 +123,10 @@ function HomeHero({ onOpenTour, onOpenMethodology, onOpenAbout }: { onOpenTour: 
         <path d="M0 360 C200 355 330 315 470 322 S600 320 640 290 L640 360 Z" fill="#ff7a45" opacity="0.55" />
         <circle cx="560" cy="330" r="130" fill="url(#home-hero-orb)" opacity="0.85" />
       </svg>
-      <div className="relative text-white px-6 pt-6 pb-12 sm:px-8 sm:py-8 sm:max-w-md">
-        <h1 className="mb-2">Práce s AI na úkolu z praxe</h1>
-        <p className="text-white/85">Vyřeš úkol z praxe s AI asistentem a uvidíš hodnocení výsledku i postupu.</p>
-        <div className="mt-4 flex flex-wrap gap-2">
+      <div className="relative text-white px-6 pt-6 pb-12 sm:px-8 sm:py-10 sm:max-w-2xl">
+        <h1 className="mb-3 sm:mb-4 sm:text-[34px]">Práce s AI na úkolu z praxe</h1>
+        <p className="text-white/85 leading-relaxed text-balance sm:text-lg">Vyřeš úkol z praxe s AI asistentem a uvidíš hodnocení výsledku i postupu.</p>
+        <div className="mt-5 sm:mt-8 flex flex-wrap gap-2">
           {/* The one solid button: for anyone who wants to see how it works before spending 15 minutes. */}
           <button type="button" onClick={onOpenTour} className="rounded-full bg-white text-[#241d5c] px-4 py-2 font-semibold hover:bg-white/90">
             Prohlídka na 2 minuty

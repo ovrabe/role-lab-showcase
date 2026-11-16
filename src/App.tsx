@@ -69,7 +69,7 @@ export default function App() {
           >
             Role Lab
           </button>
-          <div className="justify-self-end flex items-center gap-3">
+          <div className="justify-self-end flex items-center gap-4 sm:gap-6">
             {status === "preview" && <PreviewPill />}
             {/* The theme switch only on the home page: it is a one-off setting, the default
                 follows the system, and inside the task every row of the screen counts. */}
