@@ -37,7 +37,7 @@ export function Footer({ page, onOpenReleaseNotes }: FooterProps) {
             <span aria-hidden="true">·</span>
             <button type="button" onClick={() => setIsFeedbackOpen(true)} className={linkClass}>
               <MessageSquare aria-hidden="true" size={14} />
-              Napsat autorovi
+              Poslat zpětnou vazbu
             </button>
           </>
         )}

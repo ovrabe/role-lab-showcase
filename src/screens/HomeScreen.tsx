@@ -83,7 +83,8 @@ export function HomeScreen({
 }
 
 // Opening banner in the AI colour sweep (docs/SPEC.md, section 9), kept low so the roles
-// start on the first screen. On a computer the shapes sit beside the text; on a phone a
+// start on the first screen. On a computer the shapes sit beside the text, drawn whole ("meet"),
+// because cropping them cuts the waves off where they rise on the left; on a phone a
 // low strip of waves drawn for that height runs along the bottom, so nothing is cut off.
 // Inline SVG, so nothing is downloaded.
 function HomeHero({ onOpenTour, onOpenMethodology, onOpenAbout }: { onOpenTour: () => void; onOpenMethodology: () => void; onOpenAbout?: () => void }) {
@@ -102,7 +103,7 @@ function HomeHero({ onOpenTour, onOpenMethodology, onOpenAbout }: { onOpenTour: 
       </svg>
       <svg
         viewBox="0 0 640 360"
-        preserveAspectRatio="xMaxYMax slice"
+        preserveAspectRatio="xMaxYMax meet"
         aria-hidden="true"
         className="hidden sm:block absolute bottom-0 right-0 h-full w-1/2 opacity-90"
       >

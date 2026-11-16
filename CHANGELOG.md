@@ -2,6 +2,18 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.6.2 – 16. 11. 2026
+
+Dvě drobné opravy.
+
+### Opraveno
+
+- Vlna v úvodním banneru na počítači už není vlevo useknutá.
+
+### Změněno
+
+- Odkaz na zpětnou vazbu v patičce se jmenuje „Poslat zpětnou vazbu“, aby se nepletl s odkazem „Napiš autorovi“ u rolí.
+
 ## 1.6.1 – 16. 11. 2026
 
 Kratší úvod.

@@ -103,11 +103,11 @@ Náročnost: **S** = do půl dne, **M** = 1–2 dny, **L** = víc dní.
 | 5 | Zpětná vazba ve výsledku: „Odpovídá hodnocení tvé práci?“ a „Tady nesouhlasím“ u oblasti. Přesunuto do části 10, fáze 1 | S–M |
 | 6 | Veřejný GitHub s README pro náboráře, kontrola tajných údajů, security review | S |
 
-Hotové kroky označuje ✅ (listopad 2026). Navíc hotovo: patička s odkazem na LinkedIn a okno „Napsat autorovi“ (zprávy pro autora v Upstash).
+Hotové kroky označuje ✅ (listopad 2026). Navíc hotovo: patička s odkazem na LinkedIn a okno „Poslat zpětnou vazbu“ (zprávy pro autora v Upstash).
 
 **Backlog na jednom místě (verze 1.5.0).** Vše, co lidé autorovi pošlou, se uloží do Upstash jako záloha a zároveň se z toho stane issue v soukromém repozitáři na GitHubu:
 
-- zpráva z okna „Napsat autorovi“ vždy, se štítkem `zpětná vazba`,
+- zpráva z okna „Poslat zpětnou vazbu“ vždy, se štítkem `zpětná vazba`,
 - odpověď „Odpovídá hodnocení tvé práci?“ jen když je záporná nebo s komentářem, se štítkem `hodnocení`,
 - zpráva z testovacího scénáře (`?testovani`, jen webová verze) se štítkem `testování`.
 
