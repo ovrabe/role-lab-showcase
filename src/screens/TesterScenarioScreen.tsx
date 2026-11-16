@@ -73,8 +73,9 @@ export function TesterScenarioScreen() {
       <header className="space-y-4">
         <h1>Testovací scénář</h1>
         <p>
-          Díky, že Role Lab vyzkoušíš. Projdi sedm kroků v tomhle pořadí a u každého odpověz na pár otázek. Aplikaci měj
-          otevřenou ve vedlejší kartě, odpovědi se tady mezitím pamatují. Celé to zabere asi 40 minut.
+          Díky, že Role Lab vyzkoušíš. Zabere to asi 10 minut. Aplikaci měj otevřenou ve vedlejší kartě a tady
+          odpovídej, odpovědi se mezitím pamatují. Každá otázka je nepovinná a odeslat můžeš kdykoli, i když neprojdeš
+          všechno.
         </p>
         <a href="/" target="_blank" rel="noopener" className="inline-flex items-center gap-2 rounded-full bg-action text-action-contrast px-5 py-2.5 font-medium">
           Otevřít Role Lab v nové kartě <ExternalLink aria-hidden="true" size={16} />
@@ -82,7 +83,7 @@ export function TesterScenarioScreen() {
         <ul className="card list-disc pl-10 space-y-2 text-sm">
           <li>Co napíšeš asistentovi, jde k AI (Claude) přes server aplikace. Nepiš tam osobní ani citlivé firemní údaje.</li>
           <li>Hodnocení celého úkolu jde udělat dvakrát za den, výzev zvládneš patnáct.</li>
-          <li>Odpovědi se odešlou jedním tlačítkem dole do soukromého seznamu námětů autora. Nepovinná je každá otázka.</li>
+          <li>Odpovědi se odešlou tlačítkem dole do soukromého seznamu námětů autora.</li>
         </ul>
         <p className="text-sm text-ink-muted" aria-live="polite">
           Zodpovězeno {answered} z {questionCount}

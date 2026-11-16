@@ -2,6 +2,16 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.6.3 – 16. 11. 2026
+
+Kratší testovací scénář.
+
+### Změněno
+
+- Testovací scénář (`?testovani`) zabere asi 10 minut místo 40. Kroky jdou v pořadí proč, co, jak, co když: k čemu aplikace je, jak funguje, jak se v ní pohybuje a co tester z používání bude mít. Úkol z role je volitelný na konci.
+- Pokyny ve scénáři odpovídají novému úvodu: karta Výzva dne, devět rolí, mapa výzev přes odkaz „Všechny výzvy“.
+- V úvodu scénáře stojí, že každá otázka je nepovinná a odeslat jde kdykoli.
+
 ## 1.6.2 – 16. 11. 2026
 
 Dvě drobné opravy.

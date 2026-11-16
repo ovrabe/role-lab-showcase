@@ -15,10 +15,10 @@ describe("tester scenario", () => {
   });
 
   it("sends only answered questions, trimmed, in scenario order with their wording", () => {
-    const report = reportAnswers({ q15: "9", q1: " 4 ", q2: "   " });
+    const report = reportAnswers({ q16: "Možná", q28: " 4 ", q27: "   " });
     expect(report).toEqual([
-      { step: "První dojem", question: "Je z úvodu jasné, k čemu Role Lab je?", answer: "4" },
-      { step: "Celkově", question: "Jak pravděpodobné je, že Role Lab doporučíš kolegovi nebo kolegyni?", answer: "9" },
+      { step: "Proč: k čemu Role Lab je", question: "Je jasné, proč aplikace vznikla?", answer: "4" },
+      { step: "Co když: co ti to dá", question: "Vrátíš se k Role Labu?", answer: "Možná" },
     ]);
   });
 

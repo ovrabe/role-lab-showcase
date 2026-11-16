@@ -12,80 +12,66 @@ export type ScenarioStep = { title: string; minutes: string; todo: string; quest
 
 const agree: [string, string] = ["nesouhlasím", "souhlasím"];
 
+// Ordered as why, what, how, what if: what the app is for, how it works, how it feels to use,
+// and what the tester gets out of it. About 10 minutes; the full role task is an optional extra.
 export const scenarioSteps: ScenarioStep[] = [
   {
-    title: "První dojem",
+    title: "Proč: k čemu Role Lab je",
     minutes: "2 minuty",
-    todo: "Otevři úvodní stránku aplikace v nové kartě a zatím nic neklikej. Jen se rozhlédni.",
+    todo: "Otevři Role Lab v nové kartě a přečti si úvod. Jestli chceš, klikni na „O projektu“. Nic dalšího zatím nezkoušej.",
     questions: [
-      { id: "q1", type: "scale", text: "Je z úvodu jasné, k čemu Role Lab je?", ends: ["vůbec", "úplně"] },
-      { id: "q2", type: "text", text: "Co tě upoutalo jako první a co nebylo jasné?" },
+      { id: "q27", type: "text", text: "Napiš jednou větou, k čemu podle tebe Role Lab je a pro koho." },
+      { id: "q28", type: "scale", text: "Je jasné, proč aplikace vznikla?", ends: ["vůbec", "úplně"] },
     ],
   },
   {
-    title: "Prohlídka",
+    title: "Co: prohlídka",
     minutes: "2 minuty",
     todo: "Na úvodu klikni na „Prohlídka na 2 minuty“ a projdi ji až k hodnocení. Prohlídka nevolá AI a nic neukládá.",
     questions: [
       { id: "q23", type: "scale", text: "Po prohlídce je jasné, jak úkol probíhá a jak se hodnotí.", ends: agree },
-      { id: "q24", type: "text", text: "Co v prohlídce chybělo nebo bylo navíc?" },
     ],
   },
   {
-    title: "Výzva dne",
+    title: "Jak: výzva dne a volné proklikání",
     minutes: "5 minut",
-    todo: "Na úvodu klikni na „Začít výzvu“. Přečti situaci a výstup AI, napiš odpověď a odevzdej ji. Hodnocení přijde za pár sekund.",
+    todo: "Na úvodu klikni na kartu „Výzva dne“, napiš odpověď a odevzdej ji. Hodnocení přijde za pár sekund. Pak se chvíli volně proklikej: role a jejich úkoly, profil vpravo nahoře, mapa výzev přes odkaz „Všechny výzvy“.",
     questions: [
-      { id: "q3", type: "scale", text: "Zadání výzvy bylo srozumitelné.", ends: agree },
-      { id: "q4", type: "scale", text: "Hodnocení odpovídalo kvalitě tvé odpovědi.", ends: agree },
-      { id: "q5", type: "text", text: "Co z výsledku bylo užitečné a co ne?" },
+      { id: "q4", type: "scale", text: "Hodnocení výzvy odpovídalo kvalitě tvé odpovědi.", ends: agree },
+      { id: "q13", type: "scale", text: "V aplikaci se snadno orientuješ.", ends: agree },
+      { id: "q29", type: "scale", text: "Texty a pokyny v aplikaci jsou srozumitelné.", ends: agree },
+      { id: "q14", type: "text", text: "Kde nebylo jasné, co dál, co se stane po kliknutí nebo co znamená nějaký text?" },
     ],
   },
   {
-    title: "Úkol obtížnosti 1",
-    minutes: "15 až 20 minut",
-    todo: "Na úvodu vyber roli, která je nejblíž tvé práci (je jich osm, od category managera po mikrobiologii), a v ní úkol „Obtížnost 1 · Základní“. Přečti zadání, prohlédni podklady, pracuj s asistentem jako v běžné práci a odevzdej výsledek. Hodnocení trvá minutu až dvě.",
+    title: "Co když: co ti to dá",
+    minutes: "1 minuta",
+    todo: "Už nic neklikej, jen odpověz.",
+    questions: [
+      { id: "q30", type: "text", text: "Co by ti pravidelné používání Role Labu přineslo?" },
+      { id: "q16", type: "choice", text: "Vrátíš se k Role Labu?", options: ["Ano", "Možná", "Ne"] },
+      { id: "q31", type: "text", text: "Proč ano, nebo proč ne?" },
+    ],
+  },
+  {
+    title: "Na závěr",
+    minutes: "1 minuta",
+    todo: "Pár údajů na konec. Všechno je nepovinné.",
+    questions: [
+      { id: "q20", type: "text", text: "Objevila se nějaká chyba? Popiš, co byl tvůj krok, co se mělo stát a co se stalo." },
+      { id: "q21", type: "line", text: "Tvoje role nebo obor" },
+      { id: "q22", type: "line", text: "Zařízení a prohlížeč" },
+    ],
+  },
+  {
+    title: "Navíc, když máš čas: úkol z role",
+    minutes: "15 minut, nepovinné",
+    todo: "Když máš čtvrt hodiny navíc: na úvodu vyber roli, která je nejblíž tvé práci, a v ní úkol „Obtížnost 1 · Základní“. Pracuj s asistentem jako v běžné práci a odevzdej výsledek. Hodnocení trvá minutu až dvě.",
     questions: [
       { id: "q26", type: "line", text: "Vybraná role a úkol" },
       { id: "q6", type: "scale", text: "Zadání a podklady byly jasné.", ends: agree },
-      { id: "q25", type: "scale", text: "Situace a data v úkolu odpovídají tomu, jak to v té práci opravdu chodí.", ends: agree },
-      { id: "q7", type: "scale", text: "Práce s asistentem fungovala dobře.", ends: agree },
       { id: "q8", type: "scale", text: "Hodnocení bylo férové a citace v něm sedí.", ends: agree },
-      { id: "q9", type: "scale", text: "Rozbor toho, co bylo v datech schované, mi dal smysl.", ends: agree },
       { id: "q10", type: "text", text: "Co by stálo za změnu na úkolu nebo na hodnocení?" },
-    ],
-  },
-  {
-    title: "Profil a pokrok",
-    minutes: "3 minuty",
-    todo: "Vpravo nahoře klikni na svou ikonu, otevře se profil. Podívej se na dovednosti a odznaky a zkus změnit ikonu.",
-    questions: [
-      { id: "q11", type: "scale", text: "Profil a odznaky mě lákají zkusit další úkol nebo výzvu.", ends: agree },
-      { id: "q12", type: "text", text: "Co ti na profilu chybí nebo co je navíc?" },
-    ],
-  },
-  {
-    title: "Orientace",
-    minutes: "3 minuty",
-    todo: "Projdi pár obrazovek (mapa výzev, Jak hodnotíme, úkoly role) a vracej se šipkou vlevo nahoře nebo tlačítkem zpět v prohlížeči. Pokud můžeš, otevři aplikaci i na telefonu.",
-    questions: [
-      { id: "q13", type: "scale", text: "V aplikaci se snadno orientuješ.", ends: agree },
-      { id: "q14", type: "text", text: "Kde nebylo jasné, kam dál, nebo co se stane po kliknutí?" },
-    ],
-  },
-  {
-    title: "Celkově",
-    minutes: "5 minut",
-    todo: "Na závěr pár otázek k celé aplikaci.",
-    questions: [
-      { id: "q15", type: "nps", text: "Jak pravděpodobné je, že Role Lab doporučíš kolegovi nebo kolegyni?", ends: ["vůbec", "určitě"] },
-      { id: "q16", type: "choice", text: "Vrátíš se zítra k výzvě dne?", options: ["Ano", "Možná", "Ne"] },
-      { id: "q17", type: "text", text: "Co bylo nejlepší?" },
-      { id: "q18", type: "text", text: "Co nejvíc vadilo nebo chybělo?" },
-      { id: "q19", type: "text", text: "Jaká role nebo jaký úkol by tě zajímal?" },
-      { id: "q20", type: "text", text: "Objevila se nějaká chyba? Popiš, co byl tvůj krok, co se mělo stát a co se stalo." },
-      { id: "q21", type: "line", text: "Tvoje role nebo obor (nepovinné)" },
-      { id: "q22", type: "line", text: "Zařízení a prohlížeč (nepovinné)" },
     ],
   },
 ];
