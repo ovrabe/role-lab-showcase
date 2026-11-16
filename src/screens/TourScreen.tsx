@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Lightbulb, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { RotateCcw, Send } from "lucide-react";
 import { BriefPanel } from "../task/BriefPanel";
 import { ChatMessages } from "../assistant/ChatMessages";
 import { ResultScreen } from "../result/ResultScreen";
 import { tourResult } from "../tutorial/loadTour";
 import type { Tour } from "../tutorial/tour";
+import { Coach, MaterialTable, NextButton } from "../tutorial/TourParts";
 
 // A two-minute walkthrough of a task with a made-up example: the person clicks through
 // prepared messages and sees scripted replies. Nothing here calls AI, saves anything or
@@ -15,6 +16,10 @@ type Stage = 0 | 1 | 2 | 3;
 
 // Long enough to read as "the assistant is answering", short enough not to bore.
 const thinkingMs = 900;
+
+// Where the person got to, kept while the page is open: someone who goes from the end of the
+// tour to the daily challenge and back lands where they left, not at the start again.
+const remembered = { stage: 0 as Stage, sentCount: 0 };
 
 type TourProps = {
   // Where to go after the tour: choosing a real task, or today's short challenge if there is one.
@@ -30,10 +35,21 @@ export function TourScreen(props: TourProps) {
 }
 
 function TourWalkthrough({ tour, onChooseTask, onTryChallenge }: TourProps & { tour: Tour }) {
-  const [stage, setStage] = useState<Stage>(0);
+  const [stage, setStage] = useState<Stage>(remembered.stage);
   // How many prepared messages have been sent so far, and whether a reply is on its way.
-  const [sentCount, setSentCount] = useState(0);
+  const [sentCount, setSentCount] = useState(remembered.sentCount);
   const [isThinking, setIsThinking] = useState(false);
+
+  useEffect(() => {
+    remembered.stage = stage;
+    remembered.sentCount = sentCount;
+  }, [stage, sentCount]);
+
+  function restart() {
+    setStage(0);
+    setSentCount(0);
+    setIsThinking(false);
+  }
 
   useEffect(() => {
     if (!isThinking) return;
@@ -68,7 +84,14 @@ function TourWalkthrough({ tour, onChooseTask, onTryChallenge }: TourProps & { t
     // The result needs the full width for its two columns; the rest reads better narrow.
     <article className={`mx-auto space-y-6 ${stage === 3 ? "" : "max-w-3xl"}`}>
       <header className="space-y-3">
-        <p className="text-sm font-semibold text-ink-muted">Prohlídka · {tour.title}</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-ink-muted">Prohlídka · {tour.title}</p>
+          {(stage > 0 || sentCount > 0) && (
+            <button type="button" onClick={restart} className="flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink">
+              <RotateCcw aria-hidden="true" size={14} /> Začít znovu
+            </button>
+          )}
+        </div>
         <ol aria-label="Kroky prohlídky" className="grid grid-cols-4 gap-2">
           {stageLabels.map((label, index) => (
             <li key={label} aria-current={index === stage ? "step" : undefined} className="space-y-1.5">
@@ -146,57 +169,5 @@ function TourWalkthrough({ tour, onChooseTask, onTryChallenge }: TourProps & { t
         </>
       )}
     </article>
-  );
-}
-
-// The guide's voice: what to notice on this screen.
-function Coach({ children }: { children: ReactNode }) {
-  return (
-    <p role="note" className="rl-rise flex gap-3 rounded-control bg-notice text-notice-ink p-4">
-      <Lightbulb aria-hidden="true" size={20} className="shrink-0 mt-0.5" />
-      <span>{children}</span>
-    </p>
-  );
-}
-
-function NextButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
-  return (
-    <button type="button" onClick={onClick} className="rounded-full bg-action text-action-contrast px-5 py-2.5 font-medium">
-      {children}
-    </button>
-  );
-}
-
-function MaterialTable({ tour }: { tour: Tour }) {
-  const { material } = tour;
-  return (
-    <section className="card space-y-3">
-      <h2 className="text-base font-semibold">Podklady: {material.title}</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-line text-left">
-              {material.columns.map((column) => (
-                <th key={column} scope="col" className="py-2 pr-4 font-semibold whitespace-nowrap">
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {material.rows.map((row) => (
-              <tr key={row[0]} className="border-b border-line last:border-0">
-                {row.map((cell, index) => (
-                  <td key={index} className="py-2 pr-4 whitespace-nowrap tabular-nums">
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="text-sm text-ink-muted">{material.note}</p>
-    </section>
   );
 }

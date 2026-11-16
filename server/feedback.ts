@@ -3,6 +3,8 @@ import { DimensionId } from "../src/roles/roleSchema.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import type { RateLimiter } from "./rateLimit.js";
 import { upstashTransaction } from "./upstash.js";
+import type { IssueTracker } from "./issues.js";
+import { issueFromFeedback } from "./feedbackIssues.js";
 
 /**
  * "Share feedback" (docs/PRODUCTION.md, step 5): a short note for the author, optionally with
@@ -21,7 +23,10 @@ export type FeedbackEntry =
       level: number;
       scores: Partial<Record<DimensionId, number>>;
       at: string;
-    };
+    }
+  // The tester scenario (?testovani): every question with its answer, grouped by step.
+  | { kind: "tester"; answers: TesterAnswer[]; contact?: string; at: string };
+export type TesterAnswer = { step: string; question: string; answer: string };
 export type FeedbackStore = { save(entry: FeedbackEntry): Promise<void> };
 
 // The newest notes are kept; older ones fall off, so spam cannot fill the database.
@@ -49,6 +54,17 @@ const EvaluationRequest = z.object({
   scores: z.partialRecord(DimensionId, z.number().int().min(1).max(4)),
 });
 
+// A tester report: up to 40 answered questions. The question texts come from the page, so the
+// report stays readable even when the scenario changes; lengths are capped against abuse.
+const TesterRequest = z.object({
+  kind: z.literal("tester"),
+  answers: z
+    .array(z.object({ step: z.string().trim().min(1).max(80), question: z.string().trim().min(1).max(300), answer: z.string().trim().min(1).max(2_000) }))
+    .min(1)
+    .max(40),
+  contact: z.string().trim().max(200).optional(),
+});
+
 export function memoryFeedbackStore(): FeedbackStore & { entries: FeedbackEntry[] } {
   const entries: FeedbackEntry[] = [];
   return {
@@ -72,9 +88,10 @@ export function upstashFeedbackStore(url: string, token: string): FeedbackStore 
 
 export async function handleFeedback(
   request: Request,
-  { feedback, limiter }: { feedback: FeedbackStore; limiter: RateLimiter },
+  { feedback, limiter, issues = null }: { feedback: FeedbackStore; limiter: RateLimiter; issues?: IssueTracker | null },
 ): Promise<Response> {
-  const body = await readJson(request, 10_000);
+  // Room for a full tester report (40 answers); a single note stays far below.
+  const body = await readJson(request, 100_000);
   if (body instanceof Response) return body;
   const entry = toEntry(body, new Date().toISOString());
   if (!entry) return badRequest("invalid_request", "Invalid feedback.");
@@ -87,10 +104,24 @@ export async function handleFeedback(
     console.error("Saving feedback failed:", error);
     return badRequest("upstream_error", "Feedback could not be saved.", 503);
   }
+  // The backlog copy is a convenience: the note is already saved, so a GitHub outage is only logged.
+  const issue = issueFromFeedback(entry);
+  if (issues && issue) {
+    try {
+      await issues.create(issue);
+    } catch (error) {
+      console.error("Creating the backlog issue failed:", error);
+    }
+  }
   return json({ ok: true });
 }
 
 function toEntry(body: unknown, at: string): FeedbackEntry | null {
+  const tester = TesterRequest.safeParse(body);
+  if (tester.success) {
+    const { answers, contact } = tester.data;
+    return { kind: "tester", answers, ...(contact ? { contact } : {}), at };
+  }
   const evaluation = EvaluationRequest.safeParse(body);
   if (evaluation.success) {
     const { comment, ...rest } = evaluation.data;

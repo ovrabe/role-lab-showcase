@@ -32,6 +32,8 @@ Rozhraní Role Lab  ── zpráva ──▶   ověří vstup a limity
 2. Samostatný workspace v Anthropic Console s tvrdým měsíčním limitem útraty. Zvlášť klíč pro vývoj a pro ostrý provoz.
 3. Klíč jde kdykoli zneplatnit a vytvořit nový. GitHub hlídá, jestli klíč omylem neskončil v repozitáři.
 
+   Stejně se zachází s tokenem pro backlog na GitHubu (`GITHUB_ISSUES_TOKEN`): jen v nastavení serveru, omezený na zakládání issues v jednom soukromém repozitáři. Kontrola webového buildu hledá i GitHub tokeny.
+
 **Server**
 4. Server sám skládá pokyny pro Clauda. Uživatel posílá jen svou zprávu a vybrané podklady úkolu, ne vlastní systémové pokyny. Funkci tak nejde zneužít jako „Clauda zadarmo“.
 5. Kontrola vstupů: platná role, délka zprávy, počet zpráv (25 jako dnes), velikost příloh. Omezená délka odpovědi.
@@ -102,6 +104,14 @@ Náročnost: **S** = do půl dne, **M** = 1–2 dny, **L** = víc dní.
 | 6 | Veřejný GitHub s README pro náboráře, kontrola tajných údajů, security review | S |
 
 Hotové kroky označuje ✅ (listopad 2026). Navíc hotovo: patička s odkazem na LinkedIn a okno „Share feedback“ (zprávy pro autora v Upstash).
+
+**Backlog na jednom místě (verze 1.5.0).** Vše, co lidé autorovi pošlou, se uloží do Upstash jako záloha a zároveň se z toho stane issue v soukromém repozitáři na GitHubu:
+
+- zpráva z okna „Share feedback“ vždy, se štítkem `zpětná vazba`,
+- odpověď „Odpovídá hodnocení tvé práci?“ jen když je záporná nebo s komentářem, se štítkem `hodnocení`,
+- zpráva z testovacího scénáře (`?testovani`, jen webová verze) se štítkem `testování`.
+
+E-mail je všude nepovinný a slouží jen k odpovědi na danou zprávu. Nastavení serveru: `GITHUB_ISSUES_TOKEN` a `GITHUB_ISSUES_REPO`. Když chybí nebo GitHub nejde, zprávy zůstanou v Upstash a nic se neztratí.
 
 Pak pustit 3–5 lidem a podle zpětné vazby vybrat další kroky. Další rozvoj popisuje část 10.
 

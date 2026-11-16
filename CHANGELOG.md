@@ -2,6 +2,21 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.5.0 – 16. 11. 2026
+
+Zpětná vazba na jednom místě.
+
+### Přidáno
+
+- Testovací scénář přímo v aplikaci (odkaz s `?testovani` na konci adresy). Tester projde sedm kroků a odpovědi odešle jedním tlačítkem. Rozpracované odpovědi se pamatují v prohlížeči.
+- Zprávy autorovi, odpovědi testerů a nesouhlas s hodnocením se ukládají do jednoho soukromého seznamu námětů.
+
+### Změněno
+
+- Ve formuláři zpětné vazby je nepovinný e-mail s vysvětlením, k čemu slouží: autor dá vědět, jak s námětem naložil.
+- Prohlídka si pamatuje, kde skončila. Po návratu z denní výzvy nezačíná znovu a dá se spustit od začátku tlačítkem Začít znovu.
+- Texty původních rolí a úkolů jsou genderově neutrální.
+
 ## 1.4.0 – 16. 11. 2026
 
 Šest nových rolí.

@@ -11,6 +11,7 @@ import { CalibrationScreen } from "./screens/CalibrationScreen";
 import { SamplesScreen } from "./screens/SamplesScreen";
 import { RoleTasksScreen } from "./screens/RoleTasksScreen";
 import { TourScreen } from "./screens/TourScreen";
+import { TesterScenarioScreen } from "./screens/TesterScenarioScreen";
 import { roleGroups } from "./roles/roleGroups";
 import { isParticipantBuild, isWebBuild } from "./buildFlags";
 import { loadRoles } from "./roles/loadRoles";
@@ -33,6 +34,7 @@ export type Screen =
   | { name: "calibration" }
   | { name: "samples" }
   | { name: "tour" }
+  | { name: "testing" }
   | { name: "role"; roleId: string }
   | { name: "task"; roleId: string };
 
@@ -56,6 +58,8 @@ export function initialScreen(): Screen {
   if (!isParticipantBuild && params.has("ukazky")) return { name: "samples" };
   // ?prohlidka opens the guided tour, so a link can send someone straight to it.
   if (params.has("prohlidka")) return { name: "tour" };
+  // ?testovani opens the tester scenario; it sends answers to the server, so web version only.
+  if (isWebBuild && params.has("testovani")) return { name: "testing" };
   const lastRoleId = loadLastRoleId();
   return lastRoleId && activeRoles.some((role) => role.id === lastRoleId)
     ? { name: "task", roleId: lastRoleId }
@@ -128,6 +132,7 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
       {isWebBuild && screen.name === "about" && <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} />}
       {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={aiStatus} backend={backend} />}
       {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}
+      {isWebBuild && screen.name === "testing" && <TesterScenarioScreen />}
       {screen.name === "tour" && (
         <TourScreen
           onChooseTask={() => setScreen({ name: "home" })}

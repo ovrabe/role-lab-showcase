@@ -36,8 +36,11 @@ else if (page.includes(challengeLine)) problems.push("Challenge evaluator instru
 // Anything that looks like an Anthropic API key.
 if (/sk-ant-[A-Za-z0-9_-]{10,}/.test(page)) problems.push("Something like an Anthropic API key found in the page");
 
+// Anything that looks like a GitHub token (the issues token is server-only, like the API key).
+if (/(github_pat_|ghp_|gho_|ghs_)[A-Za-z0-9_]{20,}/.test(page)) problems.push("Something like a GitHub token found in the page");
+
 if (problems.length > 0) {
   console.error("Web bundle check failed:\n- " + problems.join("\n- "));
   process.exit(1);
 }
-console.log("Web bundle check passed: no evaluator keys, evaluator instructions or API keys in dist-web/index.html.");
+console.log("Web bundle check passed: no evaluator keys, evaluator instructions, API keys or GitHub tokens in dist-web/index.html.");

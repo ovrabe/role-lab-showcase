@@ -20,9 +20,9 @@
       "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
       "anchors": {
         "1": "Chce celý výsledek jedním dotazem.",
-        "2": "Postupuje po krocích, ale nahodile. Nechá AI rozhodovat tam, kde by měl rozhodnout sám, nebo ji nevyužije na výpočty.",
+        "2": "Postupuje po krocích, ale nahodile. Nechá AI rozhodovat tam, kde má rozhodnout člověk, nebo ji nevyužije na výpočty.",
         "3": "Logický postup: přehled dat, metriky, kandidáti, doporučení.",
-        "4": "Postup upravuje podle mezivýsledků. AI nechá počítat metriky jako trend nebo týdny zásoby, rozhodnutí si drží sám."
+        "4": "Postup upravuje podle mezivýsledků. AI nechá počítat metriky jako trend nebo týdny zásoby, rozhodnutí zůstává u člověka."
       }
     },
     {
@@ -31,7 +31,7 @@
       "question": "Kontroluje výstupy AI i samotná data?",
       "anchors": {
         "1": "Přebírá výstup bez kontroly.",
-        "2": "Obecně se ujišťuje („jsi si jistý?“), ale nic konkrétního neověří.",
+        "2": "Obecně se ujišťuje („určitě?“), ale nic konkrétního neověří.",
         "3": "Konkrétně ověří aspoň jedno číslo nebo si nechá ukázat výpočet. Odhalí část neobvyklých hodnot v datech.",
         "4": "Systematicky hledá neobvyklé hodnoty, odhalí ty podstatné a upraví podle nich závěr."
       }
@@ -70,19 +70,19 @@
       "level": 2,
       "label": "Používá",
       "minAverage": 1.75,
-      "description": "AI mu pomáhá, ale nevede ji a systematicky nekontroluje."
+      "description": "AI pomáhá, ale bez vedení a systematické kontroly."
     },
     {
       "level": 3,
       "label": "Pracuje s AI",
       "minAverage": 2.5,
-      "description": "AI vede, ověřuje ji a jeho výsledek je obhajitelný."
+      "description": "AI vede, ověřuje ji a výsledek je obhajitelný."
     },
     {
       "level": 4,
       "label": "Může učit ostatní",
       "minAverage": 3.25,
-      "description": "S AI pracuje systematicky a jeho postup se dá předat dál."
+      "description": "S AI pracuje systematicky a postup se dá předat dál."
     }
   ],
   "capRule": {

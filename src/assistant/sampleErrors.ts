@@ -39,7 +39,7 @@ export function handleSampleError(error: unknown): SampleErrorHandling {
     case "rate_limited":
       return {
         kind: "notice",
-        message: "Claude je teď vytížený nebo jsi narazil na limit. Zkus to za chvíli.",
+        message: "Claude je teď vytížený nebo je vyčerpaný limit. Zkus to za chvíli.",
         keepPartial: true,
         offerRetry: true,
       };

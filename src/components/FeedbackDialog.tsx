@@ -56,7 +56,7 @@ export function FeedbackDialog({ open, page, onClose }: FeedbackDialogProps) {
       {state === "sent" ? (
         <div className="space-y-4">
           <h2 id="feedback-title">Díky, zpráva dorazila</h2>
-          <p>Autor si ji přečte.{contact.trim() ? " Pokud bude potřeba, ozve se ti." : ""}</p>
+          <p>Autor si ji přečte.{contact.trim() ? " Až se k námětu dostane, dá ti vědět, jak s ním naložil." : ""}</p>
           <button type="button" autoFocus onClick={close} className="rounded-full bg-action text-action-contrast px-5 py-2 font-semibold">
             Zavřít
           </button>
@@ -78,16 +78,21 @@ export function FeedbackDialog({ open, page, onClose }: FeedbackDialogProps) {
             />
           </label>
           <label className="block">
-            <span className="block font-medium mb-1">Kontakt pro odpověď (nepovinné)</span>
+            <span className="block font-medium mb-1">E-mail (nepovinné)</span>
+            <span className="block text-sm text-ink-muted mb-2">
+              Chceš vědět, jak autor s námětem naložil? Nech e-mail. Použije se jen k odpovědi na tuhle zprávu.
+            </span>
             <input
+              type="email"
               value={contact}
               onChange={(event) => setContact(event.target.value)}
               maxLength={200}
-              placeholder="E-mail nebo LinkedIn"
+              autoComplete="email"
+              placeholder="jmeno@example.com"
               className="w-full rounded-control border border-line bg-surface p-3 text-base"
             />
           </label>
-          <p className="text-sm text-ink-muted">Ukládá se jen to, co sem napíšeš.</p>
+          <p className="text-sm text-ink-muted">Ukládá se jen to, co sem napíšeš, do soukromého seznamu námětů autora.</p>
           {state === "limit" && (
             <p role="alert" className="bg-notice text-notice-ink rounded-control p-3">
               Dnešní limit zpráv je vyčerpaný. Zkus to prosím zítra.

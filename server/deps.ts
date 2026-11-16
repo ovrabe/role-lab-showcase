@@ -3,6 +3,7 @@ import { anthropicClient, type ClaudeClient } from "./claudeClient.js";
 import { mockClaude } from "./mockClaude.js";
 import { memoryCounter, upstashCounter, type RateLimiter } from "./rateLimit.js";
 import { memoryFeedbackStore, upstashFeedbackStore, type FeedbackStore } from "./feedback.js";
+import { githubIssueTracker, memoryIssueTracker, type IssueTracker } from "./issues.js";
 
 /**
  * What the endpoints need, created once per server instance. Secrets come only from the
@@ -14,7 +15,15 @@ import { memoryFeedbackStore, upstashFeedbackStore, type FeedbackStore } from ".
  * endpoints refuse to answer instead of serving fake answers or running without limits.
  */
 export type ServerDeps =
-  | { content: ServerContent; claude: ClaudeClient; limiter: RateLimiter; feedback: FeedbackStore }
+  | {
+      content: ServerContent;
+      claude: ClaudeClient;
+      limiter: RateLimiter;
+      feedback: FeedbackStore;
+      // Where reports and feedback become backlog items. Optional: without it everything is
+      // still saved in the feedback store, so a missing token loses nothing.
+      issues: IssueTracker | null;
+    }
   | { misconfigured: string };
 
 let cached: ServerDeps | undefined;
@@ -26,6 +35,9 @@ export function getServerDeps(): ServerDeps {
   const storeUrl = (process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL)?.trim();
   const storeToken = (process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN)?.trim();
   const onVercel = Boolean(process.env.VERCEL);
+  // A fine-grained GitHub token that can only create issues, and the repository, e.g. "owner/name".
+  const issuesToken = process.env.GITHUB_ISSUES_TOKEN?.trim();
+  const issuesRepository = process.env.GITHUB_ISSUES_REPO?.trim();
 
   if (onVercel && !apiKey) {
     cached = { misconfigured: "ANTHROPIC_API_KEY is not set for this deployment." };
@@ -41,6 +53,7 @@ export function getServerDeps(): ServerDeps {
         secret: apiKey ?? "local-development",
       },
       feedback: storeUrl && storeToken ? upstashFeedbackStore(storeUrl, storeToken) : memoryFeedbackStore(),
+      issues: issuesToken && issuesRepository ? githubIssueTracker(issuesToken, issuesRepository) : onVercel ? null : memoryIssueTracker(),
     };
   }
   return cached;

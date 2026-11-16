@@ -22,7 +22,7 @@
         "1": "Chce hotový podklad jedním dotazem.",
         "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout za sebe.",
         "3": "Logický postup: shrnutí podkladů, porovnání, rizika, rozhodnutí.",
-        "4": "Nejdřív nechá podklady porovnat mezi sebou, z rozporů odvodí rizika a varianty. Doporučení si drží sám."
+        "4": "Nejdřív nechá podklady porovnat mezi sebou, z rozporů odvodí rizika a varianty. Doporučení zůstává u člověka."
       }
     },
     {
@@ -70,19 +70,19 @@
       "level": 2,
       "label": "Používá",
       "minAverage": 1.75,
-      "description": "AI mu pomáhá, ale nevede ji a systematicky nekontroluje."
+      "description": "AI pomáhá, ale bez vedení a systematické kontroly."
     },
     {
       "level": 3,
       "label": "Pracuje s AI",
       "minAverage": 2.5,
-      "description": "AI vede, ověřuje ji a jeho výsledek je obhajitelný."
+      "description": "AI vede, ověřuje ji a výsledek je obhajitelný."
     },
     {
       "level": 4,
       "label": "Může učit ostatní",
       "minAverage": 3.25,
-      "description": "S AI pracuje systematicky a jeho postup se dá předat dál."
+      "description": "S AI pracuje systematicky a postup se dá předat dál."
     }
   ],
   "capRule": {
