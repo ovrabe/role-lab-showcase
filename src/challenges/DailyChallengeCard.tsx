@@ -1,4 +1,3 @@
-import { skillNames } from "../roles/skillNames";
 import type { ChallengeConfig } from "./challengeSchema";
 import { loadChallengeProgress } from "./challengeProgress";
 import { pragueDay } from "./dailyChallenge";
@@ -18,27 +17,31 @@ export function DailyChallengeCard({ challenge, totalCount, onStart, onOpenMap }
     (record) => record.challengeId === challenge.id && pragueDay(new Date(record.completedAt)) === today,
   );
 
+  // One line rather than a card, so the roles below start on the first screen of a phone.
   return (
-    <section aria-labelledby="daily-heading" className="card mb-10 space-y-3 border-l-4 border-l-accent">
-      <p className="text-sm font-semibold text-accent">Výzva dne · {skillNames[challenge.skill]} · asi {challenge.minutes} minut</p>
-      <h2 id="daily-heading">{challenge.title}</h2>
-      {doneToday ? (
-        <p className="text-ink-muted">Dnes hotovo se skóre {doneToday.score} / 4. Zítra čeká jiná výzva.</p>
-      ) : (
-        <p className="text-ink-muted">Přečti si situaci, posuď výstup AI a napiš krátkou odpověď. Hodnocení přijde hned.</p>
-      )}
-      <div className="flex flex-wrap gap-2 pt-1">
-        <button
-          type="button"
-          onClick={() => onStart(challenge.id)}
-          className={doneToday ? "rounded-full border border-line px-5 py-2 font-semibold" : "rl-submit-sweep rounded-full px-6 py-2.5 font-semibold"}
-        >
-          {doneToday ? "Zkusit znovu" : "Začít výzvu"}
-        </button>
-        <button type="button" onClick={onOpenMap} className="rounded-full border border-line px-5 py-2">
-          Všechny výzvy ({totalCount})
-        </button>
-      </div>
+    <section aria-labelledby="daily-heading" className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+      <button
+        type="button"
+        onClick={() => onStart(challenge.id)}
+        className="soft-card w-full sm:w-auto sm:flex-1 min-w-0 flex items-center gap-3 px-4 py-3 text-left border-l-4 border-l-accent hover:-translate-y-0.5 transition-transform"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-accent">
+            Výzva dne · asi {challenge.minutes} minut{doneToday ? ` · hotovo ${doneToday.score} / 4` : ""}
+          </span>
+          <span id="daily-heading" className="block font-semibold truncate">{challenge.title}</span>
+        </span>
+        <span aria-hidden="true" className="text-xl">→</span>
+      </button>
+      {/* On a phone right under the card, so it reads as part of the daily challenge. */}
+      <button
+        type="button"
+        onClick={onOpenMap}
+        className="ml-auto sm:ml-0 inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink underline-offset-4 hover:underline"
+      >
+        Všechny výzvy ({totalCount})
+        <span aria-hidden="true">›</span>
+      </button>
     </section>
   );
 }

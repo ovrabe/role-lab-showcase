@@ -2,6 +2,18 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.6.1 – 16. 11. 2026
+
+Kratší úvod.
+
+### Změněno
+
+- Úvodní banner je nižší a má jednu větu, takže role jsou vidět hned na první obrazovce.
+- Denní výzva je na jednom řádku a odkaz „Všechny výzvy“ je vedle ní.
+- Role jsou na telefonu jako řádky v jednom panelu, na počítači jako karty ve třech sloupcích s krátkým popisem.
+- U každé role je počet úkolů a jejich délka, třeba „3 úkoly · 15–45 min“.
+- Role Research Associate v mikrobiologii se jmenuje Molekulární biolog.
+
 ## 1.6.0 – 16. 11. 2026
 
 Role Controller.

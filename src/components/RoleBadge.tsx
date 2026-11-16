@@ -4,7 +4,7 @@ export function sweepPositionFor(index: number, count: number): number {
   return count > 1 ? (index / (count - 1)) * 100 : 0;
 }
 
-export function RoleBadge({ title, sweepPosition, size = "md" }: { title: string; sweepPosition: number; size?: "md" | "lg" }) {
+export function RoleBadge({ title, sweepPosition, size = "md" }: { title: string; sweepPosition: number; size?: "sm" | "md" | "lg" }) {
   const initials = title
     .split(/\s+/)
     .map((word) => word[0])
@@ -14,7 +14,7 @@ export function RoleBadge({ title, sweepPosition, size = "md" }: { title: string
   return (
     <span
       aria-hidden="true"
-      className={`shrink-0 rounded-control grid place-items-center text-white font-semibold ${size === "lg" ? "size-14 text-lg" : "size-12"}`}
+      className={`shrink-0 rounded-control grid place-items-center text-white font-semibold ${size === "lg" ? "size-14 text-lg" : size === "sm" ? "size-9 text-sm" : "size-12"}`}
       style={{ backgroundImage: "var(--ai-sweep)", backgroundSize: "300% 100%", backgroundPosition: `${sweepPosition}% 0` }}
     >
       {initials}

@@ -6,7 +6,7 @@
   "assistantContext": "zaměstnanci mikrobiologické výzkumné laboratoře",
   "timeLimitMinutes": 15,
   "brief": {
-    "situation": "Je čtvrtek 26. 11. 2026. Pracuješ jako research associate v laboratoři antibiotické rezistence. Projekt sleduje bakterie z odpadních vod a dnes ráno se odečítala destička s izolátem OV-17 (Escherichia coli z čistírny odpadních vod).",
+    "situation": "Je čtvrtek 26. 11. 2026. Pracuješ jako molekulární biolog v laboratoři antibiotické rezistence. Projekt sleduje bakterie z odpadních vod a dnes ráno se odečítala destička s izolátem OV-17 (Escherichia coli z čistírny odpadních vod).",
     "task": "Vyhodnoť, jestli je izolát OV-17 citlivý, nebo rezistentní na ciprofloxacin. Partnerská laboratoř z projektu chce výsledek ještě dnes do společné průběžné zprávy o výskytu rezistentních bakterií.",
     "deliverable": "Krátká zpráva pro vedoucí skupiny: výsledek a co dál, nejvýš 800 znaků.",
     "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
