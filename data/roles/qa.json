@@ -1,0 +1,81 @@
+{
+  "id": "qa",
+  "title": "QA",
+  "context": "Testování e-shopové aplikace, automatické i ruční testy před každým vydáním",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, výsledky a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží výsledky bez vysvětlení nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Řekne cíl, ale chybí kontext: co se ve verzi mění, kdy je vydání, co je pro byznys kritické.",
+        "3": "Dá cíl, výsledky testů i seznam změn a řekne, o čem se rozhoduje. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí, které části aplikace jsou nejrizikovější a proč, a řekne, podle čeho se má o vydání rozhodnout."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce verdikt jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout místo sebe.",
+        "3": "Logický postup: co prošlo a co ne, co se netestovalo, co se ve verzi mění, jaké je riziko, doporučení.",
+        "4": "Postup upravuje podle mezivýsledků. Rozbor výsledků nechá na AI, rozhodnutí o vydání a podmínky zůstávají u člověka."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI i souhrny proti detailním výsledkům?",
+      "anchors": {
+        "1": "Převezme automatický souhrn nebo závěr AI bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale detailní výsledky neprojde.",
+        "3": "Projde aspoň část detailních výsledků a odhalí část toho, co souhrn neukazuje.",
+        "4": "Systematicky porovná výsledky se seznamem změn, odhalí netestovaná riziková místa a podle toho upraví doporučení."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní riziko, nechá přepočítat nebo přehodnotit verdikt.",
+        "4": "Oponuje, chce varianty, třeba odklad, vydání bez rizikové funkce nebo ruční test, a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je doporučení obhajitelné a srozumitelné pro adresáta?",
+      "anchors": {
+        "1": "Doporučení odporuje výsledkům nebo je převzaté bez vlastního zdůvodnění.",
+        "2": "Rozumné, ale stojí jen na souhrnném čísle, nebo chybí zdůvodnění.",
+        "3": "Obhajitelné. Říká, co je otestované a co ne, jaké je riziko a za jakých podmínek vydat.",
+        "4": "Navíc nabídne varianty s dopadem a časem, řekne, kdo co musí udělat, a je psané pro adresáta, ne pro testery."
+      }
+    }
+  ],
+  "levels": [
+    { "level": 1, "label": "Začíná", "minAverage": 0, "description": "AI používá nahodile a výsledek nekontroluje." },
+    { "level": 2, "label": "Používá", "minAverage": 1.75, "description": "AI pomáhá, ale bez vedení a systematické kontroly." },
+    { "level": 3, "label": "Pracuje s AI", "minAverage": 2.5, "description": "AI vede, ověřuje ji a výsledek je obhajitelný." },
+    { "level": 4, "label": "Může učit ostatní", "minAverage": 3.25, "description": "S AI pracuje systematicky a postup se dá předat dál." }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI v rozhodnutí o vydání je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": ["verification", "judgment"],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby obsahoval, co se ve verzi mění, kdy je vydání a co je pro firmu kritické.",
+    "decomposition": "Rozděl rozhodnutí do čtyř kroků a zadej je zvlášť: co prošlo a co ne, co se netestovalo, co se mění, doporučení.",
+    "verification": "Požádej AI o tabulku: každá změna ve verzi a které testy ji ověřily, s výsledkem. Řádky bez testu nebo s přeskočeným testem projdi znovu a rozhodni, co s nimi.",
+    "iteration": "Požádej AI o tři varianty: vydat, odložit, vydat bez rizikové funkce. U každé dopad a co je potřeba udělat.",
+    "judgment": "Napiš doporučení tak, aby obsahovalo verdikt, co není otestované, riziko a podmínku, za které se dá vydat."
+  }
+}

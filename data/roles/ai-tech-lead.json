@@ -1,0 +1,81 @@
+{
+  "id": "ai-tech-lead",
+  "title": "AI tech lead",
+  "context": "Softwarová firma, nasazování jazykových modelů do interních a zákaznických nástrojů",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, data a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží výsledky bez vysvětlení nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Řekne cíl, ale chybí požadavky: na čem nejvíc záleží, jaký je rozpočet, jaká chyba je nepřijatelná.",
+        "3": "Dá cíl, data a hlavní požadavky: kvalitu, cenu a rizika. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí, která chyba firmu stojí nejvíc, a řekne, podle čeho se má o nasazení rozhodovat."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce doporučení jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout místo sebe.",
+        "3": "Logický postup: přehled výsledků, výsledky podle kategorií, porovnání s požadavky, doporučení.",
+        "4": "Postup upravuje podle mezivýsledků. Výpočty a porovnání nechá na AI, rozhodnutí o nasazení zůstává u člověka."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI a čísla, ze kterých vychází?",
+      "anchors": {
+        "1": "Přebírá souhrnná čísla nebo doporučení bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale nic konkrétního neověří.",
+        "3": "Konkrétně ověří aspoň jedno číslo nebo se podívá na výsledky podle kategorií. Odhalí část slabin.",
+        "4": "Systematicky hledá, co průměr skrývá, odhalí podstatné slabiny a upraví podle nich doporučení."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní kritérium, nechá přepočítat cenu nebo přesnost.",
+        "4": "Oponuje, chce varianty a jejich rizika, třeba kombinaci modelů nebo kontrolu člověkem, a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je doporučení obhajitelné a srozumitelné pro adresáta?",
+      "anchors": {
+        "1": "Doporučení odporuje datům nebo je převzaté bez vlastního zdůvodnění.",
+        "2": "Rozumné, ale stojí jen na souhrnných číslech, nebo chybí zdůvodnění.",
+        "3": "Obhajitelné. Bere v úvahu kvalitu tam, kde na ní nejvíc záleží, cenu i riziko.",
+        "4": "Navíc navrhne, jak riziko po nasazení hlídat, odliší fakta od předpokladů a je psané pro adresáta, ne pro vývojáře."
+      }
+    }
+  ],
+  "levels": [
+    { "level": 1, "label": "Začíná", "minAverage": 0, "description": "AI používá nahodile a výsledek nekontroluje." },
+    { "level": 2, "label": "Používá", "minAverage": 1.75, "description": "AI pomáhá, ale bez vedení a systematické kontroly." },
+    { "level": 3, "label": "Pracuje s AI", "minAverage": 2.5, "description": "AI vede, ověřuje ji a výsledek je obhajitelný." },
+    { "level": 4, "label": "Může učit ostatní", "minAverage": 3.25, "description": "S AI pracuje systematicky a postup se dá předat dál." }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI v technickém rozhodnutí je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": ["verification", "judgment"],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby říkal, kdo rozhoduje, jaká chyba je nepřijatelná a jaký je rozpočet.",
+    "decomposition": "Rozděl rozhodnutí do čtyř kroků a zadej je zvlášť: přehled výsledků, výsledky podle kategorií, porovnání s požadavky, doporučení.",
+    "verification": "Požádej AI o tabulku: u každé varianty nejslabší kategorie a co by chyba v ní stála. Jedno číslo si přepočítej z podkladů.",
+    "iteration": "Požádej AI o tři varianty nasazení, včetně kombinace modelu s kontrolou člověkem, s cenou a rizikem každé.",
+    "judgment": "Napiš doporučení tak, aby obsahovalo volbu, hlavní důvod, největší riziko a jak ho po nasazení hlídat."
+  }
+}

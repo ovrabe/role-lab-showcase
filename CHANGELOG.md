@@ -2,6 +2,28 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.4.0 – 16. 11. 2026
+
+Šest nových rolí.
+
+### Přidáno
+
+- Nové role, každá zatím s jedním úkolem obtížnosti 1 (asi 15 minut):
+  - AI tech lead: Model pro třídění požadavků
+  - Recruiter: Kandidáti do druhého kola
+  - Marketér: Vítězná varianta landing page
+  - IT helpdesk: Ranní fronta požadavků
+  - QA: Vydat verzi 3.8?
+  - Research Associate v mikrobiologii: Citlivost izolátu na ciprofloxacin
+- Každý nový úkol má vlastní rubriku, vymyšlená data se záludností a je zkalibrovaný na slabém, středním a silném pokusu.
+- Stránka O projektu ukazuje výsledky kalibrace všech dvanácti úkolů.
+
+### Opraveno
+
+- Na širokém displeji se panel asistenta při posouvání stránky už nepřesouvá přes Odevzdání.
+- Neúplné hodnocení bez shrnutí se nezobrazí. Místo něj nabídne aplikace Zkusit znovu.
+- Hodnotitel píše neutrálně i tam, kde dřív používal tvary jako „sám“ nebo „jistý“.
+
 ## 1.3.0 – 15. 11. 2026
 
 Prohlídka na dvě minuty.

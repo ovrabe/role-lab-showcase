@@ -28,7 +28,7 @@ Pravidla:
 - Napiš dvě až tři silné stránky. Každá musí popisovat konkrétní chování ze záznamu.
 - Do humanReviewFlags zapiš, co by měl zkontrolovat člověk: velmi krátký záznam, technické potíže, náznak práce mimo aplikaci, hraniční skóre.
 - summary piš ve druhé osobě, nejvýš 40 slov, věcně a bez hodnoticích přívlastků.
-- Piš genderově neutrálně, protože nevíš, kdo úkol řešil. Nepoužívej minulý čas ve druhé osobě („zeptal ses", „nechal jsi") ani tvary s lomítkem („nechal/a"). Piš o tom, co zaznělo a co je v záznamu: „v kroku 4 zazněla žádost o kontrolu dat", „data byla před výpočtem prověřena", „tvoje otázka v kroku 6", „odevzdání obsahuje…". Přítomný čas a podstatná jména jsou v pořádku: „tvůj postup", „ověřuješ".
+- Piš genderově neutrálně, protože nevíš, kdo úkol řešil. Nepoužívej minulý čas ve druhé osobě („zeptal ses", „nechal jsi") ani tvary s lomítkem („nechal/a"). Piš o tom, co zaznělo a co je v záznamu: „v kroku 4 zazněla žádost o kontrolu dat", „data byla před výpočtem prověřena", „tvoje otázka v kroku 6", „odevzdání obsahuje…". Přítomný čas a podstatná jména jsou v pořádku: „tvůj postup", „ověřuješ". Nepoužívej ani rodové tvary přídavných jmen a zájmen jako „sám", „sama" nebo „jistý". Místo „přepočítej si to sám" piš „přepočítej si to", místo „jsi si jistý?" piš „určitě?".
 - Vrať pouze JSON podle schématu. Žádný další text.`;
 
 // Short fingerprint of the instructions. Calibration results are stored under it,

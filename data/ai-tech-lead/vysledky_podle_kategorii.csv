@@ -1,0 +1,16 @@
+varianta,kategorie,pocet_pozadavku,spravne_zarazeno,presnost_pct
+A,objednavky,150,138,92.0
+A,vraceni,110,99,90.0
+A,technicke,80,70,87.5
+A,platby,40,36,90.0
+A,pravni_riziko,20,19,95.0
+B,objednavky,150,147,98.0
+B,vraceni,110,107,97.3
+B,technicke,80,77,96.3
+B,platby,40,38,95.0
+B,pravni_riziko,20,8,40.0
+C,objednavky,150,140,93.3
+C,vraceni,110,101,91.8
+C,technicke,80,71,88.8
+C,platby,40,37,92.5
+C,pravni_riziko,20,17,85.0

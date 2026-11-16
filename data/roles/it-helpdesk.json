@@ -1,0 +1,81 @@
+{
+  "id": "it-helpdesk",
+  "title": "IT helpdesk",
+  "context": "Interní IT podpora ve výrobní firmě se 400 zaměstnanci",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, podklady a pravidla, které potřebuje?",
+      "anchors": {
+        "1": "Vloží požadavky bez vysvětlení nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Řekne cíl, ale chybí pravidla: podle čeho se určuje priorita, kolik je času, co je výstup.",
+        "3": "Dá cíl, frontu i pravidla priorit. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí, co je pro firmu nejrizikovější, a řekne, podle čeho se má řadit, když se pravidla a přání uživatelů rozcházejí."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce hotové pořadí jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout místo sebe.",
+        "3": "Logický postup: přečíst požadavky, určit prioritu podle pravidel, seřadit, naplánovat první kroky.",
+        "4": "Postup upravuje podle mezivýsledků. Třídění nechá na AI, rozhodnutí o pořadí a o krocích u incidentu zůstává u člověka."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI proti pravidlům a textu požadavků?",
+      "anchors": {
+        "1": "Převezme prioritu od uživatelů nebo pořadí od AI bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale požadavky s pravidly neporovná.",
+        "3": "Porovná aspoň část požadavků s pravidly a odhalí část špatně zařazených.",
+        "4": "Systematicky projde každý požadavek proti pravidlům, odhalí podstatné chyby v prioritách a podle nich pořadí upraví."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní pravidlo, nechá pořadí přehodnotit.",
+        "4": "Oponuje, ptá se, co se stane, když se něco odloží, a vědomě volí mezi možnostmi."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je pořadí obhajitelné a je jasné, co se udělá hned?",
+      "anchors": {
+        "1": "Pořadí odporuje pravidlům nebo je převzaté bez vlastního zdůvodnění.",
+        "2": "Rozumné, ale stojí na prioritách od uživatelů nebo na čase založení, nebo chybí zdůvodnění.",
+        "3": "Obhajitelné. Řídí se dopadem podle pravidel a u nejdůležitějších požadavků říká první krok.",
+        "4": "Navíc rozplánuje, co stihne a do kdy, komu dát vědět a co počká, a je psané pro adresáta."
+      }
+    }
+  ],
+  "levels": [
+    { "level": 1, "label": "Začíná", "minAverage": 0, "description": "AI používá nahodile a výsledek nekontroluje." },
+    { "level": 2, "label": "Používá", "minAverage": 1.75, "description": "AI pomáhá, ale bez vedení a systematické kontroly." },
+    { "level": 3, "label": "Pracuje s AI", "minAverage": 2.5, "description": "AI vede, ověřuje ji a výsledek je obhajitelný." },
+    { "level": 4, "label": "Může učit ostatní", "minAverage": 3.25, "description": "S AI pracuje systematicky a postup se dá předat dál." }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI v IT podpoře je bezpečnostní riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": ["verification", "judgment"],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby obsahoval pravidla priorit a bylo z něj jasné, co má být výstupem a pro koho.",
+    "decomposition": "Rozděl práci do tří kroků a zadej je zvlášť: priorita každého požadavku podle pravidel, pořadí, první krok u nejdůležitějších.",
+    "verification": "Požádej AI o tabulku: požadavek, priorita od uživatele, priorita podle pravidel a které pravidlo rozhodlo. Projdi řádky, kde se liší.",
+    "iteration": "Zeptej se AI, co se stane, když každý z prvních tří požadavků hodinu počká, a podle toho pořadí potvrď nebo změň.",
+    "judgment": "Napiš plán tak, aby u každého z prvních tří požadavků byl důvod, první krok a komu dát vědět."
+  }
+}

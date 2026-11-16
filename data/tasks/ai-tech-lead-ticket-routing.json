@@ -1,0 +1,38 @@
+{
+  "id": "ai-tech-lead-ticket-routing",
+  "roleId": "ai-tech-lead",
+  "title": "Model pro třídění požadavků",
+  "difficulty": 1,
+  "assistantContext": "zaměstnanci softwarové firmy",
+  "timeLimitMinutes": 15,
+  "brief": {
+    "situation": "Jsi AI tech lead ve firmě, která provozuje e-shopovou platformu. Zákaznická podpora chce, aby příchozí požadavky třídil do pěti front jazykový model. Tým otestoval tři varianty na 400 skutečných požadavcích z října.",
+    "task": "Doporuč, kterou variantu nasadit. Vedoucí podpory upozorňuje, že nejdražší chyba je stížnost s právním rizikem, která skončí v běžné frontě: hrozí zmeškání zákonné lhůty na odpověď. Na provoz je nejvýš 15 000 Kč měsíčně.",
+    "deliverable": "Krátký e-mail pro vedoucí podpory: kterou variantu nasadit a proč, nejvýš 800 znaků.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "souhrn-testu",
+      "title": "Souhrn testu od týmu",
+      "file": "data/ai-tech-lead/souhrn_testu.md",
+      "type": "markdown"
+    },
+    {
+      "id": "vysledky-kategorie",
+      "title": "Výsledky testu podle kategorií",
+      "file": "data/ai-tech-lead/vysledky_podle_kategorii.csv",
+      "type": "csv",
+      "rows": 15,
+      "period": "400 požadavků z října 2026, test 9.–11. 11. 2026",
+      "dictionary": [
+        { "column": "varianta", "meaning": "Testovaná varianta: A, B nebo C (popis v souhrnu testu)" },
+        { "column": "kategorie", "meaning": "Fronta, do které požadavek patří podle lidí z podpory" },
+        { "column": "pocet_pozadavku", "meaning": "Kolik požadavků z této kategorie bylo v testu" },
+        { "column": "spravne_zarazeno", "meaning": "Kolik z nich model zařadil do správné fronty" },
+        { "column": "presnost_pct", "meaning": "Podíl správně zařazených v procentech" }
+      ]
+    }
+  ]
+}

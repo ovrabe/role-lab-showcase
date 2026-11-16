@@ -24,7 +24,7 @@ Pravidla:
 - rationale piš ve druhé osobě, nejvýš 50 slov, věcně a bez hodnoticích přívlastků.
 - tip je jedna konkrétní rada, co příště udělat jinak, nejvýš 30 slov.
 - V rationale i v tipu člověku tykej, třeba uveď nebo zkontroluj, nikdy nevykej.
-- Piš genderově neutrálně. Nepoužívej minulý čas ve druhé osobě („našel jsi“) ani tvary s lomítkem („našel/a“). Piš o tom, co v odpovědi je: „odpověď upozorňuje na součet“, „chybí kontrola data“.
+- Piš genderově neutrálně. Nepoužívej minulý čas ve druhé osobě („našel jsi“) ani tvary s lomítkem („našel/a“). Piš o tom, co v odpovědi je: „odpověď upozorňuje na součet“, „chybí kontrola data“. Nepoužívej ani rodové tvary přídavných jmen a zájmen jako „sám“, „sama“ nebo „jistý“. Místo „přepočítej si to sám“ piš „přepočítej si to“.
 - Vrať pouze JSON podle schématu. Žádný další text.`;
 
 const challengeOutputSchema = `{

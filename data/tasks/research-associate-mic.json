@@ -1,0 +1,37 @@
+{
+  "id": "research-associate-mic",
+  "roleId": "research-associate",
+  "title": "Citlivost izolátu na ciprofloxacin",
+  "difficulty": 1,
+  "assistantContext": "zaměstnanci mikrobiologické výzkumné laboratoře",
+  "timeLimitMinutes": 15,
+  "brief": {
+    "situation": "Je čtvrtek 26. 11. 2026. Pracuješ jako research associate v laboratoři antibiotické rezistence. Projekt sleduje bakterie z odpadních vod a dnes ráno se odečítala destička s izolátem OV-17 (Escherichia coli z čistírny odpadních vod).",
+    "task": "Vyhodnoť, jestli je izolát OV-17 citlivý, nebo rezistentní na ciprofloxacin. Partnerská laboratoř z projektu chce výsledek ještě dnes do společné průběžné zprávy o výskytu rezistentních bakterií.",
+    "deliverable": "Krátká zpráva pro vedoucí skupiny: výsledek a co dál, nejvýš 800 znaků.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "protokol",
+      "title": "Protokol stanovení MIC",
+      "file": "data/research-associate/protokol_mic.md",
+      "type": "markdown"
+    },
+    {
+      "id": "odecet",
+      "title": "Odečet destičky 26. 11. 2026",
+      "file": "data/research-associate/odecet_desticky_2026-11-26.csv",
+      "type": "csv",
+      "rows": 57,
+      "period": "inkubace 18 h, odečet 26. 11. 2026 v 8:15",
+      "dictionary": [
+        { "column": "vzorek", "meaning": "Co je v jamce: izolát OV-17, kontrolní kmen, kontroly růstu, nebo kontrola sterility" },
+        { "column": "koncentrace_mg_l", "meaning": "Koncentrace ciprofloxacinu v mg/l, u kontrol 0" },
+        { "column": "opakovani", "meaning": "Číslo opakování, 1 až 3" },
+        { "column": "od600", "meaning": "Optická hustota při 600 nm, nad 0,10 znamená růst" }
+      ]
+    }
+  ]
+}

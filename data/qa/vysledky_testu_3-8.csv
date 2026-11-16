@@ -1,0 +1,35 @@
+test,oblast,nazev,vysledek,poznamka
+T-001,prihlaseni,Přihlášení e-mailem a heslem,prošlo,
+T-002,prihlaseni,Přihlášení přes Google,prošlo,
+T-003,prihlaseni,Zapomenuté heslo,prošlo,
+T-004,prihlaseni,Odhlášení na všech zařízeních,prošlo,
+T-005,prihlaseni,Zablokování po pěti chybných pokusech,prošlo,
+T-006,prihlaseni,Registrace nového zákazníka,prošlo,
+T-007,katalog,Vyhledávání podle názvu,prošlo,
+T-008,katalog,Filtr podle ceny,prošlo,
+T-009,katalog,Filtr podle velikosti,prošlo,
+T-010,katalog,Řazení od nejlevnějšího,prošlo,
+T-011,katalog,Detail produktu,prošlo,
+T-012,katalog,Fotogalerie produktu,prošlo,
+T-013,katalog,Produkt není skladem,prošlo,
+T-014,katalog,Stránkování výsledků,prošlo,
+T-015,kosik,Přidání do košíku,prošlo,
+T-016,kosik,Změna počtu kusů,prošlo,
+T-017,kosik,Odebrání z košíku,prošlo,
+T-018,kosik,Slevový kód,prošlo,
+T-019,kosik,Košík po odhlášení a přihlášení,prošlo,
+T-020,platby,Platba kartou,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-021,platby,Platba kartou s ověřením 3-D Secure,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-022,platby,Apple Pay,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-023,platby,Platba převodem,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-024,platby,Dobírka,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-025,platby,Zamítnutá platba,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-026,platby,DPH v souhrnu objednávky,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-027,platby,Faktura po zaplacení,přeskočeno,Sada testů plateb přeskočena: sandbox platební brány nedostupný
+T-028,profil,Změna adresy,prošlo,
+T-029,profil,Historie objednávek,prošlo,
+T-030,profil,Změna profilové fotky,neprošlo,"Fotka se po nahrání zobrazí otočená. Známá chyba QA-1182, nízká závažnost."
+T-031,profil,Smazání účtu,prošlo,
+T-032,notifikace,E-mail po objednávce,prošlo,
+T-033,notifikace,SMS při odeslání zásilky,prošlo,
+T-034,notifikace,Odhlášení z newsletteru,prošlo,

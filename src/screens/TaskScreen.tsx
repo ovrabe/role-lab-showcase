@@ -175,23 +175,28 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
         />
       ) : isWide ? (
         // Reading surfaces are solid white cards on the pastel page (docs/SPEC.md, section 9).
-        <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
-          <div className="soft-card min-w-0 p-6">
-            <TabBar tabs={["brief", "materials"]} activeTab={leftTab} onSelect={selectTab} />
-            <div role="tabpanel" id={panelId(leftTab)} aria-labelledby={tabId(leftTab)} className="pt-6">
-              {panels[leftTab]}
+        <div className="space-y-6">
+          {/* Brief and assistant in a grid of their own: a sticky element stays within its
+              parent, so the assistant stops at the end of the brief instead of sliding over
+              the submission card below. */}
+          <div className="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6">
+            <div className="soft-card min-w-0 p-6">
+              <TabBar tabs={["brief", "materials"]} activeTab={leftTab} onSelect={selectTab} />
+              <div role="tabpanel" id={panelId(leftTab)} aria-labelledby={tabId(leftTab)} className="pt-6">
+                {panels[leftTab]}
+              </div>
             </div>
+            {/* Sticky beside the brief and materials, so the chat stays in view while reading;
+                its height fills the window (the chat in AssistantPanel is sized to match). */}
+            <aside aria-label="Asistent" className="soft-card min-w-0 p-6 self-start sticky top-4">
+              <h2 className="mb-3 flex items-center gap-2">
+                <AiIcon size={20} />
+                Asistent
+              </h2>
+              {panels.assistant}
+            </aside>
           </div>
-          {/* Sticky beside the brief and materials, so the chat stays in view while reading;
-              its height fills the window (the chat in AssistantPanel is sized to match). */}
-          <aside aria-label="Asistent" className="soft-card min-w-0 p-6 self-start sticky top-4">
-            <h2 className="mb-3 flex items-center gap-2">
-              <AiIcon size={20} />
-              Asistent
-            </h2>
-            {panels.assistant}
-          </aside>
-          <div className="soft-card col-span-2 p-6">
+          <div className="soft-card p-6">
             <h2 className="mb-3">Odevzdání</h2>
             {panels.submit}
           </div>

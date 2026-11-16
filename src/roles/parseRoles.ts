@@ -6,10 +6,19 @@ export type MaterialTextLookup = (file: string) => string | undefined;
 
 // Role configs that are switched on. Adding a role = add its JSON to data/roles/, at least
 // one task to data/tasks/ and its id here. Configs present but not listed show as upcoming.
-const activeRoleIds = ["category-manager", "project-manager"];
+const activeRoleIds = [
+  "category-manager",
+  "project-manager",
+  "ai-tech-lead",
+  "recruiter",
+  "marketer",
+  "it-helpdesk",
+  "qa",
+  "research-associate",
+];
 
 // Roles shown on the intro screen as upcoming, with no config yet.
-const plannedRoleTitles = ["Recruiter", "Controller", "Marketér", "Vedoucí týmu"];
+const plannedRoleTitles = ["Controller"];
 
 export type RoleLoadError = { file: string; problems: string[] };
 

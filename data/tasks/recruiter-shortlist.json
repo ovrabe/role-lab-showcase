@@ -1,0 +1,40 @@
+{
+  "id": "recruiter-shortlist",
+  "roleId": "recruiter",
+  "title": "Kandidáti do druhého kola",
+  "difficulty": 1,
+  "assistantContext": "zaměstnanci HR ve středně velké firmě",
+  "timeLimitMinutes": 15,
+  "brief": {
+    "situation": "Dnes je pondělí 14. 12. 2026. Jsi recruiter a obsazuješ pozici Data analyst v týmu zákaznických dat. Kolegyně z HR minulý týden udělala telefonické pohovory s deseti kandidáty a každého ohodnotila.",
+    "task": "Vyber tři kandidáty do druhého kola s hiring manažerkou. Nutná je praxe s SQL. Mzdové rozpětí je 55 000–65 000 Kč měsíčně. Tým potřebuje, aby nový člověk nastoupil nejpozději 1. 3. 2027, kdy začíná nový projekt.",
+    "deliverable": "Krátký e-mail pro hiring manažerku: koho pozvat a proč, nejvýš 800 znaků.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "kandidati",
+      "title": "Kandidáti po telefonických pohovorech",
+      "file": "data/recruiter/kandidati.csv",
+      "type": "csv",
+      "rows": 10,
+      "period": "pohovory 1.–11. 12. 2026",
+      "dictionary": [
+        { "column": "kandidat", "meaning": "Kód kandidáta" },
+        { "column": "roky_praxe", "meaning": "Roky praxe v analytické práci" },
+        { "column": "sql", "meaning": "Praxe s SQL: ano, nebo ne" },
+        { "column": "python", "meaning": "Praxe s Pythonem: ano, nebo ne" },
+        { "column": "power_bi", "meaning": "Praxe s Power BI: ano, nebo ne" },
+        { "column": "skore_screeningu", "meaning": "Celkový dojem z telefonického pohovoru, 0–100 bodů" },
+        { "column": "ocekavana_mzda_czk", "meaning": "Očekávaná hrubá měsíční mzda v Kč" }
+      ]
+    },
+    {
+      "id": "poznamky",
+      "title": "Poznámky z telefonických pohovorů",
+      "file": "data/recruiter/poznamky_z_pohovoru.md",
+      "type": "markdown"
+    }
+  ]
+}

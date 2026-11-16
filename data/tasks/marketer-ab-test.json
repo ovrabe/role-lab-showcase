@@ -1,0 +1,37 @@
+{
+  "id": "marketer-ab-test",
+  "roleId": "marketer",
+  "title": "Vítězná varianta landing page",
+  "difficulty": 1,
+  "assistantContext": "zaměstnanci e-shopu s oblečením",
+  "timeLimitMinutes": 15,
+  "brief": {
+    "situation": "Dnes je pondělí 16. 11. 2026. Pracuješ v marketingu e-shopu s oblečením. Dva týdny běžel test variant stránky se zimní kolekcí a měřilo se, kolik návštěvníků se přihlásí k odběru novinek.",
+    "task": "Rozhodni, kterou variantu nasadit všem návštěvníkům. Vedoucí marketingu chce stránku přepnout ještě tento týden, aby byla hotová před Black Friday.",
+    "deliverable": "Krátký e-mail pro vedoucí marketingu: kterou variantu nasadit a proč, nejvýš 800 znaků.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "poznamky",
+      "title": "Poznámky k testu od webového týmu",
+      "file": "data/marketer/poznamky_k_testu.md",
+      "type": "markdown"
+    },
+    {
+      "id": "ab-test",
+      "title": "Výsledky testu po dnech",
+      "file": "data/marketer/ab_test_po_dnech.csv",
+      "type": "csv",
+      "rows": 29,
+      "period": "2. až 15. 11. 2026",
+      "dictionary": [
+        { "column": "datum", "meaning": "Den testu" },
+        { "column": "varianta", "meaning": "Varianta stránky: A, B nebo C (popis v poznámkách)" },
+        { "column": "navstevy", "meaning": "Počet návštěv varianty za den" },
+        { "column": "registrace", "meaning": "Kolik návštěvníků se ten den přihlásilo k odběru novinek" }
+      ]
+    }
+  ]
+}

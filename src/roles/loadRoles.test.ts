@@ -12,8 +12,17 @@ describe("role configs", () => {
     expect(errors).toEqual([]);
   });
 
-  it("include both roles, each with its original task under the role's id", () => {
-    expect([...new Set(activeRoles.map((task) => task.roleId))].sort()).toEqual(["category-manager", "project-manager"]);
+  it("include all eight roles; the two original ones keep their first task under the role's id", () => {
+    expect([...new Set(activeRoles.map((task) => task.roleId))].sort()).toEqual([
+      "ai-tech-lead",
+      "category-manager",
+      "it-helpdesk",
+      "marketer",
+      "project-manager",
+      "qa",
+      "recruiter",
+      "research-associate",
+    ]);
     // The original tasks keep the role's id, so attempts saved before roles had several tasks still match.
     expect(activeRoles.filter((task) => task.id === task.roleId).map((task) => task.difficulty)).toEqual([2, 2]);
   });

@@ -1,0 +1,81 @@
+{
+  "id": "recruiter",
+  "title": "Recruiter",
+  "context": "Interní nábor ve středně velké firmě, technické a analytické pozice",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, podklady a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží podklady bez vysvětlení nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Řekne cíl, ale chybí požadavky pozice: co je nutné, jaké je mzdové rozpětí, kdy má člověk nastoupit.",
+        "3": "Dá cíl, podklady a hlavní požadavky: nutné dovednosti, rozpětí, termín nástupu. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí, proč na termínu nebo dovednostech záleží, a řekne, podle čeho se má mezi kandidáty rozhodovat."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce hotový výběr jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI vybrat místo sebe.",
+        "3": "Logický postup: vyřadit ty, kdo nesplňují nutné požadavky, porovnat zbytek, vybrat a zdůvodnit.",
+        "4": "Postup upravuje podle mezivýsledků. Třídění a porovnání nechá na AI, rozhodnutí o kandidátech zůstává u člověka."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI a porovnává podklady mezi sebou?",
+      "anchors": {
+        "1": "Převezme pořadí podle skóre nebo výběr AI bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale podklady mezi sebou neporovná.",
+        "3": "Porovná tabulku s poznámkami a odhalí část věcí, které skóre neukazuje.",
+        "4": "Systematicky ověří u každého vybraného kandidáta nutné požadavky, mzdu i nástup a podle toho výběr upraví."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní kritérium, nechá výběr přehodnotit.",
+        "4": "Oponuje, chce náhradníky a rizika každého kandidáta a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je výběr obhajitelný, férový a srozumitelný pro adresáta?",
+      "anchors": {
+        "1": "Výběr odporuje podkladům nebo stojí na kritériu, které s prací nesouvisí.",
+        "2": "Rozumný, ale stojí jen na skóre, nebo chybí zdůvodnění.",
+        "3": "Obhajitelný. Bere v úvahu nutné dovednosti, mzdu i termín nástupu a zmíní riziko.",
+        "4": "Navíc navrhne náhradníky a další krok, odliší fakta od dojmů a je psaný pro adresáta."
+      }
+    }
+  ],
+  "levels": [
+    { "level": 1, "label": "Začíná", "minAverage": 0, "description": "AI používá nahodile a výsledek nekontroluje." },
+    { "level": 2, "label": "Používá", "minAverage": 1.75, "description": "AI pomáhá, ale bez vedení a systematické kontroly." },
+    { "level": 3, "label": "Pracuje s AI", "minAverage": 2.5, "description": "AI vede, ověřuje ji a výsledek je obhajitelný." },
+    { "level": 4, "label": "Může učit ostatní", "minAverage": 3.25, "description": "S AI pracuje systematicky a postup se dá předat dál." }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI při výběru lidí je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": ["verification", "judgment"],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby obsahoval nutné požadavky pozice, mzdové rozpětí a termín nástupu.",
+    "decomposition": "Rozděl výběr do tří kroků a zadej je zvlášť: vyřadit ty, kdo nesplňují nutné požadavky, porovnat zbytek, vybrat a zdůvodnit.",
+    "verification": "Požádej AI o tabulku vybraných kandidátů: nutné dovednosti, mzda, nejdřívější nástup a zdroj každého údaje. Jeden údaj si dohledej v poznámkách.",
+    "iteration": "Požádej AI o dva náhradníky a u každého vybraného kandidáta o největší riziko.",
+    "judgment": "Napiš doporučení tak, aby u každého kandidáta byl jeden konkrétní důvod a jedno riziko."
+  }
+}

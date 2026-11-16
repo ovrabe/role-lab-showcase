@@ -32,6 +32,12 @@ export function validateEvaluation(
   }
   const output = parsed.data;
 
+  // A reply cut short still passes the schema with an empty summary (and usually no strengths
+  // or next steps). The person would get scores with nothing to read, so offer a retry instead.
+  if (output.summary.trim() === "") {
+    return { ok: false, problems: ["Hodnocení je neúplné: chybí shrnutí."] };
+  }
+
   // Every rubric dimension exactly once, otherwise no level can be computed.
   const dimensionIds = output.dimensions.map((dimension) => dimension.id);
   const missing = role.rubric.filter((dimension) => !dimensionIds.includes(dimension.id));

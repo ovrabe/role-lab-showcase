@@ -14,10 +14,10 @@ Výsledkem je **jedna samostatná HTML stránka**, kterou autor publikuje v clau
 - `data/roles/*.json` — konfigurace rolí: rubrika, úrovně, strop, mikro-cvičení
 - `data/tasks/*.json` — úkoly rolí: zadání, seznam podkladů, obtížnost 1–3
 - `data/challenges/*.json` — krátké výzvy na jednotlivé dovednosti
-- `data/category-manager/`, `data/project-manager/` — podklady k úkolům
+- `data/<role>/` — podklady k úkolům každé role
 - `evaluator-data/*.key.json` — klíče hodnotitele k úkolům, `evaluator-data/challenges/*.key.json` k výzvám
 
-Role jsou dvě: category manager (staví se první) a projektový manažer (přidává se v milníku M4). Kód nesmí mít nic natvrdo pro jednu roli.
+Rolí je osm: category manager a projektový manažer (každá se třemi obtížnostmi) a od verze 1.4.0 AI tech lead, recruiter, marketér, IT helpdesk, QA a research associate v mikrobiologii (zatím s úkolem obtížnosti 1). Kód nesmí mít nic natvrdo pro jednu roli.
 
 Tyto soubory neměň bez mého souhlasu. Když narazíš na rozpor mezi nimi, zeptej se.
 

@@ -11,6 +11,13 @@ const calibrationRows = [
   { task: "Čerpání rozpočtu pro finanční ředitelku", role: "Projektový manažer", difficulty: 1, weak: "1,2", medium: "1,8", strong: "3,0–3,2" },
   { task: "Skutečný stav projektu Kompas", role: "Projektový manažer", difficulty: 2, weak: "1,2", medium: "–", strong: "3,8" },
   { task: "Rozhodnutí o spuštění 2. 11.", role: "Projektový manažer", difficulty: 3, weak: "1,2", medium: "2,4", strong: "3,6–3,8" },
+  // Roles added in 1.4.0: one round per run so far, hence single numbers instead of ranges.
+  { task: "Model pro třídění požadavků", role: "AI tech lead", difficulty: 1, weak: "1,0", medium: "1,2", strong: "4,0" },
+  { task: "Kandidáti do druhého kola", role: "Recruiter", difficulty: 1, weak: "1,0", medium: "1,6", strong: "3,6" },
+  { task: "Vítězná varianta landing page", role: "Marketér", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,6" },
+  { task: "Ranní fronta požadavků", role: "IT helpdesk", difficulty: 1, weak: "1,0", medium: "1,6", strong: "2,8" },
+  { task: "Vydat verzi 3.8?", role: "QA", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,4" },
+  { task: "Citlivost izolátu na ciprofloxacin", role: "Research Associate v mikrobiologii", difficulty: 1, weak: "1,0", medium: "1,6", strong: "3,4" },
 ];
 
 const fairness = [
@@ -42,7 +49,7 @@ export function AboutScreen({ onOpenMethodology }: AboutScreenProps) {
       <h2 className="mb-3">Jak projekt vznikl</h2>
       <p className="mb-8">
         Projekt vznikal postupně po milnících podle písemné specifikace. Každou změnu kontrolují automatické testy, dnes
-        jich je přes 250. Hodnotitel je zkalibrovaný na vzorových pokusech.
+        jich je přes 400. Hodnotitel je zkalibrovaný na vzorových pokusech.
       </p>
 
       <h2 className="mb-3">Kalibrace hodnotitele</h2>

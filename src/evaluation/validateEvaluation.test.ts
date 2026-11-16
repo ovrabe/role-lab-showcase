@@ -49,6 +49,19 @@ describe("validateEvaluation", () => {
     expect(validate(reply).ok).toBe(false);
   });
 
+  it.each([
+    ["an empty summary", ""],
+    ["a summary of spaces", "   "],
+  ])("rejects a reply cut short, with %s", (_label, summary) => {
+    const reply = realReply();
+    reply.summary = summary;
+    reply.strengths = [];
+    reply.nextSteps = [];
+    const result = validate(reply);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.problems[0]).toContain("shrnutí");
+  });
+
   it("rejects a reply with a missing dimension", () => {
     const reply = realReply();
     reply.dimensions = reply.dimensions.filter((dimension: { id: string }) => dimension.id !== "judgment");

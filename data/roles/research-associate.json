@@ -1,0 +1,81 @@
+{
+  "id": "research-associate",
+  "title": "Research Associate v mikrobiologii",
+  "context": "Výzkumná laboratoř antibiotické rezistence v ústavu Akademie věd v Praze-Krči",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, data a protokol, které potřebuje?",
+      "anchors": {
+        "1": "Vloží data bez vysvětlení nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Řekne cíl, ale chybí kontext: jaká metoda, jaké kontroly, podle jakých kritérií se vyhodnocuje.",
+        "3": "Dá cíl, data i protokol s kritérii platnosti a interpretace. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí, k čemu výsledek poslouží a co by stála chybná interpretace, a řekne, podle čeho se má rozhodnout."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce výsledek jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout místo sebe.",
+        "3": "Logický postup: platnost testu podle kontrol, odečet MIC, interpretace, další krok.",
+        "4": "Postup upravuje podle mezivýsledků. Odečet a výpočty nechá na AI, závěr o platnosti a interpretaci zůstává u člověka."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI proti datům a protokolu?",
+      "anchors": {
+        "1": "Převezme odečet nebo interpretaci AI bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale data s protokolem neporovná.",
+        "3": "Porovná aspoň část dat s protokolem, třeba ověří odečet MIC, a odhalí část problémů.",
+        "4": "Systematicky ověří všechny kontroly a kritéria platnosti, odhalí podstatné problémy a podle nich změní závěr."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní kritérium, nechá odečet nebo interpretaci přehodnotit.",
+        "4": "Oponuje, ptá se na jiná vysvětlení výsledku a co by je potvrdilo, a vědomě volí další postup."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je závěr vědecky obhajitelný a srozumitelný pro adresáta?",
+      "anchors": {
+        "1": "Závěr odporuje datům nebo protokolu, nebo je převzatý bez vlastního zdůvodnění.",
+        "2": "Rozumný, ale přehlíží část kontrol, nebo chybí zdůvodnění.",
+        "3": "Obhajitelný. Respektuje kritéria platnosti, říká, co z dat plyne a co ne, a navrhne další krok.",
+        "4": "Navíc navrhne, jak příčinu problému zjistit a jak se mu příště vyhnout, a je psaný pro adresáta."
+      }
+    }
+  ],
+  "levels": [
+    { "level": 1, "label": "Začíná", "minAverage": 0, "description": "AI používá nahodile a výsledek nekontroluje." },
+    { "level": 2, "label": "Používá", "minAverage": 1.75, "description": "AI pomáhá, ale bez vedení a systematické kontroly." },
+    { "level": 3, "label": "Pracuje s AI", "minAverage": 2.5, "description": "AI vede, ověřuje ji a výsledek je obhajitelný." },
+    { "level": 4, "label": "Může učit ostatní", "minAverage": 3.25, "description": "S AI pracuje systematicky a postup se dá předat dál." }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI ve vědeckém výsledku je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": ["verification", "judgment"],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby obsahoval metodu, kritéria platnosti z protokolu a k čemu výsledek poslouží.",
+    "decomposition": "Rozděl vyhodnocení do čtyř kroků a zadej je zvlášť: platnost podle kontrol, odečet MIC, interpretace, další krok.",
+    "verification": "Požádej AI o tabulku: každá podmínka platnosti z protokolu, hodnota z dat a jestli je splněná. Jednu hodnotu si dohledej v datech.",
+    "iteration": "Zeptej se AI, jaká jiná vysvětlení výsledek může mít a jak by se dala ověřit, a podle toho zvol další postup.",
+    "judgment": "Napiš závěr tak, aby obsahoval, jestli test platí, co z dat plyne a co ne, a další krok."
+  }
+}

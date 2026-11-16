@@ -1,0 +1,81 @@
+{
+  "id": "marketer",
+  "title": "Marketér",
+  "context": "E-shop s oblečením, výkonnostní marketing, web a newslettery",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, data a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží data bez vysvětlení nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Řekne cíl, ale chybí kontext: co se měřilo, jak dlouho test běžel, o čem se rozhoduje.",
+        "3": "Dá cíl, data a hlavní souvislosti: co se testovalo, jaká metrika rozhoduje, komu je výstup určen.",
+        "4": "Navíc vysvětlí, co se v testu pokazilo nebo změnilo, a řekne, podle čeho se má rozhodnout."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce vítěze jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout místo sebe.",
+        "3": "Logický postup: ověřit, jestli test proběhl správně, spočítat výsledky, posoudit rozdíly, doporučit.",
+        "4": "Postup upravuje podle mezivýsledků. Výpočty a statistiku nechá na AI, rozhodnutí o nasazení zůstává u člověka."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI a data, ze kterých vychází?",
+      "anchors": {
+        "1": "Převezme přehled z nástroje nebo závěr AI bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale nic konkrétního neověří.",
+        "3": "Konkrétně ověří aspoň jedno číslo nebo se podívá, z kolika dat výsledek je. Odhalí část problémů s testem.",
+        "4": "Systematicky prověří, jestli jsou varianty srovnatelné (počet návštěv, délka běhu, náhoda), a podle toho upraví závěr."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní kritérium, nechá přepočítat nebo ověřit, jestli rozdíl není náhoda.",
+        "4": "Oponuje, chce varianty dalšího postupu, třeba nasadit hned nebo test prodloužit, a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je doporučení obhajitelné a srozumitelné pro adresáta?",
+      "anchors": {
+        "1": "Doporučení odporuje datům nebo je převzaté bez vlastního zdůvodnění.",
+        "2": "Rozumné, ale stojí na nesrovnatelných číslech, nebo chybí zdůvodnění.",
+        "3": "Obhajitelné. Opírá se o varianty s dostatkem dat, řekne, co z testu neplyne, a navrhne další krok.",
+        "4": "Navíc vyčíslí přínos, odliší fakta od předpokladů a je psané pro adresáta, ne pro analytika."
+      }
+    }
+  ],
+  "levels": [
+    { "level": 1, "label": "Začíná", "minAverage": 0, "description": "AI používá nahodile a výsledek nekontroluje." },
+    { "level": 2, "label": "Používá", "minAverage": 1.75, "description": "AI pomáhá, ale bez vedení a systematické kontroly." },
+    { "level": 3, "label": "Pracuje s AI", "minAverage": 2.5, "description": "AI vede, ověřuje ji a výsledek je obhajitelný." },
+    { "level": 4, "label": "Může učit ostatní", "minAverage": 3.25, "description": "S AI pracuje systematicky a postup se dá předat dál." }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI v marketingovém rozhodnutí je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": ["verification", "judgment"],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby říkal, co se testovalo, jakou metrikou se rozhoduje a komu je výstup určen.",
+    "decomposition": "Rozděl vyhodnocení do čtyř kroků a zadej je zvlášť: proběhl test správně, výsledky, je rozdíl víc než náhoda, doporučení.",
+    "verification": "Požádej AI o tabulku: u každé varianty počet návštěv, registrací a dnů v testu. U každé rozhodni, jestli jí věříš.",
+    "iteration": "Požádej AI o dvě možnosti dalšího postupu, třeba nasadit vítěze hned nebo test prodloužit, s přínosem a rizikem každé.",
+    "judgment": "Napiš doporučení tak, aby obsahovalo volbu, o kolik registrací víc to přinese a co z testu neplyne."
+  }
+}

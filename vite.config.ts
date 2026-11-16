@@ -131,6 +131,7 @@ export default defineConfig(({ mode }) => ({
             "src/evaluation/validateEvaluation.test.ts",
             "src/progress/progress.test.ts",
             "src/prompts/prompts.test.ts",
+            "src/roles/allTasks.test.ts",
             "src/roles/loadRoles.test.ts",
           ]),
     ],
