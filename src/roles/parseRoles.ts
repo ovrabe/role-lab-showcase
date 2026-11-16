@@ -5,7 +5,7 @@ import { composeTask, RoleDefinition, TaskDefinition, type RoleConfig } from "./
 export type MaterialTextLookup = (file: string) => string | undefined;
 
 // Role configs that are switched on. Adding a role = add its JSON to data/roles/, at least
-// one task to data/tasks/ and its id here. Configs present but not listed show as upcoming.
+// one task to data/tasks/ and its id here. Configs present but not listed stay hidden until ready.
 const activeRoleIds = [
   "category-manager",
   "project-manager",
@@ -15,17 +15,15 @@ const activeRoleIds = [
   "it-helpdesk",
   "qa",
   "research-associate",
+  "controller",
 ];
 
-// Roles shown on the intro screen as upcoming, with no config yet.
-const plannedRoleTitles = ["Controller"];
 
 export type RoleLoadError = { file: string; problems: string[] };
 
 export type LoadedRoles = {
   // Every task of the active roles, each with its role's shared parts: by role, then by difficulty.
   activeRoles: RoleConfig[];
-  upcomingRoleTitles: string[];
   errors: RoleLoadError[];
 };
 
@@ -84,11 +82,9 @@ export function parseRoles(
     .filter((task) => activeRoleIds.includes(task.roleId))
     .sort((a, b) => activeRoleIds.indexOf(a.roleId) - activeRoleIds.indexOf(b.roleId) || a.difficulty - b.difficulty);
 
-  const inactiveConfiguredTitles = [...roles.values()].filter((role) => !activeRoleIds.includes(role.id)).map((role) => role.title);
 
   return {
     activeRoles,
-    upcomingRoleTitles: [...inactiveConfiguredTitles, ...plannedRoleTitles],
     errors,
   };
 }

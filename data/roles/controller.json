@@ -1,0 +1,81 @@
+{
+  "id": "controller",
+  "title": "Controller",
+  "context": "Výrobní firma, měsíční reporting nákladů a odchylek od rozpočtu pro vedení",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, data a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží export bez vysvětlení nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Řekne cíl, ale chybí kontext: pro koho je výstup, o čem se rozhoduje, odkud jsou čísla.",
+        "3": "Dá cíl, data i poznámky účtárny a řekne, komu je výstup určen. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí, co je pro vedení podstatné, a řekne, jak rozlišit skutečné překročení od časových posunů."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce hotový komentář jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile, nebo nechá AI rozhodnout místo sebe.",
+        "3": "Logický postup: přehled odchylek, příčiny podle poznámek, co je skutečné a co časový posun, doporučení.",
+        "4": "Postup upravuje podle mezivýsledků. Výpočty nechá na AI, posouzení příčin a doporučení zůstává u člověka."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI a porovnává čísla s poznámkami?",
+      "anchors": {
+        "1": "Převezme odchylky z exportu nebo závěr AI bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale čísla s poznámkami neporovná.",
+        "3": "Porovná aspoň největší odchylky s poznámkami a odhalí část toho, co export neukazuje.",
+        "4": "Systematicky projde všechny větší odchylky, rozliší skutečné od účetních a časových a podle toho upraví závěr."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Jeden dotaz a žádná reakce na odpověď.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní příčinu, nechá přepočítat odchylku bez jednorázových položek.",
+        "4": "Oponuje, chce varianty opatření a jejich dopad a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Dostane vedení věrohodný obraz a rozumné doporučení?",
+      "anchors": {
+        "1": "Komentář odporuje datům nebo poznámkám, nebo doporučuje zásah tam, kde problém není.",
+        "2": "Rozumný, ale stojí na hrubých odchylkách z exportu, nebo chybí zdůvodnění.",
+        "3": "Věrohodný. Odliší skutečné překročení od časových posunů a navrhne zásah tam, kde dává smysl.",
+        "4": "Navíc vyčíslí očištěnou odchylku, řekne, co se projeví v dalších měsících, a je psaný pro adresáta."
+      }
+    }
+  ],
+  "levels": [
+    { "level": 1, "label": "Začíná", "minAverage": 0, "description": "AI používá nahodile a výsledek nekontroluje." },
+    { "level": 2, "label": "Používá", "minAverage": 1.75, "description": "AI pomáhá, ale bez vedení a systematické kontroly." },
+    { "level": 3, "label": "Pracuje s AI", "minAverage": 2.5, "description": "AI vede, ověřuje ji a výsledek je obhajitelný." },
+    { "level": 4, "label": "Může učit ostatní", "minAverage": 3.25, "description": "S AI pracuje systematicky a postup se dá předat dál." }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI ve finančním reportingu je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": ["verification", "judgment"],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz tak, aby obsahoval, pro koho je komentář, o čem se na poradě rozhoduje a že máš k exportu i poznámky účtárny.",
+    "decomposition": "Rozděl práci do čtyř kroků a zadej je zvlášť: přehled odchylek, příčiny podle poznámek, skutečné proti časovým, doporučení.",
+    "verification": "Požádej AI o tabulku: každé středisko s odchylkou nad 5 %, příčina z poznámek a jestli jde o skutečné překročení, nebo časový posun. Jednu příčinu si dohledej v poznámkách.",
+    "iteration": "Požádej AI o přepočet celkové odchylky bez jednorázových a posunutých položek a o dvě možná opatření s dopadem.",
+    "judgment": "Napiš komentář tak, aby obsahoval hrubou i očištěnou odchylku, skutečné příčiny a jedno konkrétní doporučení."
+  }
+}

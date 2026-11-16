@@ -28,7 +28,7 @@ Mimo MVP:
 
 ## 4. Uživatelský tok
 
-1. **Úvod.** Výběr role. Aktivní jsou category manager, projektový manažer, AI tech lead, recruiter, marketér, IT helpdesk, QA a research associate v mikrobiologii. Controller je vidět jako připravovaný.
+1. **Úvod.** Výběr role. Aktivní jsou category manager, projektový manažer, AI tech lead, recruiter, marketér, IT helpdesk, QA, research associate v mikrobiologii a controller. Pod rolemi je odkaz „Chybí ti tvoje role? Napiš autorovi“ (jen webová verze).
 2. **Úkol.** Zadání, záložka Podklady, asistent, pole pro odevzdání s počítadlem znaků (max 2 500) a nepovinné pole „Komentář k postupu" (bez lomítek v rodě, stejný název má i v záznamu práce). Podklady se zobrazují podle typu: CSV jako tabulka se slovníkem sloupců, Markdown jako text. U každého podkladu je stažení a tlačítko „Přiložit do konverzace". Měkký časovač 30 minut: po uplynutí jen upozorní, nic nezablokuje.
 3. **Odevzdání.** Potvrzovací krok, pak vyhodnocení se stavem načítání (může trvat desítky sekund).
 4. **Výsledek.**

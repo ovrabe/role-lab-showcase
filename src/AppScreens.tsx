@@ -39,7 +39,7 @@ export type Screen =
   | { name: "task"; roleId: string };
 
 // Role configs and challenges are bundled into the page, so loading them once at start is enough.
-export const { activeRoles, upcomingRoleTitles, errors } = loadRoles();
+export const { activeRoles, errors } = loadRoles();
 const { challenges } = loadChallenges();
 const groups = roleGroups(activeRoles);
 
@@ -86,7 +86,6 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
       {screen.name === "home" && (
         <HomeScreen
           activeRoles={activeRoles}
-          upcomingRoleTitles={upcomingRoleTitles}
           errors={errors}
           onSelectRole={(roleId) => setScreen({ name: "role", roleId })}
           onOpenMethodology={() => setScreen({ name: "methodology" })}

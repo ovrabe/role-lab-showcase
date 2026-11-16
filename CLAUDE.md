@@ -17,7 +17,7 @@ Výsledkem je **jedna samostatná HTML stránka**, kterou autor publikuje v clau
 - `data/<role>/` — podklady k úkolům každé role
 - `evaluator-data/*.key.json` — klíče hodnotitele k úkolům, `evaluator-data/challenges/*.key.json` k výzvám
 
-Rolí je osm: category manager a projektový manažer (každá se třemi obtížnostmi) a od verze 1.4.0 AI tech lead, recruiter, marketér, IT helpdesk, QA a research associate v mikrobiologii (zatím s úkolem obtížnosti 1). Kód nesmí mít nic natvrdo pro jednu roli.
+Rolí je devět: category manager a projektový manažer (každá se třemi obtížnostmi), od verze 1.4.0 AI tech lead, recruiter, marketér, IT helpdesk, QA a research associate v mikrobiologii a od verze 1.6.0 controller (zatím s úkolem obtížnosti 1). Kód nesmí mít nic natvrdo pro jednu roli.
 
 Tyto soubory neměň bez mého souhlasu. Když narazíš na rozpor mezi nimi, zeptej se.
 

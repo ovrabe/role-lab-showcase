@@ -1,0 +1,9 @@
+stredisko,kod,rozpocet_rijen_czk,skutecnost_rijen_czk,odchylka_czk,odchylka_pct
+Výroba 1,V1,4200000,4260000,60000,1.4
+Výroba 2,V2,3800000,3720000,-80000,-2.1
+Logistika,LOG,1100000,1199000,99000,9.0
+Údržba,UDR,650000,960000,310000,47.7
+IT,IT,520000,505000,-15000,-2.9
+Obchod,OBC,900000,880000,-20000,-2.2
+Marketing,MKT,600000,360000,-240000,-40.0
+Správa,SPR,750000,1832000,1082000,144.3

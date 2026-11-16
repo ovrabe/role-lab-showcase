@@ -25,7 +25,6 @@ describe("server content matches the page", () => {
   it("loads the same active roles without errors", () => {
     expect(server.roles.errors).toEqual([]);
     expect(server.roles.activeRoles).toEqual(page.activeRoles);
-    expect(server.roles.upcomingRoleTitles).toEqual(page.upcomingRoleTitles);
   });
 
   describe.each(page.activeRoles.map((role) => [role.id, role] as const))("%s", (_id, role) => {

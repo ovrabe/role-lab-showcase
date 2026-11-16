@@ -12,10 +12,11 @@ describe("role configs", () => {
     expect(errors).toEqual([]);
   });
 
-  it("include all eight roles; the two original ones keep their first task under the role's id", () => {
+  it("include all nine roles; the two original ones keep their first task under the role's id", () => {
     expect([...new Set(activeRoles.map((task) => task.roleId))].sort()).toEqual([
       "ai-tech-lead",
       "category-manager",
+      "controller",
       "it-helpdesk",
       "marketer",
       "project-manager",

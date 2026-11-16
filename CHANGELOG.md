@@ -2,6 +2,20 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.6.0 – 16. 11. 2026
+
+Role Controller.
+
+### Přidáno
+
+- Nová role Controller s úkolem „Odchylky od rozpočtu za říjen“ (obtížnost 1, asi 15 minut), zkalibrovaná na slabém, středním a silném pokusu.
+- Pod seznamem rolí je odkaz „Chybí ti tvoje role? Napiš autorovi“. Návrh dorazí autorovi do seznamu námětů.
+
+### Změněno
+
+- Sekce „Připravujeme“ zmizela, všechny ohlášené role už jsou v aplikaci.
+- Odkaz na zpětnou vazbu v patičce je česky: „Napsat autorovi“.
+
 ## 1.5.0 – 16. 11. 2026
 
 Zpětná vazba na jednom místě.

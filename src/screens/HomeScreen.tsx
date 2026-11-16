@@ -8,10 +8,13 @@ import { roleGroups } from "../roles/roleGroups";
 import { ProgressTeaser } from "../progress/ProgressTeaser";
 import { DailyChallengeCard } from "../challenges/DailyChallengeCard";
 import type { ChallengeConfig } from "../challenges/challengeSchema";
+import { useState } from "react";
+import { MessageSquare } from "lucide-react";
+import { FeedbackDialog } from "../components/FeedbackDialog";
+import { isWebBuild } from "../buildFlags";
 
 type HomeScreenProps = {
   activeRoles: RoleConfig[];
-  upcomingRoleTitles: string[];
   errors: RoleLoadError[];
   onSelectRole: (roleId: string) => void;
   onOpenMethodology: () => void;
@@ -27,7 +30,6 @@ type HomeScreenProps = {
 
 export function HomeScreen({
   activeRoles,
-  upcomingRoleTitles,
   errors,
   onSelectRole,
   onOpenMethodology,
@@ -40,6 +42,7 @@ export function HomeScreen({
   onOpenChallengeMap,
 }: HomeScreenProps) {
   const roleCards = roleGroups(activeRoles);
+  const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
   return (
     <section className="max-w-2xl mx-auto">
       <HomeHero onOpenTour={onOpenTour} onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} />
@@ -86,19 +89,21 @@ export function HomeScreen({
         ))}
       </ul>
 
-      {upcomingRoleTitles.length > 0 && (
+      {/* Instead of a list of roles "coming soon": ask which role is missing. The answer
+          lands in the author's backlog. The form needs the server, so web version only. */}
+      {isWebBuild && (
         <>
-          <h2 className="text-sm font-semibold text-ink-muted mb-2">Připravujeme</h2>
-          <ul className="flex flex-wrap gap-2">
-            {upcomingRoleTitles.map((title) => (
-              <li key={title} className="bg-surface rounded-full px-3 py-1 text-sm text-ink-muted">
-                {title}
-              </li>
-            ))}
-          </ul>
+          <button
+            type="button"
+            onClick={() => setIsSuggestionOpen(true)}
+            className="inline-flex items-center gap-2 text-ink-muted hover:text-ink underline-offset-4 hover:underline"
+          >
+            <MessageSquare aria-hidden="true" size={16} />
+            Chybí ti tvoje role? Napiš autorovi
+          </button>
+          <FeedbackDialog open={isSuggestionOpen} page="home-role" onClose={() => setIsSuggestionOpen(false)} />
         </>
       )}
-
     </section>
   );
 }

@@ -18,6 +18,7 @@ const calibrationRows = [
   { task: "Ranní fronta požadavků", role: "IT helpdesk", difficulty: 1, weak: "1,0", medium: "1,6", strong: "2,8" },
   { task: "Vydat verzi 3.8?", role: "QA", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,4" },
   { task: "Citlivost izolátu na ciprofloxacin", role: "Research Associate v mikrobiologii", difficulty: 1, weak: "1,0", medium: "1,6", strong: "3,4" },
+  { task: "Odchylky od rozpočtu za říjen", role: "Controller", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,6" },
 ];
 
 const fairness = [
