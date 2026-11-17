@@ -50,6 +50,8 @@ export function EvaluationView({ role, session, run, aiStatus, onEvaluate, onCan
           <span aria-hidden="true" className="rl-spin shrink-0 size-12 rounded-full bg-[conic-gradient(from_0deg,transparent_0%,#8a5cf6_55%,#5b6cff_100%)] [mask:radial-gradient(farthest-side,transparent_calc(100%-5px),#000_calc(100%-4px))]" />
           <div className="space-y-3">
             <p>Hodnotím… Obvykle to trvá 1–2 minuty.</p>
+            {/* Closing or reloading the page drops the evaluation; on the web it still counts toward the daily limit. */}
+            <p className="text-sm text-ink-muted">Stránku mezitím nezavírej ani neobnovuj, jinak se hodnocení ztratí.</p>
             <button type="button" onClick={onCancel} className="rounded-full border border-line px-4 py-2">
               Zrušit
             </button>

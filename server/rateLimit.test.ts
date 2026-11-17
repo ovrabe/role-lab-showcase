@@ -152,3 +152,42 @@ describe("upstashCounter", () => {
     await expect(upstashCounter("https://example.upstash.io", "t").increment("k")).rejects.toThrow();
   });
 });
+
+describe("limits per browser on a shared network", () => {
+  const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: 1 }, total: { chat: 100, evaluate: 100, feedback: 100, challenge: 100 } };
+  const limiter = (): RateLimiter => ({ counter: memoryCounter(), secret: "s", limits, now: () => new Date("2026-11-11T10:00:00Z") });
+  const browser = (index: number) => `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`;
+  const call = (ip: string, browserId?: string) =>
+    new Request("http://localhost/api/chat", { headers: { "x-real-ip": ip, ...(browserId ? { "x-role-lab-browser": browserId } : {}) } });
+
+  it("gives each browser its own limit, even behind one IP address", async () => {
+    const { takeFromLimit } = await import("./rateLimit");
+    const shared = limiter();
+    expect(await takeFromLimit(shared, "chat", call("9.9.9.9", browser(1)))).toBeNull();
+    expect(await takeFromLimit(shared, "chat", call("9.9.9.9", browser(1)))).toBe("limit_person");
+    expect(await takeFromLimit(shared, "chat", call("9.9.9.9", browser(2)))).toBeNull();
+  });
+
+  it("caps one IP address at a few people's worth, so invented numbers do not help a script", async () => {
+    const { takeFromLimit } = await import("./rateLimit");
+    const shared = limiter();
+    for (let index = 1; index <= 4; index++) expect(await takeFromLimit(shared, "chat", call("9.9.9.9", browser(index)))).toBeNull();
+    expect(await takeFromLimit(shared, "chat", call("9.9.9.9", browser(5)))).toBe("limit_person");
+    expect(await takeFromLimit(shared, "chat", call("8.8.8.8", browser(6)))).toBeNull();
+  });
+
+  it("ignores a malformed number and counts by the IP address", async () => {
+    const { takeFromLimit } = await import("./rateLimit");
+    const shared = limiter();
+    expect(await takeFromLimit(shared, "chat", call("7.7.7.7", "x"))).toBeNull();
+    expect(await takeFromLimit(shared, "chat", call("7.7.7.7", "y"))).toBe("limit_person");
+  });
+
+  it("gives back every counter it took", async () => {
+    const { takeFromLimit, giveBackToLimit } = await import("./rateLimit");
+    const shared = limiter();
+    await takeFromLimit(shared, "chat", call("9.9.9.9", browser(1)));
+    await giveBackToLimit(shared, "chat", call("9.9.9.9", browser(1)));
+    expect(await takeFromLimit(shared, "chat", call("9.9.9.9", browser(1)))).toBeNull();
+  });
+});

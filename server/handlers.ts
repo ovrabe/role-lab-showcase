@@ -12,6 +12,7 @@ import type { ClaudeClient, ClaudeError } from "./claudeClient.js";
 import type { RateLimiter } from "./rateLimit.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
+import { budgetResponse, recordSpend } from "./spendBudget.js";
 import type { IssueTracker } from "./issues.js";
 
 /**
@@ -97,6 +98,8 @@ export async function handleChat(request: Request, { content, claude, limiter, i
   const fitted = fitTurnsToBudget(buildAssistantTurns(role, parsed.data.transcript, content.getMaterialText));
   if (!fitted) return badRequest("too_large", "Conversation does not fit the prompt budget.", 413);
   if (fitted.turns[fitted.turns.length - 1].role !== "user") return badRequest("invalid_request", "Last turn must be the person's.");
+  const overBudget = await budgetResponse(limiter, request, issues);
+  if (overBudget) return overBudget;
   const limited = await limitResponse(limiter, "chat", request);
   if (limited) return limited;
 
@@ -109,6 +112,7 @@ export async function handleChat(request: Request, { content, claude, limiter, i
         const result = await claude.chat(fitted.turns, {
           signal: request.signal,
           onDelta: (text) => send({ type: "delta", text }),
+          onUsage: (model, usage) => recordSpend(limiter, request, model, usage),
         });
         send({ type: "done", truncated: result.truncated });
       } catch (error) {
@@ -146,12 +150,17 @@ export async function handleEvaluate(request: Request, { content, claude, limite
 
   const key = content.getEvaluatorKey(role.id);
   if (!key) return json({ kind: "missing_key" } satisfies EvaluateResponse);
+  const overBudget = await budgetResponse(limiter, request, issues);
+  if (overBudget) return overBudget;
   const limited = await limitResponse(limiter, "evaluate", request);
   if (limited) return limited;
 
   let reply: string;
   try {
-    reply = await claude.evaluate(buildEvaluatorPrompt(role, key, session), { signal: request.signal });
+    reply = await claude.evaluate(buildEvaluatorPrompt(role, key, session), {
+      signal: request.signal,
+      onUsage: (model, usage) => recordSpend(limiter, request, model, usage),
+    });
   } catch (error) {
     const failure = asClaudeError(error);
     await handleClaudeFailure({ limiter, issues }, "evaluate", request, failure);

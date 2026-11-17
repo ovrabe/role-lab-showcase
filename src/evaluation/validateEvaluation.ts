@@ -108,6 +108,17 @@ export function validateEvaluation(
     }
   }
 
+  // Quoting the assistant is fine for showing its mistake, but a high score backed only by the
+  // assistant's own words ("zkontroloval jsem data") says nothing about what the person did.
+  const isAssistantTurn = (evidence: Evidence) =>
+    transcript.find((candidate) => candidate.turn === evidence.turn)?.kind === "assistant";
+  for (const dimension of output.dimensions) {
+    if (dimension.score >= 3 && dimension.evidence.length > 0 && dimension.evidence.every(isAssistantTurn)) {
+      const name = role.rubric.find((rubricDimension) => rubricDimension.id === dimension.id)?.name ?? dimension.id;
+      codeReviewFlags.push(`Skóre ${dimension.score} v oblasti ${name} dokládají jen odpovědi asistenta, ne práce člověka. Zkontroluj ho.`);
+    }
+  }
+
   return {
     ok: true,
     evaluation: {

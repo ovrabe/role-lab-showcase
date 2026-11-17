@@ -63,3 +63,20 @@ describe("normalizeForQuotes and quoteParts", () => {
     expect(quoteParts("A … B ... C …")).toEqual(["a", "b", "c"]);
   });
 });
+
+describe("whole words only", () => {
+  it("does not find a number inside a bigger number", () => {
+    expect(quoteAppearsIn("10 %", "Konverze klesla o 110 %.")).toBe(false);
+    expect(quoteAppearsIn("10 %", "Konverze klesla o 10 %.")).toBe(true);
+  });
+
+  it("does not find a word inside another word", () => {
+    expect(quoteAppearsIn("kontrol", "Data jsem nekontroloval.")).toBe(false);
+    expect(quoteAppearsIn("nekontroloval", "Data jsem nekontroloval.")).toBe(true);
+  });
+
+  it("still verifies quotes shortened with an ellipsis, part by part", () => {
+    expect(quoteAppearsIn("Spočítej marži … podle kategorií", "Spočítej marži za říjen podle kategorií.")).toBe(true);
+    expect(quoteAppearsIn("Spočítej marži … dle kategorií", "Spočítej marži za říjen podle kategorií.")).toBe(false);
+  });
+});

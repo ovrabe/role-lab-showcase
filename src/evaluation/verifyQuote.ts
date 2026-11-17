@@ -20,19 +20,22 @@ export function quoteParts(quote: string): string[] {
 }
 
 /**
- * True when `quote` appears in `source`. A quote shortened with an ellipsis
+ * True when `quote` appears in `source` as whole words. A quote shortened with an ellipsis
  * ("…" or "...") is verified when all its parts appear in that order.
+ * Whole words, because "10 %" must not be found in "110 %", nor "kontrol" in "nekontroloval".
  */
 export function quoteAppearsIn(quote: string, source: string): boolean {
-  const normalizedSource = normalizeForQuotes(source);
+  // Spaces around both sides make every match start and end on a word boundary.
+  const normalizedSource = ` ${normalizeForQuotes(source)} `;
   const parts = quoteParts(quote);
   if (parts.length === 0) return false;
 
   let searchFrom = 0;
   for (const part of parts) {
-    const index = normalizedSource.indexOf(part, searchFrom);
+    const index = normalizedSource.indexOf(` ${part} `, searchFrom);
     if (index < 0) return false;
-    searchFrom = index + part.length;
+    // Continue from the space after this part, so the next part may start right there.
+    searchFrom = index + part.length + 1;
   }
   return true;
 }

@@ -11,12 +11,25 @@ const problems = [];
 // The public copy of the code has no evaluator keys, so there is nothing of them to leak.
 // Role keys sit in evaluator-data/, challenge keys in evaluator-data/challenges/.
 const keyFiles = existsSync("evaluator-data") ? readdirSync("evaluator-data", { recursive: true }) : [];
+// Every string in a key that is a sentence, not a value: short ones (product names, numbers)
+// also appear in the visible materials, so only text of 40+ characters is checked. That covers
+// trap explanations and conditions, judgment markers, acceptable answers and fact notes.
+function sentencesIn(value, found = []) {
+  if (typeof value === "string" && value.trim().length >= 40) found.push(value.trim());
+  else if (Array.isArray(value)) value.forEach((item) => sentencesIn(item, found));
+  else if (value && typeof value === "object") Object.values(value).forEach((item) => sentencesIn(item, found));
+  return found;
+}
+
 for (const name of keyFiles.filter((file) => file.endsWith(".key.json"))) {
-  const key = JSON.parse(readFileSync(join("evaluator-data", name), "utf8"));
+  const { _warning, ...key } = JSON.parse(readFileSync(join("evaluator-data", name), "utf8"));
   for (const trap of key.traps ?? []) {
     for (const text of [trap.title, trap.whatIsWrong]) {
       if (typeof text === "string" && page.includes(text)) problems.push(`${name}: trap ${trap.id} found in the page`);
     }
+  }
+  for (const sentence of sentencesIn(key)) {
+    if (page.includes(sentence)) problems.push(`${name}: key text found in the page: "${sentence.slice(0, 60)}…"`);
   }
 }
 

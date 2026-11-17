@@ -21,7 +21,12 @@ export type LimitCode = "limit_person" | "limit_daily";
  * Adds one to a counter and returns the new value. Counters are dropped after two days.
  * decrement gives one back (see giveBackToLimit); a counter without it just keeps the count.
  */
-export type Counter = { increment(key: string): Promise<number>; decrement?(key: string): Promise<void> };
+export type Counter = {
+  increment(key: string): Promise<number>;
+  decrement?(key: string): Promise<void>;
+  // Adds any amount and returns the new value; add(key, 0) reads it (server/spendBudget.ts).
+  add?(key: string, amount: number): Promise<number>;
+};
 
 export type RateLimiter = {
   counter: Counter;
@@ -45,6 +50,11 @@ export function memoryCounter(): Counter {
     async decrement(key) {
       counts.set(key, (counts.get(key) ?? 0) - 1);
     },
+    async add(key, amount) {
+      const next = (counts.get(key) ?? 0) + amount;
+      counts.set(key, next);
+      return next;
+    },
   };
 }
 
@@ -65,6 +75,14 @@ export function upstashCounter(url: string, token: string): Counter {
     async decrement(key) {
       await upstashTransaction(url, token, [["DECR", key]]);
     },
+    async add(key, amount) {
+      const [value] = await upstashTransaction(url, token, [
+        ["INCRBY", key, String(Math.round(amount))],
+        ["EXPIRE", key, String(keyLifetimeSeconds)],
+      ]);
+      if (typeof value !== "number") throw new Error("Upstash returned no counter value");
+      return value;
+    },
   };
 }
 
@@ -73,12 +91,37 @@ function pragueDay(date: Date): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Prague" }).format(date);
 }
 
-// The person behind a request, as a short keyed hash of their IP address. Vercel sets
-// x-real-ip and x-forwarded-for itself; locally there is none and everyone is "unknown".
-function personId(request: Request, secret: string): string {
-  const ip =
-    request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  return createHmac("sha256", secret).update(ip).digest("hex").slice(0, 16);
+// Who is behind a request. The page sends a random number its browser keeps
+// (src/ai/apiHeaders.ts), so people sharing one network (an office, a home) each get their own
+// limit. A script can invent a new number for every call, so each IP address also has a ceiling
+// of a few people's worth. Without the number (an old page), the IP address is the person.
+// Vercel sets x-real-ip and x-forwarded-for itself; locally there is none ("unknown").
+// Only short keyed hashes are stored, so the counters cannot be turned back into either value.
+const sharedNetworkPeople = 4;
+const browserIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const hashed = (value: string, secret: string) => createHmac("sha256", secret).update(value).digest("hex").slice(0, 16);
+const ipOf = (request: Request) =>
+  request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+function browserOf(request: Request): string | null {
+  const id = request.headers.get("x-role-lab-browser")?.trim() ?? "";
+  return browserIdPattern.test(id) ? id : null;
+}
+
+// The counters one call goes against, with their ceilings, in the order they are checked.
+function limitKeys(limiter: RateLimiter, action: LimitedAction, request: Request) {
+  const limits = limiter.limits ?? dailyLimits;
+  const day = pragueDay((limiter.now ?? (() => new Date()))());
+  const ip = hashed(ipOf(request), limiter.secret);
+  const browser = browserOf(request);
+  const keys: { key: string; max: number; code: LimitCode }[] = browser
+    ? [
+        { key: `rl:${day}:${action}:browser:${hashed(browser, limiter.secret)}`, max: limits.perPerson[action], code: "limit_person" },
+        { key: `rl:${day}:${action}:person:${ip}`, max: limits.perPerson[action] * sharedNetworkPeople, code: "limit_person" },
+      ]
+    : [{ key: `rl:${day}:${action}:person:${ip}`, max: limits.perPerson[action], code: "limit_person" }];
+  keys.push({ key: `rl:${day}:${action}:total`, max: limits.total[action], code: "limit_daily" });
+  return keys;
 }
 
 /**
@@ -87,14 +130,9 @@ function personId(request: Request, secret: string): string {
  * up the shared daily allowance.
  */
 export async function takeFromLimit(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<LimitCode | null> {
-  const limits = limiter.limits ?? dailyLimits;
-  const day = pragueDay((limiter.now ?? (() => new Date()))());
-
-  const personCount = await limiter.counter.increment(personKey(day, action, request, limiter.secret));
-  if (personCount > limits.perPerson[action]) return "limit_person";
-
-  const totalCount = await limiter.counter.increment(totalKey(day, action));
-  if (totalCount > limits.total[action]) return "limit_daily";
+  for (const { key, max, code } of limitKeys(limiter, action, request)) {
+    if ((await limiter.counter.increment(key)) > max) return code;
+  }
   return null;
 }
 
@@ -105,11 +143,5 @@ export async function takeFromLimit(limiter: RateLimiter, action: LimitedAction,
  */
 export async function giveBackToLimit(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<void> {
   if (!limiter.counter.decrement) return;
-  const day = pragueDay((limiter.now ?? (() => new Date()))());
-  await limiter.counter.decrement(personKey(day, action, request, limiter.secret));
-  await limiter.counter.decrement(totalKey(day, action));
+  for (const { key } of limitKeys(limiter, action, request)) await limiter.counter.decrement(key);
 }
-
-const personKey = (day: string, action: LimitedAction, request: Request, secret: string) =>
-  `rl:${day}:${action}:person:${personId(request, secret)}`;
-const totalKey = (day: string, action: LimitedAction) => `rl:${day}:${action}:total`;

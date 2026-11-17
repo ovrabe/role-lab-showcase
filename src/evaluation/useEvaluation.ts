@@ -27,6 +27,15 @@ export function useEvaluation(role: RoleConfig, controls: TaskSessionControls, b
   // Leaving the screen cancels a running evaluation; it can be started again later.
   useEffect(() => () => abortRef.current?.abort(), []);
 
+  // While the evaluator works, closing or reloading the tab asks first: the result would be
+  // lost, and on the web the attempt would still count toward the daily limit.
+  useEffect(() => {
+    if (run.status !== "running") return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [run.status]);
+
   async function evaluate(session: TaskSession) {
     if (!backend) return;
     const controller = new AbortController(); // a new controller for every call

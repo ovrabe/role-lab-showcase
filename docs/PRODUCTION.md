@@ -138,6 +138,7 @@ První dva nápady pokrývá část 10 (fáze 1 a 2).
 | Další role a obtížnosti podle zpětné vazby testerů | M |
 | Anglická verze | M |
 | Dvouminutové video podle `docs/DEMO.md` | S |
+| Režim pro hodnocení lidí (assessment). Dnes je Role Lab jen na trénink: po hodnocení uvidíš záludnosti a můžeš začít znovu, takže druhý pokus je cvičení. Pro hodnocení by se počítal jen první pokus, nebo by druhý dostal jiná data (rozhodnuto 17. 11. 2026) | M–L |
 
 ## 9. Otevřené otázky
 

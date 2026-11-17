@@ -162,3 +162,22 @@ describe("sample evaluations", () => {
     },
   );
 });
+
+describe("a high score backed only by the assistant's words", () => {
+  const assistantItem = transcript.find((item) => item.kind === "assistant")!;
+  const assistantQuote = assistantItem.content.split(/\s+/).slice(0, 4).join(" ");
+
+  it("is flagged for review", () => {
+    const reply = realReply();
+    const dimension = reply.dimensions[0];
+    dimension.score = 4;
+    dimension.evidence = [{ turn: assistantItem.turn, quote: assistantQuote }];
+    const result = validate(reply);
+    expect(result.ok && result.evaluation.codeReviewFlags.some((flag) => flag.includes("dokládají jen odpovědi asistenta"))).toBe(true);
+  });
+
+  it("is not flagged when the strong sample quotes the person", () => {
+    const result = validate(realReply());
+    expect(result.ok && result.evaluation.codeReviewFlags.some((flag) => flag.includes("dokládají jen odpovědi asistenta"))).toBe(false);
+  });
+});

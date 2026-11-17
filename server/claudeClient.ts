@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ChatTurn } from "../src/assistant/promptBudget.js";
+import type { Usage } from "./spendBudget.js";
 
 /**
  * How the web server talks to Claude. The handlers only see this small interface, so
@@ -8,13 +9,16 @@ import type { ChatTurn } from "../src/assistant/promptBudget.js";
  * Errors are thrown as {code, message, text?} with the same codes the claude.ai runtime
  * uses (see src/assistant/sampleErrors.ts), so the page handles every backend alike.
  */
+// onUsage: told what a finished call used, so the server can count the day's spending.
+type CallOptions = { signal: AbortSignal; onUsage?: (model: string, usage: Usage) => Promise<void> };
+
 export type ClaudeClient = {
   // The assistant: streams the answer, calling onDelta with each new piece of text.
-  chat(turns: ChatTurn[], options: { signal: AbortSignal; onDelta: (text: string) => void }): Promise<{ truncated: boolean }>;
+  chat(turns: ChatTurn[], options: CallOptions & { onDelta: (text: string) => void }): Promise<{ truncated: boolean }>;
   // The evaluator: one long answer, returned as text (expected to hold JSON).
-  evaluate(prompt: string, options: { signal: AbortSignal }): Promise<string>;
+  evaluate(prompt: string, options: CallOptions): Promise<string>;
   // The short-challenge evaluator: a short JSON answer from the cheaper model.
-  evaluateChallenge(prompt: string, options: { signal: AbortSignal }): Promise<string>;
+  evaluateChallenge(prompt: string, options: CallOptions): Promise<string>;
 };
 
 export type ClaudeError = { code: string; message: string; text?: string };
@@ -56,7 +60,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
   const client = new Anthropic({ apiKey, timeout: 280_000, maxRetries: 1 });
 
   return {
-    async chat(turns, { signal, onDelta }) {
+    async chat(turns, { signal, onDelta, onUsage }) {
       let text = "";
       try {
         const stream = client.beta.messages.stream(
@@ -84,6 +88,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
         // Token counts only, never content: shows in the Vercel log whether the cache works.
         const { input_tokens, cache_read_input_tokens, cache_creation_input_tokens, output_tokens } = message.usage;
         console.log(`Chat usage: input ${input_tokens}, cache read ${cache_read_input_tokens ?? 0}, cache write ${cache_creation_input_tokens ?? 0}, output ${output_tokens}`);
+        await onUsage?.(assistantModel, message.usage);
         if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined.", text } satisfies ClaudeError;
         if (text.trim() === "") throw { code: "empty_completion", message: "Empty answer." } satisfies ClaudeError;
         return { truncated: message.stop_reason === "max_tokens" };
@@ -93,7 +98,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
       }
     },
 
-    async evaluate(prompt, { signal }) {
+    async evaluate(prompt, { signal, onUsage }) {
       try {
         // Streamed even though nobody watches: the evaluation can take minutes, and a
         // long non-streaming request risks an HTTP timeout.
@@ -109,6 +114,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
           { signal },
         );
         const message = await stream.finalMessage();
+        await onUsage?.(evaluatorModel, message.usage);
         if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined." } satisfies ClaudeError;
         return message.content.map((block) => (block.type === "text" ? block.text : "")).join("");
       } catch (error) {
@@ -117,7 +123,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
       }
     },
 
-    async evaluateChallenge(prompt, { signal }) {
+    async evaluateChallenge(prompt, { signal, onUsage }) {
       try {
         const message = await client.messages.create(
           // The model thinks before it answers and the thinking counts toward max_tokens
@@ -126,6 +132,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
           { model: challengeModel, max_tokens: 8000, messages: [{ role: "user", content: prompt }] },
           { signal },
         );
+        await onUsage?.(challengeModel, message.usage);
         if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined." } satisfies ClaudeError;
         return message.content.map((block) => (block.type === "text" ? block.text : "")).join("");
       } catch (error) {

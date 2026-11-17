@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { reportAnswers, scenarioSteps, type ScenarioAnswers, type ScenarioQuestion } from "../testing/testerScenario";
+import { apiHeaders } from "../ai/apiHeaders";
 
 // The tester scenario (?testovani, web version only): the tester goes through the app in
 // another tab and answers here; one click sends everything to the author's backlog.
@@ -47,7 +48,7 @@ export function TesterScenarioScreen() {
     try {
       const response = await fetch("/api/feedback", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({ kind: "tester", answers: reportAnswers(answers), contact: contact.trim() || undefined }),
       });
       if (response.ok) {

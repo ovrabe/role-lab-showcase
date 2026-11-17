@@ -2,6 +2,27 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.7.0 – 17. 11. 2026
+
+Férovější limity, hlídání útraty a pevnější hodnocení.
+
+### Přidáno
+
+- Denní limity se počítají pro každý prohlížeč zvlášť, takže lidé na jedné síti (kancelář, domácnost) už nesdílejí jeden limit. Jedna IP adresa má strop zhruba čtyř lidí. Prohlížeč si k tomu uloží náhodné číslo, které s tebou nijak nesouvisí.
+- Denní rozpočet podle skutečné útraty: nejvýš 1,50 $ z jedné IP adresy a 3 $ celkem za den. Když se vyčerpá, autor dostane upozornění do seznamu námětů.
+- Kontrola ostrého webu po vydání jedním příkazem (`npm run smoke`).
+
+### Změněno
+
+- Citace v hodnocení se ověřují jen jako celá slova, takže „10 %“ se už nenajde v „110 %“.
+- Když vysoké skóre dokládají jen odpovědi asistenta, hodnocení je označené ke kontrole člověkem.
+- Během hodnocení stránka upozorní, ať ji nezavíráš, a před zavřením se zeptá.
+- Když nejde ověřit denní limit, stránka napíše, že má Role Lab potíže, místo „spojení s Claudem se přerušilo“.
+
+### Bezpečnost
+
+- Kontrola webového buildu hlídá všechny věty z klíčů hodnotitele, nejen popisy záludností.
+
 ## 1.6.5 – 17. 11. 2026
 
 Opravy po bezpečnostní a provozní revizi.

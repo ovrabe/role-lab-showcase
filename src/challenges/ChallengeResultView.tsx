@@ -1,4 +1,4 @@
-import { TrapStatusIcon } from "../result/ResultDetails";
+import { TrapStatusIcon } from "../result/TrapReview";
 import type { ChallengeResult } from "./challengeResult";
 import type { ChallengeConfig } from "./challengeSchema";
 

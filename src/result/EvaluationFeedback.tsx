@@ -3,6 +3,7 @@ import type { DimensionId, RoleConfig } from "../roles/roleSchema";
 import type { StoredEvaluation } from "../evaluation/evaluationSchema";
 import { computeLevel } from "../evaluation/computeLevel";
 import { readItem, writeItem } from "../session/sessionStorage";
+import { apiHeaders } from "../ai/apiHeaders";
 
 type Rating = "yes" | "rather_yes" | "rather_no" | "no";
 type SendState = "idle" | "sending" | "sent" | "limit" | "error";
@@ -57,7 +58,7 @@ export function EvaluationFeedback({ role, evaluation }: EvaluationFeedbackProps
     try {
       const response = await fetch("/api/feedback", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({
           kind: "evaluation",
           rating,

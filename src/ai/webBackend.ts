@@ -2,6 +2,7 @@ import { StoredEvaluation } from "../evaluation/evaluationSchema";
 import { ChallengeResult } from "../challenges/challengeResult";
 import { handleSampleError } from "../assistant/sampleErrors";
 import type { AiBackend } from "./aiBackend";
+import { apiHeaders } from "./apiHeaders";
 
 /**
  * Backend for the web build (docs/SPEC.md, section 13): the page sends the role and what
@@ -27,7 +28,7 @@ export const webBackend: AiBackend = {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({ roleId: role.id, transcript }),
         signal,
       });
@@ -75,7 +76,7 @@ export const webBackend: AiBackend = {
     try {
       const response = await fetch("/api/evaluate", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({ roleId: role.id, session }),
         signal,
       });
@@ -102,7 +103,7 @@ export const webBackend: AiBackend = {
     try {
       const response = await fetch("/api/challenge", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({ challengeId: challenge.id, answer }),
         signal,
       });

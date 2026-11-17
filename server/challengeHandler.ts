@@ -4,6 +4,7 @@ import { maxAnswerChars, minAnswerChars, validateChallengeReply, type ChallengeR
 import { asClaudeError, parseJsonReply, type HandlerDeps } from "./handlers.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
+import { budgetResponse, recordSpend } from "./spendBudget.js";
 
 /**
  * POST /api/challenge (docs/PRODUCTION.md, part 10, phase 2): one short challenge answer in,
@@ -34,6 +35,8 @@ export async function handleChallenge(request: Request, { content, claude, limit
 
   const key = content.getChallengeKey(challenge.id);
   if (!key) return json({ kind: "missing_key" } satisfies ChallengeResponse);
+  const overBudget = await budgetResponse(limiter, request, issues);
+  if (overBudget) return overBudget;
   const limited = await limitResponse(limiter, "challenge", request);
   if (limited) return limited;
 
@@ -44,7 +47,9 @@ export async function handleChallenge(request: Request, { content, claude, limit
   let raw: unknown;
   for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
     try {
-      raw = parseJsonReply(await claude.evaluateChallenge(prompt, { signal: request.signal }));
+      raw = parseJsonReply(
+        await claude.evaluateChallenge(prompt, { signal: request.signal, onUsage: (model, usage) => recordSpend(limiter, request, model, usage) }),
+      );
     } catch (error) {
       const failure = asClaudeError(error);
       await handleClaudeFailure({ limiter, issues }, "challenge", request, failure);

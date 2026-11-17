@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { apiHeaders } from "../ai/apiHeaders";
 
 type FeedbackDialogProps = { open: boolean; page: string; onClose: () => void };
 type SendState = "idle" | "sending" | "sent" | "limit" | "error";
@@ -37,7 +38,7 @@ export function FeedbackDialog({ open, page, onClose }: FeedbackDialogProps) {
     try {
       const response = await fetch("/api/feedback", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({ message, contact: contact.trim() || undefined, page }),
       });
       setState(response.ok ? "sent" : response.status === 429 ? "limit" : "error");

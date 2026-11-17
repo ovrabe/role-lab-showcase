@@ -47,7 +47,7 @@ export async function limitResponse(limiter: RateLimiter, action: LimitedAction,
     code = await takeFromLimit(limiter, action, request);
   } catch (error) {
     console.error("Rate limit counter failed:", error);
-    return badRequest("upstream_error", "Limit counter unavailable.", 503);
+    return badRequest("service_unavailable", "Limit counter unavailable.", 503);
   }
   return code ? badRequest(code, "Daily limit reached.", 429) : null;
 }

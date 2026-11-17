@@ -83,6 +83,15 @@ export function handleSampleError(error: unknown): SampleErrorHandling {
         keepPartial: true,
         offerRetry: false,
       };
+    // Web build: the server cannot check the daily limits (counter store down), so it lets
+    // nothing through. Nothing to do with Claude or the person: just try again later.
+    case "service_unavailable":
+      return {
+        kind: "notice",
+        message: "Role Lab má teď potíže. Zkus to prosím za pár minut, rozpracovaná práce zůstane uložená.",
+        keepPartial: true,
+        offerRetry: true,
+      };
     // Web build: daily limits (server/rateLimit.ts). Counters reset at midnight Czech time.
     case "limit_person":
       return {
