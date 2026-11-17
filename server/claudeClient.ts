@@ -108,7 +108,10 @@ export function anthropicClient(apiKey: string): ClaudeClient {
             max_tokens: 32000,
             betas: [fallbackBeta],
             fallbacks: "default",
-            output_config: { effort: "high" },
+            // "medium" since 1.8.0: one calibration round on all 13 tasks (17. 11. 2026) kept the
+            // order weak < medium < strong and every trap status, at about 30 % lower cost
+            // and 35 s instead of 48 s per evaluation. Recalibrate before changing it again.
+            output_config: { effort: "medium" },
             messages: [{ role: "user", content: prompt }],
           },
           { signal },

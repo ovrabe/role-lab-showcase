@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { handleFeedback, memoryFeedbackStore, upstashFeedbackStore, type FeedbackStore } from "./feedback";
 import { memoryCounter, type RateLimiter } from "./rateLimit";
 
-const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 2, challenge: 1 }, total: { chat: 1, evaluate: 1, feedback: 3, challenge: 1 } };
+const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 2, challenge: 1, example: 1, stats: 1 }, total: { chat: 1, evaluate: 1, feedback: 3, challenge: 1, example: 1, stats: 1 } };
 
 function setup(store = memoryFeedbackStore()) {
   const limiter: RateLimiter = { counter: memoryCounter(), secret: "test", limits };

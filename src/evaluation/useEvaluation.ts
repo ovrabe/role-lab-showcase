@@ -5,6 +5,7 @@ import type { TaskSessionControls } from "../session/useTaskSession";
 import type { AiBackend } from "../ai/aiBackend";
 import { attemptFromEvaluation } from "../progress/progress";
 import { recordAttempt } from "../progress/progressStorage";
+import { track } from "../ai/track";
 
 export type EvaluationRun =
   | { status: "idle" }
@@ -48,6 +49,7 @@ export function useEvaluation(role: RoleConfig, controls: TaskSessionControls, b
       controls.saveEvaluation(outcome.evaluation);
       // Only the person's own evaluations count; samples and calibration never pass here.
       recordAttempt(attemptFromEvaluation(role, outcome.evaluation));
+      track("task_evaluated", role.id);
       setRun({ status: "idle" });
     } else if (outcome.kind === "missing_key") {
       setRun({ status: "failed", message: "Pro tuhle roli chybí klíč hodnotitele. Dej vědět autorovi.", canRetry: false });

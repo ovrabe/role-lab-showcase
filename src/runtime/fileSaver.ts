@@ -79,3 +79,30 @@ export async function saveTextFile(filename: string, content: string): Promise<S
     return { kind: "fallback" };
   }
 }
+
+/** Offers a binary file (the result card PNG) the same way as saveTextFile. */
+export async function saveBlobFile(filename: string, blob: Blob): Promise<SaveOutcome> {
+  const isInsideClaude = (window as { claude?: Claude }).claude !== undefined;
+  if (!isInsideClaude) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    return { kind: "saved" };
+  }
+  const downloads = await getDownloads();
+  if (!downloads) return { kind: "error", message: "Stahování obrázků tu není dostupné." };
+  try {
+    await downloads.save({ filename, data: blob });
+    return { kind: "saved" };
+  } catch (error) {
+    const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "unavailable";
+    if (code === "declined") return { kind: "declined" };
+    if (code === "rate_limited") return { kind: "error", message: "Jedno stahování už čeká na potvrzení. Dokonči ho, pak to zkus znovu." };
+    return { kind: "error", message: "Stahování obrázků tu není dostupné." };
+  }
+}

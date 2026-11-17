@@ -8,9 +8,12 @@ import { LevelSummary, ReviewNotes } from "./ResultSummary";
 import { DimensionList } from "./ResultDetails";
 import { TrapReview } from "./TrapReview";
 import { GrowthSection } from "./GrowthSection";
+import { PromptTips } from "./PromptTips";
+import { StrongExampleSection, canShowStrongExample } from "./StrongExampleSection";
 import { ReviewerPanel } from "./ReviewerPanel";
 import { TranscriptView } from "./TranscriptView";
 import { SaveFileButton } from "../components/SaveFileButton";
+import { ResultCardButton } from "./ResultCardButton";
 import { buildExport, exportFilename } from "./buildExport";
 import { ResultProgress } from "../progress/ResultProgress";
 import { EvaluationFeedback } from "./EvaluationFeedback";
@@ -82,6 +85,9 @@ export function ResultScreen({ role, session, onReviewChange }: ResultScreenProp
         />
         <TrapReview {...detailsProps} keyData={keyData} />
         <GrowthSection role={role} evaluation={evaluation} />
+        <PromptTips role={role} evaluation={evaluation} />
+        {/* Only beside the person's own result: a sample already is a made-up attempt. */}
+        {onReviewChange && canShowStrongExample && <StrongExampleSection role={role} />}
         <ReviewNotes evaluation={evaluation} />
         {/* Web version only (it needs the project's server), and only for the person's own attempt. */}
         {isWebBuild && onReviewChange && <EvaluationFeedback role={role} evaluation={evaluation} />}
@@ -100,6 +106,7 @@ export function ResultScreen({ role, session, onReviewChange }: ResultScreenProp
             getContent={() => buildExport(role, session, review)}
             className="rounded-full bg-action text-action-contrast px-[1.1rem] py-2 font-medium disabled:opacity-50"
           />
+          <ResultCardButton role={role} evaluation={evaluation} level={level} />
           <button
             type="button"
             onClick={() => setIsReviewerMode((current) => !current)}

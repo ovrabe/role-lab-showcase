@@ -3,6 +3,7 @@ import type { RoleConfig } from "../roles/roleSchema";
 import type { ReviewerReview, TaskSession, TranscriptEvent } from "./sessionSchema";
 import { deleteSession, isAheadOf, loadSession, saveSession, sessionKey } from "./sessionStorage";
 import type { StoredEvaluation } from "../evaluation/evaluationSchema";
+import { track } from "../ai/track";
 
 function createSession(roleId: string): TaskSession {
   const now = new Date().toISOString();
@@ -59,7 +60,13 @@ export function withSubmission(session: TaskSession): TaskSession {
 }
 
 export function useTaskSession(role: RoleConfig) {
-  const [session, setSession] = useState<TaskSession>(() => loadSession(role.id) ?? createSession(role.id));
+  const [session, setSession] = useState<TaskSession>(() => {
+    const stored = loadSession(role.id);
+    if (stored) return stored;
+    // A new attempt, counted anonymously for the author (web only, src/ai/track.ts).
+    track("task_started", role.id);
+    return createSession(role.id);
+  });
   // False when the browser refuses to store data; the task still works, but a reload would lose it.
   const [isStored, setIsStored] = useState(true);
 
@@ -163,6 +170,7 @@ export function useTaskSession(role: RoleConfig) {
 
     restart() {
       deleteSession(role.id);
+      track("task_started", role.id);
       setSession(createSession(role.id));
     },
   };

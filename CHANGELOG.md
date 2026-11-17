@@ -2,6 +2,21 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.8.0 – 17. 11. 2026
+
+Víc z výsledku a levnější hodnocení.
+
+### Přidáno
+
+- Tahák formulací: u nejslabší oblasti ukázky, jak AI zadat lépe.
+- Karta s výsledkem ke stažení (obrázek PNG): úroveň, silné stránky a kroky na příště.
+- „Jak to řešil silný pokus“: vymyšlený silný pokus o stejný úkol vedle tvého výsledku, s tím, co na něm hodnotitel ocenil. Ukáže se až po tvém hodnocení.
+- Anonymní statistika pro autora: denní součty začatých, odevzdaných a ohodnocených pokusů, bez identity a bez textů.
+
+### Změněno
+
+- Hodnotitel pracuje s nižším úsilím. Kalibrace na všech 13 úkolech dopadla stejně, hodnocení je zhruba o třetinu levnější a rychlejší.
+
 ## 1.7.0 – 17. 11. 2026
 
 Férovější limity, hlídání útraty a pevnější hodnocení.

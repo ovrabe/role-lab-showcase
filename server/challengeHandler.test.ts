@@ -32,8 +32,8 @@ const deps = (claude: ClaudeClient, limits?: { perPerson: number }) => ({
     ...(limits
       ? {
           limits: {
-            perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: limits.perPerson },
-            total: { chat: 1, evaluate: 1, feedback: 1, challenge: 99 },
+            perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: limits.perPerson, example: 1, stats: 1 },
+            total: { chat: 1, evaluate: 1, feedback: 1, challenge: 99, example: 1, stats: 1 },
           },
         }
       : {}),

@@ -9,9 +9,11 @@ import { upstashTransaction } from "./upstash.js";
 export const dailyLimits = {
   // Per person: two full attempts (25 messages each), two evaluations, a few feedback notes.
   // Short challenges use the cheap model: enough for every challenge once a day.
-  perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15 },
+  // Strong samples (exampleHandler.ts) cost no Claude call; the limit only stops scripts.
+  // Anonymous statistics (statsHandler.ts): a few events per attempt, the limit only stops scripts.
+  perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15, example: 30, stats: 300 },
   // For everyone together: a ceiling on what one day can cost (and on feedback spam).
-  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300 },
+  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300, example: 1000, stats: 20000 },
 };
 
 export type LimitedAction = keyof typeof dailyLimits.perPerson;
@@ -26,6 +28,8 @@ export type Counter = {
   decrement?(key: string): Promise<void>;
   // Adds any amount and returns the new value; add(key, 0) reads it (server/spendBudget.ts).
   add?(key: string, amount: number): Promise<number>;
+  // Reads several counters at once, 0 for a missing one (the daily statistics, statsHandler.ts).
+  readMany?(keys: string[]): Promise<number[]>;
 };
 
 export type RateLimiter = {
@@ -55,6 +59,9 @@ export function memoryCounter(): Counter {
       counts.set(key, next);
       return next;
     },
+    async readMany(keys) {
+      return keys.map((key) => counts.get(key) ?? 0);
+    },
   };
 }
 
@@ -82,6 +89,11 @@ export function upstashCounter(url: string, token: string): Counter {
       ]);
       if (typeof value !== "number") throw new Error("Upstash returned no counter value");
       return value;
+    },
+    async readMany(keys) {
+      if (keys.length === 0) return [];
+      const [values] = await upstashTransaction(url, token, [["MGET", ...keys]]);
+      return (values as (string | null)[]).map((value) => Number(value ?? 0));
     },
   };
 }

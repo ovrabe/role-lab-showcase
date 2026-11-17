@@ -1,0 +1,30 @@
+{
+  "_note": "Tahák formulací na výsledkové stránce: ukázky, jak AI zadat lépe, pro nejslabší oblast. Obecné pro všechny role (schváleno 17. 11. 2026).",
+  "framing": [
+    "Pracuju jako [role] v [firma/obor]. Výsledek je pro [kdo] a potřebuju ho do [kdy]. Než začneš, zeptej se mě na všechno, co ti chybí.",
+    "Tady jsou podklady: [přílohy]. Cílem je [rozhodnutí]. Na čem bude výsledek záviset nejvíc?",
+    "Shrň mi vlastními slovy, co po tobě chci. Teprve pak začni."
+  ],
+  "decomposition": [
+    "Než se pustíš do řešení, navrhni postup v krocích. Projdeme ho spolu a pak pojedeme krok po kroku.",
+    "Co je potřeba zjistit, než můžu rozhodnout? Seřaď to od nejdůležitějšího.",
+    "Začni jen prvním krokem: [krok]. Na další se zeptám, až uvidím výsledek."
+  ],
+  "verification": [
+    "Než začneš počítat, projdi data a napiš mi, co v nich nesedí nebo chybí.",
+    "U každého čísla ve výsledku napiš, ze kterého řádku nebo podkladu pochází.",
+    "Přepočítej [číslo] jiným způsobem a porovnej, jestli vyjde stejně.",
+    "Co z toho, co jsi napsal, je odhad, a co přímo vyplývá z dat?"
+  ],
+  "iteration": [
+    "Tohle nesedí: [co]. Oprav to a vysvětli, co se změnilo.",
+    "Výsledek je moc obecný. Přepiš ho pro [konkrétního adresáta] a nejvýš na [délka].",
+    "Co je na tvém návrhu nejslabší místo? Navrhni, jak ho zlepšit."
+  ],
+  "judgment": [
+    "Jaké jsou dvě až tři možnosti a co mluví pro a proti každé?",
+    "Co by se muselo stát, aby bylo moje doporučení špatně?",
+    "Na co upozornit, aby to [adresát] nepochopil jinak?",
+    "Rozhodnutí je moje: [rozhodnutí]. Pomoz mi ho napsat srozumitelně a s důvody."
+  ]
+}

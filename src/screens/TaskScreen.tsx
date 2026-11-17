@@ -19,6 +19,7 @@ import { PhoneTaskLayout, WideTaskLayout } from "../task/TaskLayouts";
 import { RoleBadge } from "../components/RoleBadge";
 import { NextStepButton, StepGuide } from "../task/StepGuide";
 import { stepStates, taskProgress } from "../task/taskProgress";
+import { track } from "../ai/track";
 
 type TaskScreenProps = {
   role: RoleConfig;
@@ -93,6 +94,7 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
     // The evaluator gets exactly the state that is being stored (state updates are async).
     const submitted = withSubmission(controls.session);
     controls.submit();
+    track("task_submitted", role.id);
     if (aiStatus === "available") evaluation.evaluate(submitted);
   }
 

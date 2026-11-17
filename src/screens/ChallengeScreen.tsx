@@ -7,6 +7,7 @@ import { ChallengeResultView } from "../challenges/ChallengeResultView";
 import { recordChallenge, recordFromResult } from "../challenges/challengeProgress";
 import { Markdown } from "../components/Markdown";
 import { skillNames } from "../roles/skillNames";
+import { track } from "../ai/track";
 
 type ChallengeScreenProps = {
   challenge: ChallengeConfig;
@@ -42,7 +43,10 @@ export function ChallengeScreen({ challenge, aiStatus, backend, onBack }: Challe
     abort.current = new AbortController();
     setPhase({ name: "evaluating" });
     const outcome = await backend.evaluateChallenge(challenge, answer, abort.current.signal);
-    if (outcome.kind === "ok") recordChallenge(recordFromResult(challenge, outcome.result, new Date().toISOString()));
+    if (outcome.kind === "ok") {
+      recordChallenge(recordFromResult(challenge, outcome.result, new Date().toISOString()));
+      track("challenge_evaluated", challenge.id);
+    }
     setPhase({ name: "done", outcome });
   }
 
