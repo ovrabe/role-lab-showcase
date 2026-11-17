@@ -2,6 +2,31 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.6.5 – 17. 11. 2026
+
+Opravy po bezpečnostní a provozní revizi.
+
+### Opraveno
+
+- Když AI přestane fungovat pro všechny (došlý kredit nebo neplatný klíč), stránka to srozumitelně řekne a nenabízí opakování dokola. Pokus se nepočítá do denního limitu a autorovi jednou denně přijde upozornění do seznamu námětů.
+- Volání, které selže dřív, než AI cokoli napíše, už neubere pokus z denního limitu.
+- Zpráva delší než 20 000 znaků se neodešle. Stránka to oznámí a text nechá v poli. Dřív taková zpráva, nebo dlouhá odpověď asistenta, úkol nevratně zablokovala.
+- Hodnocení velmi dlouhé konverzace už neskončí chybou: pro hodnotitele se zkrátí střed nejdelších odpovědí asistenta, zprávy člověka zůstanou celé.
+- Stejný úkol otevřený ve dvou kartách: starší karta už nepřepíše odevzdání ani hodnocení z druhé karty.
+- Uložená práce, kterou by budoucí verze nepřečetla, se před přepsáním zálohuje.
+- Hodnocení na webu nezablokuje velké množství událostí v záznamu (ukládání odevzdání, stahování podkladů).
+- Hláška o vyčerpaném osobním limitu už neuvádí „dva pokusy denně“ i u chatu.
+
+### Bezpečnost
+
+- Server kontroluje čas každé zprávy, takže přes něj nejde vložit text do pokynů hodnotiteli.
+- Text ze zpětné vazby je v seznamu námětů jako citace s poznámkou, že nejde o pokyny. Zmínky typu @jméno nikoho neupozorní.
+
+### Změněno
+
+- Chat používá cachování promptů, takže jeden pokus stojí zhruba o třetinu méně.
+- Volání Clauda má časový limit a opakuje se nejvýš jednou, takže při výpadku nikdo nečeká bez konce.
+
 ## 1.6.4 – 16. 11. 2026
 
 Vzdušnější banner na počítači.

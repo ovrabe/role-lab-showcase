@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { RoleConfig } from "../roles/roleSchema";
 import type { ReviewerReview, TaskSession, TranscriptEvent } from "./sessionSchema";
-import { deleteSession, loadSession, saveSession } from "./sessionStorage";
+import { deleteSession, isAheadOf, loadSession, saveSession, sessionKey } from "./sessionStorage";
 import type { StoredEvaluation } from "../evaluation/evaluationSchema";
 
 function createSession(roleId: string): TaskSession {
@@ -63,9 +63,26 @@ export function useTaskSession(role: RoleConfig) {
   // False when the browser refuses to store data; the task still works, but a reload would lose it.
   const [isStored, setIsStored] = useState(true);
 
+  // The same task open in two tabs: the tab that was left behind must not write its older
+  // state over a submission or evaluation made in the other one. It takes that state instead.
   useEffect(() => {
+    const stored = loadSession(role.id);
+    if (stored && isAheadOf(stored, session)) {
+      setSession(stored);
+      return;
+    }
     setIsStored(saveSession(session));
-  }, [session]);
+  }, [session, role.id]);
+
+  useEffect(() => {
+    function onStorage(event: StorageEvent) {
+      if (event.key !== sessionKey(role.id)) return;
+      const stored = loadSession(role.id);
+      if (stored) setSession((current) => (isAheadOf(stored, current) ? stored : current));
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [role.id]);
 
   const materialTitle = (materialId: string) =>
     role.materials.find((material) => material.id === materialId)?.title ?? materialId;

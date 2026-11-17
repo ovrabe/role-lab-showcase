@@ -8,6 +8,8 @@ export async function upstashTransaction(url: string, token: string, commands: s
     method: "POST",
     headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
     body: JSON.stringify(commands),
+    // Every request waits for the counter first; a store that hangs must not hang the page.
+    signal: AbortSignal.timeout(5_000),
   });
   if (!response.ok) throw new Error(`Upstash HTTP ${response.status}`);
   const results = (await response.json()) as { result?: unknown; error?: string }[] | { error: string };

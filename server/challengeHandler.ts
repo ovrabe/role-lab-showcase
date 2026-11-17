@@ -3,6 +3,7 @@ import { buildChallengePrompt } from "../src/challenges/challengePrompt.js";
 import { maxAnswerChars, minAnswerChars, validateChallengeReply, type ChallengeResult } from "../src/challenges/challengeResult.js";
 import { asClaudeError, parseJsonReply, type HandlerDeps } from "./handlers.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
+import { handleClaudeFailure } from "./claudeFailure.js";
 
 /**
  * POST /api/challenge (docs/PRODUCTION.md, part 10, phase 2): one short challenge answer in,
@@ -23,7 +24,7 @@ export type ChallengeResponse =
   | { kind: "error"; code: string; message: string }
   | { kind: "missing_key" };
 
-export async function handleChallenge(request: Request, { content, claude, limiter }: HandlerDeps): Promise<Response> {
+export async function handleChallenge(request: Request, { content, claude, limiter, issues }: HandlerDeps): Promise<Response> {
   const body = await readJson(request);
   if (body instanceof Response) return body;
   const parsed = ChallengeRequest.safeParse(body);
@@ -45,8 +46,9 @@ export async function handleChallenge(request: Request, { content, claude, limit
     try {
       raw = parseJsonReply(await claude.evaluateChallenge(prompt, { signal: request.signal }));
     } catch (error) {
-      const { code, message } = asClaudeError(error);
-      return json({ kind: "error", code, message } satisfies ChallengeResponse);
+      const failure = asClaudeError(error);
+      await handleClaudeFailure({ limiter, issues }, "challenge", request, failure);
+      return json({ kind: "error", code: failure.code, message: failure.message } satisfies ChallengeResponse);
     }
   }
   if (raw === undefined) return json({ kind: "invalid", problems: ["invalid_json"] } satisfies ChallengeResponse);

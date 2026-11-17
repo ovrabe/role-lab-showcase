@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { DimensionId } from "../roles/roleSchema";
-import { readItem, writeItem } from "../session/sessionStorage";
+import { keepUnreadable, readItem, writeItem } from "../session/sessionStorage";
 import type { ChallengeResult } from "./challengeResult";
 import type { ChallengeConfig } from "./challengeSchema";
 
@@ -58,10 +58,12 @@ export function loadChallengeProgress(): ChallengeProgress {
   if (!raw) return emptyChallengeProgress;
   try {
     const parsed = ChallengeProgress.safeParse(JSON.parse(raw));
-    return parsed.success ? parsed.data : emptyChallengeProgress;
+    if (parsed.success) return parsed.data;
   } catch {
-    return emptyChallengeProgress;
+    // Not JSON: kept below.
   }
+  keepUnreadable(storageKey, raw);
+  return emptyChallengeProgress;
 }
 
 /** Saves one evaluated answer. Returns false when the browser does not allow storage. */

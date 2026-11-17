@@ -29,7 +29,11 @@ export function githubIssueTracker(token: string, repository: string): IssueTrac
         },
         body: JSON.stringify({
           title: issue.title.slice(0, maxTitleLength),
-          body: issue.body.slice(0, maxBodyLength),
+          // A cut body says so: the full text is still in the feedback store (Upstash).
+          body:
+            issue.body.length > maxBodyLength
+              ? `${issue.body.slice(0, maxBodyLength)}\n\n_…zkráceno, celé znění je uložené v Upstash._`
+              : issue.body,
           labels: issue.labels,
         }),
         signal: AbortSignal.timeout(requestTimeoutMs),

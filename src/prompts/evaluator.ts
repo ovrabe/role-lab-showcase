@@ -1,6 +1,8 @@
 import type { RoleConfig } from "../roles/roleSchema.js";
 import type { TaskSession } from "../session/sessionSchema.js";
 import type { EvaluatorKey } from "../evaluation/evaluatorKeys.js";
+import type { TranscriptItem } from "../session/sessionSchema.js";
+import { maxPromptBytes } from "../assistant/promptBudget.js";
 
 // Instructions and output schema taken verbatim from docs/PROMPTS.md, section 2. Keep them in sync.
 const evaluatorInstructions = `Jsi pečlivý a férový hodnotitel praktických dovedností práce s AI. Hodnotíš, jak člověk pracoval s AI asistentem na pracovním úkolu a jak kvalitní je jeho výsledek. Tvoje hodnocení uvidí ten člověk i jeho vedoucí a může ovlivnit jeho další rozvoj. Buď proto přesný a opírej se jen o důkazy.
@@ -83,7 +85,6 @@ export const neutralizeTags = (text: string) => text.replace(promptTags, "‹$1$
 export function buildEvaluatorPrompt(role: RoleConfig, key: EvaluatorKey, session: TaskSession): string {
   // The file's own "SERVER-ONLY" note is for people, not for the model.
   const { _warning: _unused, ...keyForModel } = key as EvaluatorKey & { _warning?: string };
-  const transcriptLines = session.transcript.map((item) => `[${item.turn}] ${item.kind} (${item.ts}): ${neutralizeTags(item.content)}`);
   const attachedIds = new Set(
     session.transcript.filter((item) => item.event === "data_attached").map((item) => item.materialId),
   );
@@ -99,12 +100,56 @@ export function buildEvaluatorPrompt(role: RoleConfig, key: EvaluatorKey, sessio
 <mikro_cviceni>${JSON.stringify(role.microExercises)}</mikro_cviceni>
 <klic>${JSON.stringify(keyForModel)}</klic>
 <zaznam>
-${transcriptLines.join("\n")}
+${transcriptPlaceholder}
 </zaznam>
 <odevzdani>${neutralizeTags(session.submission)}</odevzdani>
 <komentar_k_postupu>${neutralizeTags(session.reflection.trim()) || "neuveden"}</komentar_k_postupu>
 <podklady>${role.materials.map((material) => `${material.title} (${material.file})`).join("; ")}</podklady>
 <metadata>Čas v úkolu: ${minutes} min. Přiložené podklady: ${attachedTitles.length > 0 ? attachedTitles.join("; ") : "žádné"}. Počet zpráv uživatele: ${userMessages}.</metadata>`;
 
-  return `${evaluatorInstructions}\n\nVýstupní schéma:\n${outputSchema}\n\n${message}`;
+  const frame = `${evaluatorInstructions}\n\nVýstupní schéma:\n${outputSchema}\n\n${message}`;
+  // The transcript goes in last, shortened if needed so the whole prompt fits the budget.
+  const room = maxPromptBytes - bytesOf(frame.replace(transcriptPlaceholder, ""));
+  return frame.replace(transcriptPlaceholder, () => fitTranscript(session.transcript, room));
+}
+
+const transcriptPlaceholder = "\u0000ZAZNAM\u0000";
+const shortenedMark = " […zkráceno pro hodnocení…] ";
+const encoder = new TextEncoder();
+const bytesOf = (text: string) => encoder.encode(text).length;
+
+/**
+ * The record as numbered lines, within `room` bytes. A very long conversation would not fit
+ * one call (claude.ai takes at most 256 KiB), and the evaluation could then never run. So the
+ * middle of the longest texts is cut, the assistant's answers first: the person's own
+ * messages are the main evidence of how they worked. Honest attempts fit untouched.
+ * A quote from a cut part fails verification and is flagged for review, nothing is faked.
+ */
+function fitTranscript(items: TranscriptItem[], room: number): string {
+  const render = (assistantCap: number, userCap: number) =>
+    items
+      .map((item) => {
+        const cap = item.kind === "assistant" ? assistantCap : item.kind === "user" ? userCap : Infinity;
+        // The time too: the web server checks it, but a page's stored record can be edited by hand.
+        return `[${item.turn}] ${item.kind} (${neutralizeTags(item.ts)}): ${neutralizeTags(shorten(item.content, cap))}`;
+      })
+      .join("\n");
+
+  const caps = [Infinity, 8_000, 4_000, 2_000, 1_000, 500];
+  for (const assistantCap of caps) {
+    const lines = render(assistantCap, Infinity);
+    if (bytesOf(lines) <= room) return lines;
+  }
+  for (const userCap of caps.slice(1)) {
+    const lines = render(500, userCap);
+    if (bytesOf(lines) <= room) return lines;
+  }
+  // Still too long (hundreds of items): send the shortest version; the call reports the size.
+  return render(500, 500);
+}
+
+function shorten(text: string, cap: number): string {
+  if (text.length <= cap) return text;
+  const half = Math.floor(cap / 2);
+  return text.slice(0, half) + shortenedMark + text.slice(text.length - half);
 }

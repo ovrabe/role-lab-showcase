@@ -4,7 +4,7 @@ import { TaskSession } from "./sessionSchema";
 // published page with cleared data). Every access is wrapped so the app keeps
 // working in memory and never crashes because of storage.
 
-const sessionKey = (roleId: string) => `role-lab:session:${roleId}`;
+export const sessionKey = (roleId: string) => `role-lab:session:${roleId}`;
 const lastRoleKey = "role-lab:last-role";
 
 export function readItem(key: string): string | null {
@@ -25,16 +25,38 @@ export function writeItem(key: string, value: string | null): boolean {
   }
 }
 
+/**
+ * Stored data this version cannot read (written by a newer or older format) would be replaced
+ * by a fresh state on the next save, and the person's work would be gone. A copy is kept
+ * under a side key first, once, so it can still be recovered by hand.
+ */
+export function keepUnreadable(key: string, raw: string): void {
+  const backupKey = `${key}:neprectene`;
+  if (readItem(backupKey) === null) writeItem(backupKey, raw);
+}
+
 /** Returns the stored session, or null when there is none or it is unreadable. */
 export function loadSession(roleId: string): TaskSession | null {
-  const raw = readItem(sessionKey(roleId));
+  const key = sessionKey(roleId);
+  const raw = readItem(key);
   if (raw === null) return null;
   try {
     const result = TaskSession.safeParse(JSON.parse(raw));
-    return result.success && result.data.roleId === roleId ? result.data : null;
+    if (result.success && result.data.roleId === roleId) return result.data;
   } catch {
-    return null;
+    // Not JSON: kept below like any other unreadable record.
   }
+  keepUnreadable(key, raw);
+  return null;
+}
+
+/**
+ * True when `stored` is the same attempt as `current` but further on: submitted or evaluated
+ * in another tab. Writing `current` over it would silently undo that submission or evaluation.
+ */
+export function isAheadOf(stored: TaskSession, current: TaskSession): boolean {
+  if (stored.startedAt !== current.startedAt) return false;
+  return Boolean((stored.submittedAt && !current.submittedAt) || (stored.evaluation && !current.evaluation));
 }
 
 /** Returns false when the browser refused to store it. */

@@ -1,4 +1,4 @@
-import { readItem, writeItem } from "../session/sessionStorage";
+import { keepUnreadable, readItem, writeItem } from "../session/sessionStorage";
 import { emptyProgress, Progress, withAttempt, type ProgressAttempt } from "./progress";
 
 // Kept apart from the task sessions, so "Začít znovu" clears the task but never the progress.
@@ -9,10 +9,12 @@ export function loadProgress(): Progress {
   if (!raw) return emptyProgress;
   try {
     const parsed = Progress.safeParse(JSON.parse(raw));
-    return parsed.success ? parsed.data : emptyProgress;
+    if (parsed.success) return parsed.data;
   } catch {
-    return emptyProgress;
+    // Not JSON: kept below.
   }
+  keepUnreadable(progressKey, raw);
+  return emptyProgress;
 }
 
 /** Saves one finished evaluation. Returns false when the browser does not allow storage. */

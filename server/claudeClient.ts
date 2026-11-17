@@ -31,12 +31,16 @@ export const challengeModel = "claude-haiku-5-5";
 // fallback, "default" form), so a rare false refusal does not end the person's turn.
 const fallbackBeta = "server-side-fallback-2026-07-01";
 
-function toClaudeError(error: unknown, partialText = ""): ClaudeError {
+export function toClaudeError(error: unknown, partialText = ""): ClaudeError {
   if (error instanceof Anthropic.APIUserAbortError) return { code: "cancelled", message: "Aborted.", text: partialText };
   if (error instanceof Anthropic.RateLimitError) return { code: "rate_limited", message: "Rate limited.", text: partialText };
+  // Our account, not the person's fault: the key was rejected or expired, or the prepaid
+  // credit ran out (a 400 that says so). Retrying cannot help until the author steps in.
   if (error instanceof Anthropic.AuthenticationError || error instanceof Anthropic.PermissionDeniedError) {
-    // Our key, not the person's fault: a configuration problem on the server.
-    return { code: "upstream_error", message: "The server's API key was rejected.", text: partialText };
+    return { code: "ai_unavailable", message: "The server's API key was rejected.", text: partialText };
+  }
+  if (error instanceof Anthropic.BadRequestError && /credit balance/i.test(error.message)) {
+    return { code: "ai_unavailable", message: "Anthropic credit balance too low.", text: partialText };
   }
   if (error instanceof Anthropic.APIError) {
     return { code: "upstream_error", message: `Anthropic API error ${error.status ?? ""}`.trim(), text: partialText };
@@ -46,7 +50,10 @@ function toClaudeError(error: unknown, partialText = ""): ClaudeError {
 
 /** The real client. The key comes only from the server's environment (ANTHROPIC_API_KEY). */
 export function anthropicClient(apiKey: string): ClaudeClient {
-  const client = new Anthropic({ apiKey });
+  // Vercel ends a function after 300 s (vercel.json). Giving up a little earlier returns a
+  // clean error to the page instead of a cut connection. One retry is enough for a brief
+  // overload; the SDK's default two retries could keep a person waiting for minutes.
+  const client = new Anthropic({ apiKey, timeout: 280_000, maxRetries: 1 });
 
   return {
     async chat(turns, { signal, onDelta }) {
@@ -60,6 +67,9 @@ export function anthropicClient(apiKey: string): ClaudeClient {
             fallbacks: "default",
             // Chat answers: thorough enough for calculations, without long pauses.
             output_config: { effort: "medium" },
+            // Every turn resends the whole conversation, attached materials included. With the
+            // cache, the part already sent costs a tenth on the next turn (for 5 minutes).
+            cache_control: { type: "ephemeral" },
             messages: turns,
           },
           { signal },
@@ -71,6 +81,9 @@ export function anthropicClient(apiKey: string): ClaudeClient {
           }
         }
         const message = await stream.finalMessage();
+        // Token counts only, never content: shows in the Vercel log whether the cache works.
+        const { input_tokens, cache_read_input_tokens, cache_creation_input_tokens, output_tokens } = message.usage;
+        console.log(`Chat usage: input ${input_tokens}, cache read ${cache_read_input_tokens ?? 0}, cache write ${cache_creation_input_tokens ?? 0}, output ${output_tokens}`);
         if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined.", text } satisfies ClaudeError;
         if (text.trim() === "") throw { code: "empty_completion", message: "Empty answer." } satisfies ClaudeError;
         return { truncated: message.stop_reason === "max_tokens" };

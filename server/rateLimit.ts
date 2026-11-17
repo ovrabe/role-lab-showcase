@@ -17,8 +17,11 @@ export const dailyLimits = {
 export type LimitedAction = keyof typeof dailyLimits.perPerson;
 export type LimitCode = "limit_person" | "limit_daily";
 
-/** Adds one to a counter and returns the new value. Counters are dropped after two days. */
-export type Counter = { increment(key: string): Promise<number> };
+/**
+ * Adds one to a counter and returns the new value. Counters are dropped after two days.
+ * decrement gives one back (see giveBackToLimit); a counter without it just keeps the count.
+ */
+export type Counter = { increment(key: string): Promise<number>; decrement?(key: string): Promise<void> };
 
 export type RateLimiter = {
   counter: Counter;
@@ -39,6 +42,9 @@ export function memoryCounter(): Counter {
       counts.set(key, next);
       return next;
     },
+    async decrement(key) {
+      counts.set(key, (counts.get(key) ?? 0) - 1);
+    },
   };
 }
 
@@ -55,6 +61,9 @@ export function upstashCounter(url: string, token: string): Counter {
       ]);
       if (typeof value !== "number") throw new Error("Upstash returned no counter value");
       return value;
+    },
+    async decrement(key) {
+      await upstashTransaction(url, token, [["DECR", key]]);
     },
   };
 }
@@ -81,10 +90,26 @@ export async function takeFromLimit(limiter: RateLimiter, action: LimitedAction,
   const limits = limiter.limits ?? dailyLimits;
   const day = pragueDay((limiter.now ?? (() => new Date()))());
 
-  const personCount = await limiter.counter.increment(`rl:${day}:${action}:person:${personId(request, limiter.secret)}`);
+  const personCount = await limiter.counter.increment(personKey(day, action, request, limiter.secret));
   if (personCount > limits.perPerson[action]) return "limit_person";
 
-  const totalCount = await limiter.counter.increment(`rl:${day}:${action}:total`);
+  const totalCount = await limiter.counter.increment(totalKey(day, action));
   if (totalCount > limits.total[action]) return "limit_daily";
   return null;
 }
+
+/**
+ * Returns a call taken by takeFromLimit, for a call that failed before Claude wrote anything
+ * (credit used up, overloaded API): the person should not lose an attempt to our outage.
+ * Called only after takeFromLimit let the call through, so both counters were raised.
+ */
+export async function giveBackToLimit(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<void> {
+  if (!limiter.counter.decrement) return;
+  const day = pragueDay((limiter.now ?? (() => new Date()))());
+  await limiter.counter.decrement(personKey(day, action, request, limiter.secret));
+  await limiter.counter.decrement(totalKey(day, action));
+}
+
+const personKey = (day: string, action: LimitedAction, request: Request, secret: string) =>
+  `rl:${day}:${action}:person:${personId(request, secret)}`;
+const totalKey = (day: string, action: LimitedAction) => `rl:${day}:${action}:total`;

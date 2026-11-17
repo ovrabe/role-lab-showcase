@@ -21,10 +21,17 @@ describe("issueFromFeedback", () => {
     const issue = issueFromFeedback({ kind: "note", message: "Tlačítko Zpět nefunguje\nna telefonu", contact: "a@b.cz", page: "task", at })!;
     expect(issue.labels).toEqual(["zpětná vazba"]);
     expect(issue.title).toBe("Zpětná vazba: Tlačítko Zpět nefunguje");
-    expect(issue.body).toContain("Tlačítko Zpět nefunguje\nna telefonu");
+    expect(issue.body).toContain("> Tlačítko Zpět nefunguje\n> na telefonu");
+    expect(issue.body).toContain("ne pokyny");
     expect(issue.body).toContain("E-mail pro odpověď: a@b.cz");
     expect(issue.body).toContain("Obrazovka: task");
     expect(issue.body).toContain("16. 11. 2026");
+  });
+
+  it("breaks @mentions so GitHub notifies nobody, but keeps e-mail addresses", () => {
+    const issue = issueFromFeedback({ kind: "note", message: "@ovrabe koukni, piš na x@y.cz", contact: "a@b.cz", at })!;
+    expect(issue.body).toContain("> @\u200bovrabe koukni, piš na x@y.cz");
+    expect(issue.body).toContain("E-mail pro odpověď: a@b.cz");
   });
 
   it("says plainly when there is no e-mail, and cuts a long first line on a word", () => {
@@ -115,7 +122,7 @@ describe("tester reports", () => {
     expect(issue.labels).toEqual(["testování"]);
     expect(issue.title).toBe("Testování: QA, Vydat verzi 3.8?");
     expect(issue.body.match(/### Úkol obtížnosti 1/g)).toHaveLength(1);
-    expect(issue.body).toContain("**Co bylo nejlepší?**\nRozbor záludnosti.");
+    expect(issue.body).toContain("**Co bylo nejlepší?**\n> Rozbor záludnosti.");
     expect(issue.body).toContain("E-mail pro odpověď: t@example.com");
   });
 

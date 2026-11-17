@@ -25,7 +25,9 @@ describe("githubIssueTracker", () => {
     await githubIssueTracker("t", "o/r").create({ title: "x".repeat(500), body: "y".repeat(50_000), labels: [] });
     const sent = JSON.parse((fetchMock.mock.calls[0][1] as RequestInit).body as string);
     expect(sent.title).toHaveLength(120);
-    expect(sent.body).toHaveLength(20_000);
+    expect(sent.body.startsWith("y".repeat(20_000))).toBe(true);
+    expect(sent.body).toContain("zkráceno, celé znění je uložené v Upstash");
+    expect(sent.body.length).toBeLessThan(20_100);
   });
 
   it.each([401, 403, 404, 422, 500])("fails on status %i without putting the token or GitHub's reply in the error", async (status) => {

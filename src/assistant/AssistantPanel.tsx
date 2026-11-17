@@ -10,7 +10,7 @@ import { fitTurnsToBudget } from "./promptBudget";
 import { handleSampleError, partialTextOf } from "./sampleErrors";
 import { ChatMessages } from "./ChatMessages";
 import { ChatComposer } from "./ChatComposer";
-import { maxUserMessages } from "./limits";
+import { maxMessageChars, maxUserMessages } from "./limits";
 
 
 const previewReply =
@@ -20,6 +20,8 @@ const interruptedNote = "\n\n_(Odpověď se přerušila.)_";
 const truncatedNote = "\n\n_(Odpověď byla zkrácena, protože byla příliš dlouhá.)_";
 const tooLargeMessage =
   "Zpráva i s přiloženými podklady je na asistenta příliš dlouhá. Zkrať ji nebo přilož méně podkladů.";
+const tooLongTextMessage =
+  "Zpráva je moc dlouhá, víc než 20\u00a0000 znaků. Podklady přilož raději tlačítkem, nebo vlož jen jejich část. Text ti zůstal v poli.";
 
 type Notice = { message: string; offerRetry: boolean };
 
@@ -90,6 +92,10 @@ export function AssistantPanel(props: AssistantPanelProps) {
   function sendMessage(text: string, materialIds: string[]): boolean {
     if (isPending || remainingMessages === 0) return false;
     if (text === "" && materialIds.length === 0) return false;
+    if (text.length > maxMessageChars) {
+      setNotice({ message: tooLongTextMessage, offerRetry: false });
+      return false;
+    }
     const updated = withUserMessage(controls.session, role, text, materialIds);
     const fitted = fitTurnsToBudget(buildAssistantTurns(role, updated.transcript, getMaterialText));
     if (!fitted) {

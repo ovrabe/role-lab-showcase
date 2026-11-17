@@ -73,11 +73,23 @@ export function handleSampleError(error: unknown): SampleErrorHandling {
         keepPartial: false,
         offerRetry: false,
       };
+    // Web build: the API is unusable for everyone (credit used up, key rejected). The server
+    // gives the attempt back and files a backlog issue (server/claudeFailure.ts), so retrying
+    // now would not help and the author does know.
+    case "ai_unavailable":
+      return {
+        kind: "notice",
+        message: "AI je teď dočasně nedostupná. Autor už o tom ví. Zkus to prosím později, rozpracovaný úkol zůstane uložený a pokus se ti nepočítá.",
+        keepPartial: true,
+        offerRetry: false,
+      };
     // Web build: daily limits (server/rateLimit.ts). Counters reset at midnight Czech time.
     case "limit_person":
       return {
         kind: "notice",
-        message: "Tvůj dnešní limit je vyčerpaný (dva pokusy denně). Zkus to zítra, rozpracovaný úkol zůstane uložený.",
+        // One message for every action, so no number: chat, evaluation and challenges have
+        // different limits (server/rateLimit.ts).
+        message: "Tvůj dnešní limit pro tuhle část je vyčerpaný. Zkus to zítra, rozpracovaná práce zůstane uložená.",
         keepPartial: false,
         offerRetry: false,
       };
@@ -105,9 +117,18 @@ export function handleSampleError(error: unknown): SampleErrorHandling {
         offerRetry: true,
       };
 
+    // The chat and the evaluator both shorten what they send to fit, so this means a record far
+    // beyond normal use. Sending the same again cannot help: no retry.
+    case "prompt_too_large":
+      return {
+        kind: "notice",
+        message: "Záznam práce je na odeslání příliš dlouhý. Rozpracovaný úkol zůstává uložený. Dej prosím vědět autorovi.",
+        keepPartial: true,
+        offerRetry: false,
+      };
+
     case "invalid_request":
     case "unknown_role":
-    case "prompt_too_large":
     case "transform_error":
     case "queue_overflow":
       console.error("sample() rejected because of the page:", error);
