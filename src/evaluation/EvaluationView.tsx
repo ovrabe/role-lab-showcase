@@ -48,11 +48,13 @@ export function EvaluationView({ role, session, run, aiStatus, onEvaluate, onCan
           }
         />
       ) : run.status === "running" ? (
-        <div role="status" className="card flex items-start gap-4">
+        // Only the first line is a live region: the steps change every few seconds and a screen
+        // reader would otherwise read each change aloud.
+        <div className="card flex items-start gap-4">
           {/* A slowly turning ring in the data gradient while the evaluator works. */}
           <span aria-hidden="true" className="rl-spin shrink-0 size-12 rounded-full bg-[conic-gradient(from_0deg,transparent_0%,#8a5cf6_55%,#5b6cff_100%)] [mask:radial-gradient(farthest-side,transparent_calc(100%-5px),#000_calc(100%-4px))]" />
           <div className="space-y-3">
-            <p className="font-semibold">Hodnotím. Obvykle to trvá do minuty.</p>
+            <p role="status" className="font-semibold">Hodnotím. Obvykle to trvá do minuty.</p>
             <EvaluationProgress />
             {/* Closing or reloading the page drops the evaluation; on the web it still counts toward the daily limit. */}
             <p className="text-sm text-ink-muted">Stránku mezitím nezavírej ani neobnovuj, jinak se hodnocení ztratí.</p>

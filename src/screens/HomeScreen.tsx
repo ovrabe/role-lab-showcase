@@ -55,7 +55,8 @@ export function HomeScreen({
         onOpenMap={onOpenChallengeMap}
       />
 
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      {/* The note sits under the heading on every screen; the extra space below keeps it apart from the cards. */}
+      <div className="mb-5 space-y-1">
         <h2>Vyber si roli</h2>
         {/* Role Lab is for practice for now (decided 17. 11. 2026): said once, where people choose. */}
         <p className="text-sm text-ink-muted">Je to trénink, ne zkouška. Výsledek vidíš jen ty.</p>

@@ -34,7 +34,11 @@ export function EvaluationProgress() {
     <div className="space-y-3">
       <ol className="space-y-1.5" aria-label="Průběh hodnocení">
         {steps.map((step, index) => (
-          <li key={step.text} className={`flex items-center gap-2 ${index > current ? "text-ink-muted opacity-60" : ""}`}>
+          <li
+            key={step.text}
+            aria-current={index === current ? "step" : undefined}
+            className={`flex items-center gap-2 ${index > current ? "text-ink-muted opacity-60" : ""}`}
+          >
             {index < current ? (
               <Check aria-hidden="true" size={16} className="shrink-0 text-progress" />
             ) : (

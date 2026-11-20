@@ -11,7 +11,17 @@ export type WhyControls = {
  * "Proč tohle skóre?" under one area of the result (docs/PROMPTS.md, section 5). Asked on a
  * click only; the answer is stored with the attempt, so it shows again without a new call.
  */
-export function WhyScore({ dimensionId, why }: { dimensionId: string; why: WhyControls }) {
+export function WhyScore(props: { dimensionId: string; why: WhyControls }) {
+  // One live region that stays on the page, so a screen reader reads the answer out when it
+  // replaces the button (a region created together with its content is often not announced).
+  return (
+    <div aria-live="polite">
+      <WhyScoreContent {...props} />
+    </div>
+  );
+}
+
+function WhyScoreContent({ dimensionId, why }: { dimensionId: string; why: WhyControls }) {
   const [state, setState] = useState<{ kind: "idle" } | { kind: "asking" } | { kind: "error"; message: string }>({ kind: "idle" });
   const answer = why.answers[dimensionId];
 

@@ -154,6 +154,7 @@ function TourWalkthrough({ tour, onChooseTask, onTryChallenge }: TourProps & { t
           <Coach>{tour.coach.result}</Coach>
           {/* The real result screen. Without onReviewChange, score changes stay in memory only. */}
           <ResultScreen role={tour.role} session={tour.session} />
+          <Coach>{tour.coach.resultMore}</Coach>
           <section className="card space-y-3 max-w-3xl">
             <h2>Teď to zkus naostro</h2>
             <p>Skutečný úkol trvá asi 15 minut a hodnotí ho AI. Denní výzva je kratší, asi na 5 minut.</p>

@@ -15,7 +15,8 @@ const TourFile = z.object({
   // Who the scripted assistant works for; shown nowhere yet, kept for the role config.
   assistantContext: nonEmpty,
   // Hints for the screens around the conversation; the conversation has its own per message.
-  coach: z.object({ brief: nonEmpty, submission: nonEmpty, result: nonEmpty }),
+  // resultMore: what only the person's own result adds (the tour shows a sample result).
+  coach: z.object({ brief: nonEmpty, submission: nonEmpty, result: nonEmpty, resultMore: nonEmpty }),
   brief: z.object({ situation: nonEmpty, task: nonEmpty, deliverable: nonEmpty }),
   material: z.object({
     title: nonEmpty,

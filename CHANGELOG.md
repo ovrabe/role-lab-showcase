@@ -2,6 +2,20 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.9.2 – 20. 11. 2026
+
+Drobnosti pro první testery.
+
+### Změněno
+
+- Poznámka „Je to trénink, ne zkouška. Výsledek vidíš jen ty.“ je i na počítači pod nadpisem „Vyber si roli“ a karty rolí začínají o kus níž.
+- Prohlídka na konci řekne, co najdeš navíc na vlastním výsledku: „Proč tohle skóre?“, silný pokus, tahák a kartu ke stažení.
+
+### Opraveno
+
+- Čtečky obrazovky už nepředčítají každou změnu kroku během hodnocení a oznámí odpověď na „Proč tohle skóre?“ i načtený silný pokus.
+- Testy ve veřejné kopii projektu, které potřebují neveřejná data, se v ní přeskočí.
+
 ## 1.9.1 – 20. 11. 2026
 
 Oprava vydání 1.9.0, které se kvůli chybě v sestavení serveru nenasadilo. Obsahuje všechny změny z 1.9.0.

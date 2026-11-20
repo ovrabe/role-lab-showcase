@@ -10,7 +10,8 @@
   "coach": {
     "brief": "Takhle začíná každý úkol: situace, co máš udělat, a podklady. Data jsou vymyšlená, jako ve všech úkolech.",
     "submission": "Výsledek se odevzdává zvlášť, ne v chatu. Tady je e-mail od AI ještě doplněný o zálohu pro případ, že pražírna nedodá. Hodnotí se výsledek i celý rozhovor.",
-    "result": "Tohle je hodnocení. Každé skóre dokládá citace: klikni na ni a záznam práce se posune na to místo. Celkovou úroveň počítá kód z pěti skóre, ne AI. Když s hodnocením nesouhlasíš, otevři režim hodnotitele a skóre uprav."
+    "result": "Tohle je hodnocení. Každé skóre dokládá citace: klikni na ni a záznam práce se posune na to místo. Celkovou úroveň počítá kód z pěti skóre, ne AI. Když s hodnocením nesouhlasíš, otevři režim hodnotitele a skóre uprav.",
+    "resultMore": "Na vlastním výsledku najdeš navíc: u každé oblasti „Proč tohle skóre?“, které skóre vysvětlí s citacemi, silný pokus o stejný úkol pro srovnání, tahák formulací pro nejslabší oblast a kartu s výsledkem ke stažení."
   },
   "material": {
     "title": "Nabídka pražíren na leden 2027",

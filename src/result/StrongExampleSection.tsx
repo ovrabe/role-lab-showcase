@@ -46,58 +46,64 @@ export function StrongExampleSection({ role }: { role: RoleConfig }) {
         <h2 id="strong-heading">Jak to řešil silný pokus</h2>
         <p className="text-ink-muted">Vymyšlený silný pokus o stejný úkol. Porovnej si ho se svým postupem.</p>
       </div>
-      {state.kind === "closed" && (
-        <button type="button" onClick={() => void open()} className="rounded-full border border-line px-4 py-2 hover:border-accent">
-          Ukázat silný pokus
-        </button>
-      )}
-      {state.kind === "loading" && <p className="text-ink-muted">Načítám…</p>}
-      {state.kind === "none" && <p className="text-ink-muted">Pro tenhle úkol zatím silný pokus není.</p>}
-      {state.kind === "error" && (
-        <p className="text-ink-muted">
-          Silný pokus se nepodařilo načíst.{" "}
-          <button type="button" onClick={() => void open()} className="underline underline-offset-4">
-            Zkusit znovu
+      {/* A live region that stays on the page: loading, errors and the sample are read out. */}
+      <div aria-live="polite" className="space-y-4">
+        {state.kind === "closed" && (
+          <button type="button" onClick={() => void open()} className="rounded-full border border-line px-4 py-2 hover:border-accent">
+            Ukázat silný pokus
           </button>
-        </p>
-      )}
-      {state.kind === "shown" && (
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <h3>Zprávy asistentovi</h3>
-            <ol className="space-y-2">
-              {state.example.messages.map((message) => (
-                <li key={message.turn} className="rounded-control bg-paper p-3 whitespace-pre-wrap">
-                  <span className="text-sm text-ink-muted">Krok {message.turn}</span>
-                  <br />
-                  {message.text}
-                </li>
+        )}
+        {state.kind === "loading" && (
+          <p className="text-ink-muted">Načítám…</p>
+        )}
+        {state.kind === "none" && <p className="text-ink-muted">Pro tenhle úkol zatím silný pokus není.</p>}
+        {state.kind === "error" && (
+          <p className="text-ink-muted">
+            Silný pokus se nepodařilo načíst.{" "}
+            <button type="button" onClick={() => void open()} className="underline underline-offset-4">
+              Zkusit znovu
+            </button>
+          </p>
+        )}
+        {state.kind === "shown" && (
+          // Focus stays on the page; the heading tells a screen reader the sample is there.
+          <div className="space-y-5" aria-label="Silný pokus">
+            <div className="space-y-2">
+              <h3>Zprávy asistentovi</h3>
+              <ol className="space-y-2">
+                {state.example.messages.map((message) => (
+                  <li key={message.turn} className="rounded-control bg-paper p-3 whitespace-pre-wrap">
+                    <span className="text-sm text-ink-muted">Krok {message.turn}</span>
+                    <br />
+                    {message.text}
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div className="space-y-2">
+              <h3>Odevzdaný výsledek</h3>
+              <p className="rounded-control bg-paper p-3 whitespace-pre-wrap">{state.example.submission}</p>
+            </div>
+            <div className="space-y-3">
+              <h3>Co na něm hodnotitel ocenil</h3>
+              {state.example.dimensions.map((dimension) => (
+                <div key={dimension.id} className="space-y-1">
+                  <p className="font-semibold">
+                    {areaName(dimension.id)}: {dimension.score} ze 4
+                  </p>
+                  <ul className="space-y-1 text-ink-muted">
+                    {dimension.quotes.map((quote) => (
+                      <li key={`${quote.place}-${quote.quote}`}>
+                        „{quote.quote}“ ({quote.place === "submission" ? "odevzdání" : `krok ${quote.place}`})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ol>
+            </div>
           </div>
-          <div className="space-y-2">
-            <h3>Odevzdaný výsledek</h3>
-            <p className="rounded-control bg-paper p-3 whitespace-pre-wrap">{state.example.submission}</p>
-          </div>
-          <div className="space-y-3">
-            <h3>Co na něm hodnotitel ocenil</h3>
-            {state.example.dimensions.map((dimension) => (
-              <div key={dimension.id} className="space-y-1">
-                <p className="font-semibold">
-                  {areaName(dimension.id)}: {dimension.score} ze 4
-                </p>
-                <ul className="space-y-1 text-ink-muted">
-                  {dimension.quotes.map((quote) => (
-                    <li key={`${quote.place}-${quote.quote}`}>
-                      „{quote.quote}“ ({quote.place === "submission" ? "odevzdání" : `krok ${quote.place}`})
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 }
