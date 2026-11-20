@@ -1,9 +1,19 @@
 import { useState, type FocusEvent } from "react";
 import type { TaskSessionControls } from "../session/useTaskSession";
 
-// Same limit for every role (docs/SPEC.md, section 4). Going over is allowed
-// while writing, so a pasted draft is never cut off; submitting will be blocked in M3.
+// The upper limit for every task (docs/SPEC.md, section 4). Going over is allowed while
+// writing, so a pasted draft is never cut off; only submitting is blocked.
 export const submissionCharLimit = 2500;
+
+/**
+ * The limit the task's brief states ("nejvýš 800 znaků"), so the counter agrees with the brief.
+ * Every task states one (src/task/charLimit.test.ts); without it the general limit applies.
+ */
+export function charLimitFromDeliverable(deliverable: string): number {
+  const match = deliverable.match(/nejvýš\s+([\d\s]+?)\s+znaků/);
+  const stated = match ? Number(match[1].replace(/\s/g, "")) : NaN;
+  return Number.isFinite(stated) && stated > 0 ? Math.min(stated, submissionCharLimit) : submissionCharLimit;
+}
 
 const formatNumber = (value: number) => value.toLocaleString("cs-CZ");
 
@@ -16,10 +26,12 @@ function bringFieldToTop(event: FocusEvent<HTMLTextAreaElement>) {
   window.setTimeout(() => field.scrollIntoView({ block: "start" }), 300);
 }
 
-export function SubmissionPanel({ controls, onSubmit }: { controls: TaskSessionControls; onSubmit: () => void }) {
+type SubmissionPanelProps = { controls: TaskSessionControls; charLimit: number; onSubmit: () => void };
+
+export function SubmissionPanel({ controls, charLimit, onSubmit }: SubmissionPanelProps) {
   const { session } = controls;
   const length = session.submission.length;
-  const overLimit = length - submissionCharLimit;
+  const overLimit = length - charLimit;
 
   return (
     <div className="space-y-5 max-w-3xl">
@@ -43,18 +55,18 @@ export function SubmissionPanel({ controls, onSubmit }: { controls: TaskSessionC
         <div className="mt-2 h-1.5 rounded-full bg-line overflow-hidden" aria-hidden="true">
           <div
             className="h-full rounded-full bg-accent transition-[width] duration-300"
-            style={{ width: `${Math.min(100, (length / submissionCharLimit) * 100)}%` }}
+            style={{ width: `${Math.min(100, (length / charLimit) * 100)}%` }}
           />
         </div>
         <p id="submission-counter" aria-live="polite" className="text-sm mt-1.5 tabular-nums">
           {overLimit > 0 ? (
             <span className="font-semibold text-accent">
-              {formatNumber(length)} / {formatNumber(submissionCharLimit)} znaků, o {formatNumber(overLimit)} víc,
-              než je limit. Před odevzdáním text zkrať.
+              {formatNumber(length)} / {formatNumber(charLimit)} znaků, o {formatNumber(overLimit)} víc,
+              než je limit ze zadání. Před odevzdáním text zkrať.
             </span>
           ) : (
             <span className="text-ink-muted">
-              {formatNumber(length)} / {formatNumber(submissionCharLimit)} znaků
+              {formatNumber(length)} / {formatNumber(charLimit)} znaků
             </span>
           )}
         </p>
@@ -86,7 +98,7 @@ export function SubmissionPanel({ controls, onSubmit }: { controls: TaskSessionC
           session.submission.trim() === ""
             ? "Napiš svůj výsledek, pak ho můžeš odevzdat."
             : overLimit > 0
-              ? "Text je delší než limit. Zkrať ho, pak ho můžeš odevzdat."
+              ? "Text je delší než limit ze zadání. Zkrať ho, pak ho můžeš odevzdat."
               : null
         }
         onSubmit={onSubmit}
@@ -101,7 +113,7 @@ function SubmitControl({ blockedReason, onSubmit }: { blockedReason: string | nu
   if (isConfirming && !blockedReason) {
     return (
       <div role="alertdialog" aria-label="Odevzdat výsledek" className="rl-submit-bar pt-2 space-y-3">
-        <p>Po odevzdání už text nepůjde upravit. Pak se spustí hodnocení, které obvykle trvá 1–2 minuty. Odevzdat?</p>
+        <p>Po odevzdání už text nepůjde upravit. Pak se spustí hodnocení, které obvykle trvá do minuty. Odevzdat?</p>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"

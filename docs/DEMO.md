@@ -21,7 +21,7 @@ Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé vol
 Adresát projde sám, v tomhle pořadí:
 
 1. `?jak-vznikl`, 2 minuty: jak a za kolik práce produkt vznikl.
-2. `?prohlidka`, 3 minuty: celý průběh na hotovém příkladu, bez čekání na AI.
+2. `?prohlidka`, 2 minuty: celý průběh na hotovém příkladu, bez čekání na AI.
 3. Volitelně jedna výzva (asi 5 minut) nebo celý úkol (asi 15 minut) s vlastním hodnocením.
 
 ## Otázky, na které se připrav

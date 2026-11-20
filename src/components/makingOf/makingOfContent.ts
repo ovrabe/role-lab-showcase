@@ -11,14 +11,14 @@ export const benefits = [
   "Člověk si vyzkouší práci s AI na úkolu ze své role a hned vidí, co zlepšit: konkrétní kroky, vysvětlení skóre a silný pokus o stejný úkol pro srovnání.",
   "V datech každého úkolu jsou záludnosti, například chybný údaj nebo jednorázový výkyv. Tím se měří, jestli člověk výstup AI ověřuje, ne jen jestli umí napsat prompt.",
   "Hodnocení je doložitelné. Každé skóre má citaci ze záznamu, celkovou úroveň počítá kód podle pevných pravidel a člověk může skóre upravit.",
-  "Bez instalace a účtu. Hodnocení trvá asi 35 sekund.",
+  "Bez instalace a účtu. Hodnocení trvá do minuty.",
   "Nová role je konfigurace a podklady, kód se nemění. Před zveřejněním ji projde kalibrace hodnotitele.",
 ];
 
 export const figures = [
   { value: "9 / 13 / 15", label: "rolí, úkolů a výzev" },
-  { value: "~35 s", label: "trvá hodnocení" },
-  { value: "21", label: "releasů za 7 dní" },
+  { value: "< 1 min", label: "trvá hodnocení" },
+  { value: "22", label: "releasů za 7 dní" },
   { value: "3", label: "Claude modely podle úlohy" },
   { value: "11", label: "kontrol webu po každém releasu" },
   { value: "543", label: "automatických testů" },
@@ -42,7 +42,7 @@ export const workingDays: { month: number; day: number; commits: number; hours: 
   { month: 11, day: 15, commits: 52, hours: 5.82 },
   { month: 11, day: 16, commits: 54, hours: 8.08 },
   { month: 11, day: 17, commits: 31, hours: 2.14 },
-  { month: 11, day: 20, commits: 25, hours: 4.7 },
+  { month: 11, day: 20, commits: 29, hours: 5.1 },
 ];
 
 /** The prototype phase, highlighted in the chart: up to the full prototype (3. 10.). */

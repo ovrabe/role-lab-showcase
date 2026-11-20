@@ -2,7 +2,7 @@
 
 **Try it:** [role-lab-gamma.vercel.app](https://role-lab-gamma.vercel.app)
 
-> **In English, briefly.** Role Lab assesses how a person *works with AI* on a realistic task from their role, not what they know about AI. You solve a work task (e.g. a Black Friday recommendation for a category manager) with an AI assistant; the page records the whole process. A second Claude call then scores it against a public rubric in five areas, every score backed by a quote from the transcript. The overall level is computed by code, not by the model, and a reviewer can adjust each score. A personal project by a non-developer, built by directing Claude Code. The UI is in Czech.
+> **In English, briefly.** Role Lab assesses how a person *works with AI* on a realistic task from their role, not what they know about AI. You solve a work task (e.g. a Black Friday recommendation for a category manager) with an AI assistant; the page records the whole process. A second Claude call then scores it against a public rubric in five areas, every score backed by a quote from the transcript. The overall level is computed by code, not by the model, and a reviewer can adjust each score. Built AI-first: Claude Code wrote the code, tests and reviews; a human set the direction, reviewed quality and decided on risk and cost. How it was built, in numbers: [role-lab-gamma.vercel.app/?jak-vznikl](https://role-lab-gamma.vercel.app/?jak-vznikl). The UI is in Czech.
 
 ## Co to je
 
@@ -29,7 +29,7 @@ V podkladech jsou schované záludnosti, které asistent sám neprozradí. Kdo v
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
-  <img alt="Schéma infrastruktury: prohlížeč, Vercel se statickou stránkou a serverovými funkcemi, Anthropic API a Upstash Redis" src="docs/architecture-light.svg">
+  <img alt="Schéma infrastruktury: prohlížeč, Vercel se statickou stránkou a serverovými funkcemi, Anthropic API, Upstash Redis a GitHub Issues" src="docs/architecture-light.svg">
 </picture>
 
 Podrobná schémata webové verze, verze v claude.ai a vývoje s vysvětlivkami jsou v [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
@@ -38,7 +38,7 @@ Podrobná schémata webové verze, verze v claude.ai a vývoje s vysvětlivkami 
 - **Tři buildy z jednoho kódu:**
   - `npm run build` a `npm run build:resitel` dělají stránku pro claude.ai. Clauda volá přes účet toho, kdo ji otevře, bez serveru a bez klíče.
   - `npm run build:web` dělá veřejný web na Vercelu se serverovými funkcemi v `api/` a `server/`.
-- **Role jsou konfigurace, ne kód.** Rubrika, úrovně a cvičení role jsou v `data/roles/*.json`, zadání a podklady jednotlivých úkolů v `data/tasks/*.json`. Obě role běží stejným kódem.
+- **Role jsou konfigurace, ne kód.** Rubrika, úrovně a cvičení role jsou v `data/roles/*.json`, zadání a podklady jednotlivých úkolů v `data/tasks/*.json`. Všech devět rolí běží stejným kódem.
 - **Prompty** asistenta a hodnotitele jsou v `docs/PROMPTS.md`. Test hlídá, že kód používá doslova stejný text.
 
 ## Bezpečnost

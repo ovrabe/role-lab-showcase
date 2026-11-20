@@ -4,7 +4,7 @@ import type { RoleConfig } from "../roles/roleSchema";
 import { BriefPanel } from "../task/BriefPanel";
 import { MaterialsPanel } from "../task/MaterialsPanel";
 import { useIsWideScreen } from "../task/useIsWideScreen";
-import { SubmissionPanel } from "../task/SubmissionPanel";
+import { charLimitFromDeliverable, SubmissionPanel } from "../task/SubmissionPanel";
 import { SoftTimer } from "../task/SoftTimer";
 import { RestartButton } from "../task/RestartButton";
 import { useTaskSession } from "../session/useTaskSession";
@@ -144,7 +144,7 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
         onGoToSubmission={goToSubmission}
       />
     ),
-    submit: <SubmissionPanel controls={controls} onSubmit={submit} />,
+    submit: <SubmissionPanel controls={controls} charLimit={charLimitFromDeliverable(role.brief.deliverable)} onSubmit={submit} />,
   };
 
   return (

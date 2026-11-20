@@ -66,7 +66,7 @@ export const scenarioSteps: ScenarioStep[] = [
   {
     title: "Navíc, když máš čas: úkol z role",
     minutes: "15 minut, nepovinné",
-    todo: "Když máš čtvrt hodiny navíc: na úvodu vyber roli, která je nejblíž tvé práci, a v ní úkol „Obtížnost 1 · Základní“. Pracuj s asistentem jako v běžné práci a odevzdej výsledek. Hodnocení trvá minutu až dvě.",
+    todo: "Když máš čtvrt hodiny navíc: na úvodu vyber roli, která je nejblíž tvé práci, a v ní úkol „Obtížnost 1 · Základní“. Pracuj s asistentem jako v běžné práci a odevzdej výsledek. Hodnocení trvá do minuty.",
     questions: [
       { id: "q26", type: "line", text: "Vybraná role a úkol" },
       { id: "q6", type: "scale", text: "Zadání a podklady byly jasné.", ends: agree },

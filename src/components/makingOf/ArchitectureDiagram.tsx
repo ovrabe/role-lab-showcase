@@ -9,7 +9,7 @@ import { monoDetailClass, panelClass } from "./makingOfStyles";
 const endpoints = ["/chat", "/evaluate", "/challenge", "/why", "/example", "/feedback", "/stats"];
 
 const operations = [
-  { icon: Clock, text: "hodnocení ~35 s" },
+  { icon: Clock, text: "hodnocení do 1 min" },
   { icon: Database, text: "Redis: limity a denní rozpočet" },
   { icon: Zap, text: "prompt caching u asistenta" },
   { icon: TriangleAlert, text: "výpadek → upozornění, pokus se vrací" },

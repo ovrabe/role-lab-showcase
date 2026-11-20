@@ -128,7 +128,7 @@ export function MakingOfScreen({ onOpenTour }: MakingOfScreenProps) {
           className="inline-flex items-center gap-2 rounded-full bg-action px-4 py-2 font-medium text-action-contrast hover:opacity-90"
         >
           <Play aria-hidden="true" size={16} />
-          Vyzkoušet za 3 minuty
+          Prohlídka na 2 minuty
         </button>
         <a
           href={sourceCodeUrl}

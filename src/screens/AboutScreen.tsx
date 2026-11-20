@@ -48,17 +48,14 @@ export function AboutScreen({ onOpenMethodology, onOpenMakingOf }: AboutScreenPr
       </p>
 
       <h2 className="mb-3">Jak projekt vznikl</h2>
-      <p className="mb-3">
-        Projekt vznikal postupně po milnících podle písemné specifikace. Každou změnu kontrolují automatické testy, dnes
-        jich je přes 500. Hodnotitel je zkalibrovaný na vzorových pokusech.
-      </p>
+      {/* The details live on the making-of page; here only the way there, so the two never disagree. */}
       <button
         type="button"
         onClick={onOpenMakingOf}
-        className="mb-8 inline-flex items-center gap-2 font-medium text-accent underline-offset-4 hover:underline"
+        className="mb-8 inline-flex items-center gap-2 text-left font-medium text-accent underline-offset-4 hover:underline"
       >
-        Milníky, čísla a postup popisuje stránka Jak vznikl Role Lab
-        <ArrowRight aria-hidden="true" size={16} />
+        Průběh vývoje, architekturu, bezpečnost a rozhodnutí popisuje stránka Jak vznikl Role Lab
+        <ArrowRight aria-hidden="true" size={16} className="shrink-0" />
       </button>
 
       <h2 className="mb-3">Kalibrace hodnotitele</h2>

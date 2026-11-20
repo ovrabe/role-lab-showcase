@@ -2,6 +2,17 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.10.1 – 20. 11. 2026
+
+Sjednocené údaje a přesnější počítadlo.
+
+### Změněno
+
+- Počítadlo znaků u odevzdání ukazuje limit ze zadání úkolu (u krátkých úkolů 800 znaků) a nad ním výsledek nejde odevzdat.
+- Délka hodnocení je všude „do minuty“ a prohlídka všude „na 2 minuty“.
+- Stránka O projektu místo zdvojeného odstavce odkazuje na stránku Jak vznikl Role Lab.
+- Schéma architektury ve veřejném README a v dokumentaci ukazuje všechny serverové funkce, model Haiku a GitHub Issues.
+
 ## 1.10.0 – 20. 11. 2026
 
 Stránka o tom, jak Role Lab vznikl.

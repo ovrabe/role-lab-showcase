@@ -78,44 +78,49 @@ function diagram(t) {
     card(t, { x: 40, y: 318, width: 240, height: 54, iconName: "type", title: "Google Fonts", lines: [], iconColor: t.muted }),
 
     // Vercel
-    `<rect x="350" y="30" width="460" height="500" rx="16" fill="${t.panel}" stroke="${t.panelStroke}"/>`,
+    `<rect x="350" y="30" width="460" height="540" rx="16" fill="${t.panel}" stroke="${t.panelStroke}"/>`,
     text(372, 62, "Vercel", { size: 16, weight: 700, color: t.text }),
     text(434, 62, "· hosting a serverové funkce", { size: 13, color: t.muted }),
 
     card(t, { x: 372, y: 84, width: 416, height: 86, iconName: "page", title: "Statická stránka", lines: ["Jeden soubor index.html, Content Security Policy"] }),
 
-    `<rect x="372" y="196" width="416" height="138" rx="12" fill="${t.card}" stroke="${t.cardStroke}"/>`,
+    `<rect x="372" y="196" width="416" height="178" rx="12" fill="${t.card}" stroke="${t.cardStroke}"/>`,
     icon("functions", 390, 214, t.accent),
     text(420, 229, "Serverové funkce", { size: 15, weight: 600, color: t.text }),
-    ...["/api/chat", "/api/evaluate", "/api/feedback"].flatMap((name, index) => {
-      const x = 390 + index * 132;
+    text(560, 229, "· api/*.ts", { size: 13, color: t.muted }),
+    // Every function in api/, four to a row. Keep in sync with the folder.
+    ...["/chat", "/evaluate", "/challenge", "/why", "/example", "/feedback", "/stats"].flatMap((name, index) => {
+      const x = 390 + (index % 4) * 98;
+      const y = 250 + Math.floor(index / 4) * 42;
       return [
-        `<rect x="${x}" y="254" width="120" height="34" rx="8" fill="${t.accentFill}" stroke="${t.accentStroke}"/>`,
-        `<text x="${x + 60}" y="275.5" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="${t.accent}" text-anchor="middle">${name}</text>`,
+        `<rect x="${x}" y="${y}" width="90" height="32" rx="8" fill="${t.accentFill}" stroke="${t.accentStroke}"/>`,
+        `<text x="${x + 45}" y="${y + 20.5}" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="${t.accent}" text-anchor="middle">${name}</text>`,
       ];
     }),
-    text(390, 316, "Ověří původ, limity a citace, spočítá úroveň", { size: 13, color: t.muted }),
+    text(390, 356, "Ověří původ, limity a citace, spočítá úroveň", { size: 13, color: t.muted }),
 
-    `<path d="M580 382V342" stroke="${t.secretStroke}" stroke-width="1.5" stroke-dasharray="4 4"/>`,
-    `<path d="M575.5 349L580 341L584.5 349z" fill="${t.secretStroke}"/>`,
+    `<path d="M580 412V382" stroke="${t.secretStroke}" stroke-width="1.5" stroke-dasharray="4 4"/>`,
+    `<path d="M575.5 389L580 381L584.5 389z" fill="${t.secretStroke}"/>`,
     card(t, {
-      x: 372, y: 382, width: 416, height: 126, iconName: "lock", title: "Jen na serveru",
+      x: 372, y: 412, width: 416, height: 126, iconName: "lock", title: "Jen na serveru",
       lines: ["API klíč k Anthropicu", "Pokyny pro asistenta a hodnotitele", "Klíč hodnotitele, asistent ho nikdy nedostane"],
       fill: t.secretFill, stroke: t.secretStroke, titleColor: t.secret, iconColor: t.secret, detailColor: t.secret,
     }),
 
     // External services
-    card(t, { x: 900, y: 150, width: 260, height: 112, iconName: "sparkle", title: "Anthropic API", lines: ["Asistent: Claude Sonnet", "Hodnotitel: Claude Opus"] }),
-    card(t, { x: 900, y: 292, width: 260, height: 112, iconName: "database", title: "Upstash Redis", lines: ["Denní limity na osobu i celkem", "Zpětná vazba"] }),
+    card(t, { x: 900, y: 130, width: 260, height: 136, iconName: "sparkle", title: "Anthropic API", lines: ["Asistent: Claude Sonnet", "Hodnotitel: Claude Opus", "Výzvy a vysvětlení: Haiku"] }),
+    card(t, { x: 900, y: 296, width: 260, height: 112, iconName: "database", title: "Upstash Redis", lines: ["Denní limity a rozpočet", "na osobu i celkem"] }),
+    card(t, { x: 900, y: 438, width: 260, height: 112, iconName: "page", title: "GitHub Issues", lines: ["Zpětná vazba, statistika", "a upozornění z provozu"] }),
 
     // Flows
     arrow(t, { x1: 280, y: 140, x2: 372, step: 1, label: ["načte"] }),
     arrow(t, { x1: 280, y: 230, x2: 372, step: 2, label: ["zprávy,", "odevzdání"] }),
     arrow(t, { x1: 788, y: 222, x2: 900, step: 3, label: ["volání modelu"] }),
-    arrow(t, { x1: 788, y: 312, x2: 900, step: 4, label: ["počítadla"] }),
+    arrow(t, { x1: 788, y: 330, x2: 900, step: 4, label: ["počítadla"] }),
+    arrow(t, { x1: 810, y: 480, x2: 900, step: 5, label: ["upozornění"] }),
   ];
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" font-family="${font}" role="img" aria-label="Schéma infrastruktury Role Lab: prohlížeč, Vercel se statickou stránkou a serverovými funkcemi, Anthropic API a Upstash Redis">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" font-family="${font}" role="img" aria-label="Schéma infrastruktury Role Lab: prohlížeč, Vercel se statickou stránkou a serverovými funkcemi, Anthropic API, Upstash Redis a GitHub Issues">
 ${parts.join("\n")}
 </svg>
 `;

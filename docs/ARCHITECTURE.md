@@ -13,22 +13,26 @@ flowchart LR
     subgraph vercel["Vercel"]
         page["Statická stránka<br/>jeden index.html<br/>s Content Security Policy"]
         chat["/api/chat"]
-        evaluate["/api/evaluate"]
-        feedback["/api/feedback"]
+        evaluate["/api/evaluate<br/>/api/why, /api/example"]
+        challenge["/api/challenge"]
+        feedback["/api/feedback<br/>/api/stats"]
         content["Podklady, pokyny<br/>a klíče hodnotitele<br/>jen na serveru"]
     end
 
-    anthropic["Anthropic API<br/>asistent: Claude Sonnet<br/>hodnotitel: Claude Opus"]
-    upstash["Upstash Redis<br/>denní limity, osoba = otisk IP<br/>zpětná vazba"]
+    anthropic["Anthropic API<br/>asistent: Claude Sonnet<br/>hodnotitel: Claude Opus<br/>výzvy a vysvětlení skóre: Claude Haiku"]
+    upstash["Upstash Redis<br/>denní limity a rozpočet<br/>na osobu i celkem"]
+    github["GitHub Issues<br/>zpětná vazba, statistika,<br/>upozornění z provozu"]
     fonts["Google Fonts"]
 
     browser -- "načtení" --> page
     browser -- "zprávy a ID podkladů" --> chat
     browser -- "záznam a výsledek" --> evaluate
-    browser -- "zpětná vazba" --> feedback
-    content -. "skládá pokyny" .-> chat & evaluate
-    chat & evaluate --> anthropic
-    chat & evaluate & feedback --> upstash
+    browser -- "krátká výzva" --> challenge
+    browser -- "zpětná vazba, statistika" --> feedback
+    content -. "skládá pokyny" .-> chat & evaluate & challenge
+    chat & evaluate & challenge --> anthropic
+    chat & evaluate & challenge & feedback --> upstash
+    feedback --> github
     browser -.-> fonts
 ```
 
@@ -36,7 +40,7 @@ flowchart LR
 - **Pokyny a klíč hodnotitele** skládá server. Prohlížeč posílá jen zprávy uživatele a ID podkladů. Asistent klíč nikdy nedostane.
 - **Rozbor záludností** pošle server prohlížeči až s výsledkem hodnocení.
 - **Celkovou úroveň** počítá kód podle konfigurace role a ověřuje, že citace v záznamu opravdu jsou.
-- **Limity** se počítají pro každou osobu i celkem a nulují se každý den o půlnoci pražského času. Osoba je jen otisk IP adresy, ne samotná adresa.
+- **Limity** se počítají pro každou osobu i celkem a nulují se každý den o půlnoci pražského času. Osoba je náhodné číslo, které si uloží prohlížeč. Jedna IP adresa má navíc strop zhruba čtyř lidí a ukládá se jen jako otisk, ne samotná adresa.
 - **Server** přijímá požadavky jen z vlastní stránky.
 
 ## Verze v claude.ai
