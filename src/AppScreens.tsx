@@ -2,6 +2,7 @@ import { sweepPositionFor } from "./components/RoleBadge";
 import { HomeScreen } from "./screens/HomeScreen";
 import { MethodologyScreen } from "./screens/MethodologyScreen";
 import { AboutScreen } from "./screens/AboutScreen";
+import { MakingOfScreen } from "./screens/MakingOfScreen";
 import { ReleaseNotesScreen } from "./screens/ReleaseNotesScreen";
 import { ChallengeScreen } from "./screens/ChallengeScreen";
 import { ChallengeMapScreen } from "./screens/ChallengeMapScreen";
@@ -27,6 +28,7 @@ export type Screen =
   | { name: "home" }
   | { name: "methodology" }
   | { name: "about" }
+  | { name: "makingOf" }
   | { name: "profile" }
   | { name: "releaseNotes" }
   | { name: "challenge"; challengeId: string }
@@ -60,6 +62,8 @@ export function initialScreen(): Screen {
   if (params.has("prohlidka")) return { name: "tour" };
   // ?testovani opens the tester scenario; it sends answers to the server, so web version only.
   if (isWebBuild && params.has("testovani")) return { name: "testing" };
+  // ?jak-vznikl opens the making-of page, so it can be linked from an e-mail.
+  if (isWebBuild && params.has("jak-vznikl")) return { name: "makingOf" };
   const lastRoleId = loadLastRoleId();
   return lastRoleId && activeRoles.some((role) => role.id === lastRoleId)
     ? { name: "task", roleId: lastRoleId }
@@ -128,7 +132,10 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
       {screen.name === "challengeMap" && (
         <ChallengeMapScreen challenges={challenges} dailyChallengeId={todaysChallenge?.id ?? null} onSelect={openChallenge} />
       )}
-      {isWebBuild && screen.name === "about" && <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} />}
+      {isWebBuild && screen.name === "about" && (
+        <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} onOpenMakingOf={() => setScreen({ name: "makingOf" })} />
+      )}
+      {isWebBuild && screen.name === "makingOf" && <MakingOfScreen onOpenTour={() => setScreen({ name: "tour" })} />}
       {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={aiStatus} backend={backend} />}
       {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}
       {isWebBuild && screen.name === "testing" && <TesterScenarioScreen />}

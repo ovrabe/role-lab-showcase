@@ -31,7 +31,7 @@ function replaceOnce(file, pattern, replacement) {
   writeFileSync(path, text.replace(pattern, replacement));
 }
 
-replaceOnce("docs/DEMO.md", /Pak rozbor záludností: [^.]+\./, "Pak rozbor záludností, které byly schované v datech.");
+// docs/DEMO.md no longer names the traps (rewritten 20. 11. 2026); the leak check below still guards it.
 replaceOnce(
   "docs/SPEC.md",
   /slabý \([^)]*\), střední \([^)]*\), silný \([^)]*\)/,

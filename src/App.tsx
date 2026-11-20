@@ -99,7 +99,11 @@ export default function App() {
       </main>
 
       {/* Not in the task: on a phone its floating bar owns the bottom of the screen. */}
-      {screen.name !== "task" && <Footer page={screen.name} onOpenReleaseNotes={() => setScreen({ name: "releaseNotes" })} />}
+      {screen.name !== "task" && <Footer
+          page={screen.name}
+          onOpenReleaseNotes={() => setScreen({ name: "releaseNotes" })}
+          onOpenMakingOf={() => setScreen({ name: "makingOf" })}
+        />}
 
       {showSavedNote && (
         <p

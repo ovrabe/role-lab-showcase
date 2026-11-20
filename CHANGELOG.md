@@ -2,6 +2,15 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.10.0 – 20. 11. 2026
+
+Stránka o tom, jak Role Lab vznikl.
+
+### Přidáno
+
+- Stránka „Jak vznikl Role Lab“ (jen webová verze): co aplikace řeší, průběh vývoje v odpracovaných hodinách, jak funguje jedno hodnocení, hrozby a ochrana, cesta změny do produkce a rozhodnutí podle měření. Otevře ji odkaz „Built with Claude Code“ v patičce, odkaz na stránce O projektu nebo adresa s `?jak-vznikl`.
+- Náhled odkazu webové verze v e-mailu a na sociálních sítích (titulek, popis a obrázek).
+
 ## 1.9.2 – 20. 11. 2026
 
 Drobnosti pro první testery.

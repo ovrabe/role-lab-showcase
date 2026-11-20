@@ -1,25 +1,33 @@
 # Předvedení za tři minuty
 
-Cíl: ukázat, že hodnocení AI dovedností může měřit práci s AI, ne znalosti o ní, a že AI v tom procesu dělá většinu práce, zatímco člověk drží rozhodnutí.
+Cíl: ukázat dvě věci. Role Lab měří, jak člověk s AI pracuje, ne co o ní ví. A celý produkt vznikl přístupem AI-first: AI psala kód, testy a revize, člověk určoval směr, kontroloval kvalitu a rozhodoval o riziku a nákladech.
 
-Nespoléhej na živé volání Clauda. Měj připravené dva hotové běhy (slabý a silný) z kalibračních fixtures, načtené tak, aby se výsledek dal otevřít okamžitě. Ukázky otevřeš dole na stránce Jak hodnotíme → ukázková hodnocení. Jsou jen v ukázkové verzi stránky (`npm run build`); verze pro řešitele (`npm run build:resitel`) je nemá, takže předváděj z ukázkového odkazu.
+Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé volání Clauda nespoléhej. Prohlídka a stránka Jak vznikl fungují bez AI a hned.
 
-## Průběh
+## Průběh (živě nebo na sdílené obrazovce)
 
-**Problém (20 s).** Povinné AI dovednosti napříč firmou potřebují hodnocení. Test znalostí ukáže, co člověk o AI ví, ne jak s ní pracuje. A když hodnocení ovlivňuje posun lidí, musí být doložitelné.
+**Problém (20 s).** Firmy chtějí, aby lidé uměli pracovat s AI. Test znalostí ale ukáže, co člověk o AI ví, ne jak s ní na skutečné práci pracuje. Hodnocení navíc musí být doložitelné, jinak mu nikdo nevěří.
 
-**Úkol (50 s).** Otevři úkol category managera. Zadání je reálná práce: tři produkty posílit před Black Friday, dvě zásoby snížit. Ukaž asistenta a přiložení dat. Řekni jednu věc: asistent odpovídá na to, na co se člověk ptá, a data sám neprověřuje. Hodnotí se, jestli se člověk zeptá.
+**Prohlídka (70 s).** Otevři `?prohlidka`. Úkol category managera: vybrat kávu do předplatného, data jsou vymyšlená. Ukaž zadání, chat s asistentem a odevzdání. Jedna věta: asistent dělá, co se po něm chce, a data sám neprověřuje. Hodnotí se, jestli to člověk udělá.
 
-**Výsledek (60 s).** Otevři silný běh. Ukaž jednu dimenzi, klikni na citaci a nech záznam sjet na daný krok. Pak rozbor záludností, které byly schované v datech. Tady se hodnocení mění v učení. Na konci další krok s mikro-cvičením.
+**Hodnocení (50 s).** Na výsledku prohlídky klikni na citaci a nech záznam sjet na dané místo. Řekni: každé skóre dokládá citace, aplikace ověří, že v záznamu opravdu je. Celkovou úroveň počítá kód, ne model. Člověk může každé skóre upravit. Na vlastním výsledku je navíc „Proč tohle skóre?“ a silný pokus o stejný úkol pro srovnání.
 
-**Srovnání (20 s).** Přepni na slabý běh. Stejný úkol, jiná úroveň, a u každého skóre je vidět proč.
+**Jak vznikl (30 s).** Otevři `?jak-vznikl`. Křivka práce: funkční prototyp po ~4,5 h aktivní práce, úplný prototyp za víkend (~9,5 h), veřejný web po ~16 h, dnešní stav ~44 h. Pak jedna věc podle publika: schéma a tabulka hrozeb (pro IT), cesta změny do produkce (pro vývojáře), rozhodnutí podle měření (pro vedení).
 
-**Proč takhle (20 s).** AI úkol provází, hodnotí a navrhuje další krok. Úroveň počítají pevná pravidla, ne model. Člověk z L&D může každé skóre upravit a shoda mezi AI a lidmi je první metrika, kterou sleduju.
+**Co dál (10 s).** Teď trénink, ne zkouška. Další kroky: vlastní výzva podle struktury dat konkrétní firmy, vyšší obtížnosti u nových rolí, kalibrace na skutečných lidech.
 
-**Co dál (10 s).** Druhá role, kalibrace na skutečných lidech, přehled pro L&D.
+## Když odkaz posíláš e-mailem
+
+Adresát projde sám, v tomhle pořadí:
+
+1. `?jak-vznikl`, 2 minuty: jak a za kolik práce produkt vznikl.
+2. `?prohlidka`, 3 minuty: celý průběh na hotovém příkladu, bez čekání na AI.
+3. Volitelně jedna výzva (asi 5 minut) nebo celý úkol (asi 15 minut) s vlastním hodnocením.
 
 ## Otázky, na které se připrav
 
-- Co když asistent spočítá něco špatně? — Hodnotitel rozlišuje chybu člověka od chyby asistenta. Kalibrace to kontroluje.
-- Jak zabráníte tomu, aby model hodnotil pokaždé jinak? — Citace u každého skóre, úroveň počítaná v kódu, kalibrace na třech záznamech s tolerancí jedné úrovně.
-- Jak rychle přidáte další roli? — Ukaž projektového manažera: stejná aplikace, jiný JSON, jiné podklady a jiný klíč. Kód se nemění.
+- **Co když model hodnotí pokaždé jinak?** Citace u každého skóre, úroveň počítaná v kódu, kalibrace: slabý, střední a silný pokus se nikdy neprohodily a výsledek se mezi běhy lišil nejvýš o 0,2 bodu.
+- **Co když asistent spočítá něco špatně?** Hodnotitel rozlišuje chybu člověka od chyby asistenta. Ověřit výstup AI je jedna z hodnocených dovedností.
+- **Kolik to stojí?** Celý pokus 5–7 Kč, platí se jen volání modelu. Denní rozpočet a limity chrání před zneužitím.
+- **Jak rychle přidáte roli?** Role je konfigurace a podklady, kód se nemění. Sedm rolí přibylo během jednoho dne, každá až po kalibraci hodnotitele.
+- **Kam jdou data?** Záznam práce zůstává v prohlížeči. Na server jde jen to, co je nutné pro volání modelu, a anonymní statistika bez obsahu.

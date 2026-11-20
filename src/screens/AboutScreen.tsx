@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 
-type AboutScreenProps = { onOpenMethodology: () => void };
+type AboutScreenProps = { onOpenMethodology: () => void; onOpenMakingOf: () => void };
 
 // Calibration results (docs/SPEC.md, M3.5): average of the five areas, scale 1–4, from the
 // author's calibration runs. Update together with the samples in fixtures/ after a recalibration.
@@ -37,7 +37,7 @@ const security = [
 ];
 
 /** What Role Lab is and how it was built and checked. Web version only (docs/PRODUCTION.md, step 4). */
-export function AboutScreen({ onOpenMethodology }: AboutScreenProps) {
+export function AboutScreen({ onOpenMethodology, onOpenMakingOf }: AboutScreenProps) {
   return (
     <article className="max-w-2xl mx-auto">
       <h1 className="mb-6">O projektu</h1>
@@ -48,10 +48,18 @@ export function AboutScreen({ onOpenMethodology }: AboutScreenProps) {
       </p>
 
       <h2 className="mb-3">Jak projekt vznikl</h2>
-      <p className="mb-8">
+      <p className="mb-3">
         Projekt vznikal postupně po milnících podle písemné specifikace. Každou změnu kontrolují automatické testy, dnes
         jich je přes 500. Hodnotitel je zkalibrovaný na vzorových pokusech.
       </p>
+      <button
+        type="button"
+        onClick={onOpenMakingOf}
+        className="mb-8 inline-flex items-center gap-2 font-medium text-accent underline-offset-4 hover:underline"
+      >
+        Milníky, čísla a postup popisuje stránka Jak vznikl Role Lab
+        <ArrowRight aria-hidden="true" size={16} />
+      </button>
 
       <h2 className="mb-3">Kalibrace hodnotitele</h2>
       <p className="mb-4">

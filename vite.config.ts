@@ -92,6 +92,31 @@ function localApi(): Plugin {
 // and role data get inlined, nothing is fetched at runtime.
 // Mode "participant" (npm run build:resitel) builds the page for people taking the task,
 // without the author's tools; see src/buildFlags.ts. It goes to its own folder.
+// Link preview for the web version (e-mail, LinkedIn, Slack): Open Graph tags and an image
+// from public-web/. Only the web build has a public address; the claude.ai pages have none.
+const publicUrl = "https://role-lab-gamma.vercel.app";
+function webLinkPreview(): Plugin {
+  const title = "Role Lab – práce s AI na úkolu z praxe";
+  const description = "Vyřeš úkol z praxe s AI asistentem a uvidíš hodnocení výsledku i postupu, s citacemi.";
+  const tags = [
+    `<meta name="description" content="${description}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="Role Lab" />`,
+    `<meta property="og:title" content="${title}" />`,
+    `<meta property="og:description" content="${description}" />`,
+    `<meta property="og:url" content="${publicUrl}/" />`,
+    `<meta property="og:image" content="${publicUrl}/og.png" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:locale" content="cs_CZ" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+  ].join("\n    ");
+  return {
+    name: "web-link-preview",
+    transformIndexHtml: (html) => html.replace("<title>Role Lab</title>", `<title>Role Lab</title>\n    ${tags}`),
+  };
+}
+
 // The version shown in the footer comes from package.json, so a release changes it in one place.
 const appVersion: string = JSON.parse(readFileSync("package.json", "utf8")).version;
 
@@ -103,7 +128,7 @@ export default defineConfig(({ mode }) => ({
     tailwindcss(),
     escapeReplacementCharacter(),
     ...(mode === "participant" ? [participantTitle()] : []),
-    ...(mode === "web" ? [localApi()] : []),
+    ...(mode === "web" ? [localApi(), webLinkPreview()] : []),
     viteSingleFile(),
   ],
   // The web build is a participant page too: no calibration, no samples.
@@ -112,6 +137,8 @@ export default defineConfig(({ mode }) => ({
     __WEB_BUILD__: JSON.stringify(mode === "web"),
     __APP_VERSION__: JSON.stringify(appVersion),
   },
+  // Static files next to the page (the link preview image) exist only for the web build.
+  publicDir: mode === "web" ? "public-web" : false,
   build: { outDir: mode === "participant" ? "dist-resitel" : mode === "web" ? "dist-web" : "dist" },
   // The public copy of the code leaves out the evaluator keys and the sample evaluations,
   // which reveal the data traps (scripts/export-public.sh). Tests that need them run only

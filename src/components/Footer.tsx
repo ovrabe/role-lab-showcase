@@ -9,9 +9,9 @@ const linkedInUrl = "https://www.linkedin.com/in/ondrej-vrabel/";
 
 const linkClass = "inline-flex items-center gap-1.5 hover:text-ink underline-offset-4 hover:underline";
 
-type FooterProps = { page: string; onOpenReleaseNotes: () => void };
+type FooterProps = { page: string; onOpenReleaseNotes: () => void; onOpenMakingOf: () => void };
 
-export function Footer({ page, onOpenReleaseNotes }: FooterProps) {
+export function Footer({ page, onOpenReleaseNotes, onOpenMakingOf }: FooterProps) {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   return (
     <footer className="mx-auto w-full max-w-7xl px-4 pb-8 pt-2 text-sm text-ink-muted">
@@ -25,7 +25,15 @@ export function Footer({ page, onOpenReleaseNotes }: FooterProps) {
           <span className="sr-only">(otevře se v nové kartě)</span>
         </a>
         <span aria-hidden="true">·</span>
-        <span>Built with Claude Code</span>
+        {/* The making-of page exists only in the web version, like the About page. */}
+        {isWebBuild ? (
+          <button type="button" onClick={onOpenMakingOf} className={linkClass}>
+            Built with Claude Code
+            <span className="sr-only">: jak projekt vznikl</span>
+          </button>
+        ) : (
+          <span>Built with Claude Code</span>
+        )}
         <span aria-hidden="true">·</span>
         <button type="button" onClick={onOpenReleaseNotes} className={linkClass}>
           v{appVersion}
