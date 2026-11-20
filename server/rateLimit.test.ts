@@ -11,7 +11,7 @@ const role = content.roles.activeRoles.find((task) => task.id === "category-mana
 const session = loadPreviewSamples(role).find((sample) => sample.id === "strong")!.session;
 
 // Small limits so the tests stay short; the real numbers are in dailyLimits.
-const smallLimits = { perPerson: { chat: 2, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1 }, total: { chat: 3, evaluate: 2, feedback: 2, challenge: 1, example: 1, stats: 1 } };
+const smallLimits = { perPerson: { chat: 2, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1 }, total: { chat: 3, evaluate: 2, feedback: 2, challenge: 1, example: 1, stats: 1, why: 1 } };
 
 function countingClaude() {
   const calls = { chat: 0, evaluate: 0 };
@@ -154,7 +154,7 @@ describe("upstashCounter", () => {
 });
 
 describe("limits per browser on a shared network", () => {
-  const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1 }, total: { chat: 100, evaluate: 100, feedback: 100, challenge: 100, example: 1, stats: 1 } };
+  const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1 }, total: { chat: 100, evaluate: 100, feedback: 100, challenge: 100, example: 1, stats: 1, why: 1 } };
   const limiter = (): RateLimiter => ({ counter: memoryCounter(), secret: "s", limits, now: () => new Date("2026-11-11T10:00:00Z") });
   const browser = (index: number) => `00000000-0000-4000-8000-${String(index).padStart(12, "0")}`;
   const call = (ip: string, browserId?: string) =>

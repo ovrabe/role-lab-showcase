@@ -50,13 +50,15 @@ export function AboutScreen({ onOpenMethodology }: AboutScreenProps) {
       <h2 className="mb-3">Jak projekt vznikl</h2>
       <p className="mb-8">
         Projekt vznikal postupně po milnících podle písemné specifikace. Každou změnu kontrolují automatické testy, dnes
-        jich je přes 400. Hodnotitel je zkalibrovaný na vzorových pokusech.
+        jich je přes 500. Hodnotitel je zkalibrovaný na vzorových pokusech.
       </p>
 
       <h2 className="mb-3">Kalibrace hodnotitele</h2>
       <p className="mb-4">
         Vzorové pokusy prošly hodnocením opakovaně. Pořadí slabý, střední a silný se nikdy neprohodilo a výsledek
-        stejného pokusu se mezi běhy lišil nejvýš o 0,2 bodu.
+        stejného pokusu se mezi běhy lišil nejvýš o 0,2 bodu. Od verze 1.8.0 hodnotitel pracuje s nižším úsilím, takže je
+        levnější a rychlejší. Nové kolo kalibrace na všech 13 úkolech zachovalo pořadí i stav všech záludností a průměry
+        se od tabulky liší nejvýš o 0,2 bodu.
       </p>
       <div className="card mb-8 overflow-x-auto">
         <table className="w-full text-left tabular-nums">

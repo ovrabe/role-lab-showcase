@@ -5,6 +5,8 @@ import type { EvaluationRun } from "./useEvaluation";
 import { ResultScreen } from "../result/ResultScreen";
 import { SampleViewer } from "../result/SampleViewer";
 import { isParticipantBuild } from "../buildFlags";
+import { EvaluationProgress } from "./EvaluationProgress";
+import type { WhyControls } from "../result/WhyScore";
 
 type EvaluationViewProps = {
   role: RoleConfig;
@@ -14,11 +16,12 @@ type EvaluationViewProps = {
   onEvaluate: () => void;
   onCancel: () => void;
   onReviewChange: (review: ReviewerReview | null) => void;
+  why?: WhyControls;
 };
 
 // Shown instead of the task once it is submitted: the states of the evaluation, then the result.
-export function EvaluationView({ role, session, run, aiStatus, onEvaluate, onCancel, onReviewChange }: EvaluationViewProps) {
-  if (session.evaluation) return <ResultScreen role={role} session={session} onReviewChange={onReviewChange} />;
+export function EvaluationView({ role, session, run, aiStatus, onEvaluate, onCancel, onReviewChange, why }: EvaluationViewProps) {
+  if (session.evaluation) return <ResultScreen role={role} session={session} onReviewChange={onReviewChange} why={why} />;
 
   const actionButton = (label: string) => (
     <button type="button" onClick={onEvaluate} className="rounded-full bg-action text-action-contrast px-4 py-2 font-medium">
@@ -45,11 +48,12 @@ export function EvaluationView({ role, session, run, aiStatus, onEvaluate, onCan
           }
         />
       ) : run.status === "running" ? (
-        <div role="status" className="card flex items-center gap-4">
+        <div role="status" className="card flex items-start gap-4">
           {/* A slowly turning ring in the data gradient while the evaluator works. */}
           <span aria-hidden="true" className="rl-spin shrink-0 size-12 rounded-full bg-[conic-gradient(from_0deg,transparent_0%,#8a5cf6_55%,#5b6cff_100%)] [mask:radial-gradient(farthest-side,transparent_calc(100%-5px),#000_calc(100%-4px))]" />
           <div className="space-y-3">
-            <p>Hodnotím… Obvykle to trvá 1–2 minuty.</p>
+            <p className="font-semibold">Hodnotím. Obvykle to trvá do minuty.</p>
+            <EvaluationProgress />
             {/* Closing or reloading the page drops the evaluation; on the web it still counts toward the daily limit. */}
             <p className="text-sm text-ink-muted">Stránku mezitím nezavírej ani neobnovuj, jinak se hodnocení ztratí.</p>
             <button type="button" onClick={onCancel} className="rounded-full border border-line px-4 py-2">

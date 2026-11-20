@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { StoredEvaluation } from "../evaluation/evaluationSchema.js";
 import { DimensionId } from "../roles/roleSchema.js";
+import { StoredWhy } from "../evaluation/whyAnswer.js";
 
 // Shape from docs/SPEC.md, section 6.
 export const TranscriptEvent = z.enum([
@@ -46,5 +47,8 @@ export const TaskSession = z.object({
   // A human reviewer's adjustments (docs/SPEC.md, section 4.5). Kept next to the AI evaluation,
   // which is never overwritten, so the export can show both.
   review: ReviewerReview.optional(),
+  // Answers to "Proč tohle skóre?" per area (docs/PROMPTS.md, section 5), kept so a second
+  // look costs nothing. Optional, so sessions stored before 1.9.0 stay valid.
+  whyAnswers: z.record(z.string(), StoredWhy).optional(),
 });
 export type TaskSession = z.infer<typeof TaskSession>;

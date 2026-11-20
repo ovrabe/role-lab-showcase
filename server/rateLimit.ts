@@ -11,9 +11,10 @@ export const dailyLimits = {
   // Short challenges use the cheap model: enough for every challenge once a day.
   // Strong samples (exampleHandler.ts) cost no Claude call; the limit only stops scripts.
   // Anonymous statistics (statsHandler.ts): a few events per attempt, the limit only stops scripts.
-  perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15, example: 30, stats: 300 },
+  // "Proč tohle skóre?" uses the cheap model: a few questions per result are plenty.
+  perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15, example: 30, stats: 300, why: 15 },
   // For everyone together: a ceiling on what one day can cost (and on feedback spam).
-  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300, example: 1000, stats: 20000 },
+  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300, example: 1000, stats: 20000, why: 300 },
 };
 
 export type LimitedAction = keyof typeof dailyLimits.perPerson;

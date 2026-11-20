@@ -174,6 +174,18 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
           onEvaluate={() => evaluation.evaluate(controls.session)}
           onCancel={evaluation.cancel}
           onReviewChange={controls.saveReview}
+          why={
+            backend && aiStatus === "available"
+              ? {
+                  answers: controls.session.whyAnswers ?? {},
+                  async ask(dimensionId) {
+                    const outcome = await backend.explainScore(role, controls.session, dimensionId, new AbortController().signal);
+                    if (outcome.kind === "ok") controls.saveWhy(dimensionId, outcome.why);
+                    return outcome;
+                  },
+                }
+              : undefined
+          }
         />
       ) : isWide ? (
         <WideTaskLayout panels={panels} leftTab={leftTab} onSelect={selectTab} />

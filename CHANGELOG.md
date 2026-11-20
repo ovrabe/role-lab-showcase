@@ -2,6 +2,28 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.9.1 – 20. 11. 2026
+
+Oprava vydání 1.9.0, které se kvůli chybě v sestavení serveru nenasadilo. Obsahuje všechny změny z 1.9.0.
+
+### Opraveno
+
+- Serverové funkce se znovu sestaví a nasadí.
+
+## 1.9.0 – 20. 11. 2026
+
+Srozumitelnější hodnocení.
+
+### Přidáno
+
+- „Proč tohle skóre?“ u každé oblasti výsledku: krátké vysvětlení s citacemi ze záznamu, které aplikace ověří. Odpověď se uloží k pokusu.
+- Během hodnocení stránka ukazuje, na čem hodnotitel pracuje, a jeden tip na příště.
+
+### Změněno
+
+- U výběru role stojí, že jde o trénink, ne zkoušku, a že výsledek vidíš jen ty.
+- Stránka O projektu uvádí výsledky nové kalibrace hodnotitele.
+
 ## 1.8.0 – 17. 11. 2026
 
 Víc z výsledku a levnější hodnocení.

@@ -60,7 +60,7 @@ const isoTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 export const isTimestamp = (value: string) => isoTime.test(value) && !Number.isNaN(Date.parse(value));
 
 /** Checks a conversation against the role and the limits; returns a problem or null. */
-function transcriptProblem(role: RoleConfig, transcript: TranscriptItem[]): string | null {
+export function transcriptProblem(role: RoleConfig, transcript: TranscriptItem[]): string | null {
   if (transcript.filter((item) => item.kind === "user").length > maxUserMessages) return "Too many messages.";
   if (transcript.some((item) => !isTimestamp(item.ts))) return "Invalid time in the conversation.";
   // Only the person's messages: the assistant's answers can be longer (16 000 tokens), and

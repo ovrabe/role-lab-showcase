@@ -8,6 +8,9 @@ import { runEvaluator, type EvaluatorOutcome } from "../evaluation/runEvaluator"
 import { runChallengeEvaluator } from "../challenges/runChallengeEvaluator";
 import type { ChallengeConfig } from "../challenges/challengeSchema";
 import type { ChallengeOutcome } from "../challenges/challengeResult";
+import { buildWhyPrompt } from "../prompts/why";
+import { validateWhyReply, type WhyOutcome } from "../evaluation/whyAnswer";
+import { handleSampleError } from "../assistant/sampleErrors";
 
 export type ChatOptions = {
   signal: AbortSignal;
@@ -30,7 +33,11 @@ export type AiBackend = {
   evaluate(role: RoleConfig, session: TaskSession, signal: AbortSignal): Promise<EvaluatorOutcome>;
   // A short challenge: one answer, one evaluation by the quick model.
   evaluateChallenge(challenge: ChallengeConfig, answer: string, signal: AbortSignal): Promise<ChallengeOutcome>;
+  // "Proč tohle skóre?": a short explanation of one area's score by the quick model (docs/PROMPTS.md, section 5).
+  explainScore(role: RoleConfig, session: TaskSession, dimensionId: string, signal: AbortSignal): Promise<WhyOutcome>;
 };
+
+const whyFailed = "Vysvětlení se nepodařilo. Zkus to znovu.";
 
 /** Backend for the claude.ai builds: everything in the page, Claude via claude.use("sample"). */
 export function claudeAiBackend(sample: SampleFunction): AiBackend {
@@ -52,6 +59,17 @@ export function claudeAiBackend(sample: SampleFunction): AiBackend {
     },
     evaluateChallenge(challenge, answer, signal) {
       return runChallengeEvaluator(sample, challenge, answer, signal);
+    },
+    async explainScore(role, session, dimensionId, signal) {
+      const prompt = buildWhyPrompt(role, session, dimensionId);
+      if (!prompt) return { kind: "error", message: whyFailed };
+      try {
+        const why = validateWhyReply(await sample.json(prompt, { modelTier: "quick", cache: false, signal }), session);
+        return why ? { kind: "ok", why } : { kind: "error", message: whyFailed };
+      } catch (error) {
+        const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+        return { kind: "error", message: code === "invalid_json" ? whyFailed : handleSampleError(error).message || whyFailed };
+      }
     },
   };
 }

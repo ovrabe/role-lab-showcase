@@ -3,6 +3,7 @@ import { ChallengeResult } from "../challenges/challengeResult";
 import { handleSampleError } from "../assistant/sampleErrors";
 import type { AiBackend } from "./aiBackend";
 import { apiHeaders } from "./apiHeaders";
+import { StoredWhy } from "../evaluation/whyAnswer";
 
 /**
  * Backend for the web build (docs/SPEC.md, section 13): the page sends the role and what
@@ -122,6 +123,27 @@ export const webBackend: AiBackend = {
     } catch (error) {
       if (isAbort(error)) return { kind: "error", handling: handleSampleError({ code: "cancelled" }) };
       return { kind: "error", handling: handleSampleError({ code: "upstream_error" }) };
+    }
+  },
+
+  async explainScore(role, session, dimensionId, signal) {
+    try {
+      const response = await fetch("/api/why", {
+        method: "POST",
+        headers: apiHeaders(),
+        body: JSON.stringify({ roleId: role.id, session, dimensionId }),
+        signal,
+      });
+      if (!response.ok) return { kind: "error", message: handleSampleError(await errorFrom(response)).message };
+      const body = (await response.json()) as { kind: "ok"; why: unknown } | { kind: "error"; code: string; message: string };
+      if (body.kind === "ok") {
+        const parsed = StoredWhy.safeParse(body.why);
+        if (parsed.success) return { kind: "ok", why: parsed.data };
+      }
+      return { kind: "error", message: body.kind === "error" ? handleSampleError(body).message : "Vysvětlení se nepodařilo. Zkus to znovu." };
+    } catch (error) {
+      if (isAbort(error)) return { kind: "error", message: "" };
+      return { kind: "error", message: handleSampleError({ code: "upstream_error" }).message };
     }
   },
 };

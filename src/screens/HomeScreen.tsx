@@ -55,7 +55,11 @@ export function HomeScreen({
         onOpenMap={onOpenChallengeMap}
       />
 
-      <h2 className="mb-3">Vyber si roli</h2>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h2>Vyber si roli</h2>
+        {/* Role Lab is for practice for now (decided 17. 11. 2026): said once, where people choose. */}
+        <p className="text-sm text-ink-muted">Je to trénink, ne zkouška. Výsledek vidíš jen ty.</p>
+      </div>
       {activeRoles.length === 0 && (
         <p className="text-ink-muted mb-8">
           Zatím není dostupná žádná role. Autor stránky ji musí zapnout v konfiguraci.

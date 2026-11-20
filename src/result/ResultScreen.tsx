@@ -18,6 +18,7 @@ import { buildExport, exportFilename } from "./buildExport";
 import { ResultProgress } from "../progress/ResultProgress";
 import { EvaluationFeedback } from "./EvaluationFeedback";
 import { isWebBuild } from "../buildFlags";
+import type { WhyControls } from "./WhyScore";
 
 type ResultScreenProps = {
   role: RoleConfig;
@@ -25,6 +26,8 @@ type ResultScreenProps = {
   // Stores the reviewer's adjustments with the attempt. Without it (the preview sample)
   // adjustments live in memory only: a sample is not the viewer's own work.
   onReviewChange?: (review: ReviewerReview | null) => void;
+  // "Proč tohle skóre?" (WhyScore.tsx): passed only for the person's own result with Claude available.
+  why?: WhyControls;
 };
 
 /**
@@ -32,7 +35,7 @@ type ResultScreenProps = {
  * On a wide screen the record of the work sits beside it, so a clicked quote
  * shows up in context right away; on a phone the record follows below.
  */
-export function ResultScreen({ role, session, onReviewChange }: ResultScreenProps) {
+export function ResultScreen({ role, session, onReviewChange, why }: ResultScreenProps) {
   const evaluation = session.evaluation!;
   // Each click gets its own number, so clicking the same quote again still scrolls to it.
   const [selection, setSelection] = useState<{ citation: Citation; clickNumber: number } | null>(null);
@@ -79,6 +82,7 @@ export function ResultScreen({ role, session, onReviewChange }: ResultScreenProp
           {...detailsProps}
           reviewScores={review?.scores ?? null}
           isReviewerMode={isReviewerMode}
+          why={why}
           onScoreChange={(dimensionId, score) =>
             updateReview({ scores: { ...(review?.scores ?? aiScores), [dimensionId]: score } })
           }

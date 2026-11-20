@@ -61,21 +61,22 @@ Na konci: bezpečnostní kontrola kódu (security review) a přehled po bodech, 
 | Nasazení | automaticky z GitHubu po každém `git push` | automaticky z GitHubu |
 | Riziko | limit délky běhu funkce; hodnocení trvá až 2 minuty | čekání na odpověď Clauda se do limitu nepočítá |
 
-**Ověřit před výběrem:** aktuální limit délky běhu funkce na Vercelu Hobby. Pokud hodnocení nestihne, volíme Cloudflare. Počítadla limitů potřebují malé úložiště; obě platformy mají bezplatné.
+**Rozhodnuto (listopad 2026): Vercel.** Se zapnutým Fluid compute má funkce až 300 s (`vercel.json`), hodnocení trvá kolem 35 s. Počítadla limitů a rozpočtu jsou v Upstash Redis.
 
 ## 5. Náklady na API
 
-Ceny Anthropic API (stav říjen 2026, za milion tokenů): Claude Opus 5.5 4 $ vstup / 20 $ výstup, Claude Sonnet 5.5 2 $ / 10 $.
+Ceny Anthropic API (stav listopad 2026, za milion tokenů): Claude Opus 5.5 4 $ vstup / 20 $ výstup, Claude Sonnet 5.5 2 $ / 10 $, Claude Haiku 5.5 0,10 $ / 0,50 $. Čtení z cache stojí zlomek ceny vstupu, zápis do cache 1,25×.
 
-Návrh modelů zrcadlí dnešní úrovně v claude.ai: asistent `default` → Sonnet 5.5, hodnotitel `complex` → Opus 5.5. Volbu modelu potvrdí autor.
+Modely (rozhodnuto): asistent Sonnet 5.5 s cachováním promptů, hodnotitel Opus 5.5 s úsilím `medium` (od 1.8.0, kalibrace na všech 13 úkolech), krátké výzvy Haiku 5.5.
 
-| Část jednoho pokusu | Odhad tokenů | Odhad ceny |
+| Část jednoho pokusu | Cena | Zdroj |
 |---|---|---|
-| Asistent, ~10 zpráv (podklady a historie se posílají znovu) | ~150 000 vstup, ~5 000 výstup | ~0,35 $ (s cachováním výrazně méně) |
-| Hodnocení (záznam, podklady, rubrika, klíč) | ~25 000 vstup, ~12 000 výstup vč. přemýšlení | ~0,35 $ |
-| **Celkem** | | **~0,5–0,7 $, tedy zhruba 12–17 Kč** |
+| Asistent, ~10 zpráv | ~0,10–0,20 $ | odhad; cachování zlevní opakovaně posílanou historii |
+| Hodnocení | ~0,11 $ (35 s) | změřeno na 38 hodnoceních při kalibraci 17. 11. 2026 |
+| Krátká výzva | pod 0,01 $ | odhad |
+| **Celý pokus** | **~0,2–0,3 $, tedy zhruba 5–7 Kč** | |
 
-Pro 10 lidí měsíčně řádově stovky korun. Odhad je hrubý; přesné číslo dá první týden provozu. Limit útraty ve workspace zaručí, že se nepřekročí stanovená částka.
+Útratu hlídají tři vrstvy: předplacený kredit bez automatického dobíjení, denní rozpočet podle skutečné útraty (1,50 $ na IP adresu, 3 $ celkem, `server/spendBudget.ts`) a denní limity počtu volání (`server/rateLimit.ts`). Přesné číslo za pokus ukáže řádek „Chat usage“ v logu Vercelu.
 
 ## 6. Co udělá autor (nejde za něj)
 
@@ -100,8 +101,8 @@ Náročnost: **S** = do půl dne, **M** = 1–2 dny, **L** = víc dní.
 | 2 ✅ | Nasazení z GitHubu, klíč v nastavení, limit útraty, první veřejný odkaz | S |
 | 3 ✅ | Limity pokusů a denní strop, hlášky při vyčerpání, test proti vnuceným instrukcím | M |
 | 4 ✅ | Stránka „O projektu“: co to je, jak vznikl (SPEC, milníky, testy), výsledky kalibrace, bezpečnost a férovost, co se děje s daty | M |
-| 5 | Zpětná vazba ve výsledku: „Odpovídá hodnocení tvé práci?“ a „Tady nesouhlasím“ u oblasti. Přesunuto do části 10, fáze 1 | S–M |
-| 6 | Veřejný GitHub s README pro náboráře, kontrola tajných údajů, security review | S |
+| 5 ✅ | Zpětná vazba ve výsledku: „Odpovídá hodnocení tvé práci?“ a „Tady nesouhlasím“ u oblasti (část 10, fáze 1) | S–M |
+| 6 ✅ | Veřejný GitHub s README pro náboráře (role-lab-showcase), kontrola tajných údajů, security review (verze 1.6.5–1.7.0) | S |
 
 Hotové kroky označuje ✅ (listopad 2026). Navíc hotovo: patička s odkazem na LinkedIn a okno „Poslat zpětnou vazbu“ (zprávy pro autora v Upstash).
 
@@ -120,21 +121,21 @@ První dva nápady pokrývá část 10 (fáze 1 a 2).
 
 | Nápad | Proč | Náročnost |
 |---|---|---|
-| Smyčka zlepšení: mikro-cvičení na nejslabší oblast hned po výsledku | z hodnocení se stane trénink | M |
-| Vlastní pokrok: „Ověřování minule 2 → teď 3“, ukládá se v prohlížeči | důvod se vrátit | S–M |
-| Užitečné čekání na hodnocení: kroky „čtu záznam… ověřuji citace…“ a tip | čekání nepůsobí jako zaseknutí | S |
-| Vyladěný úvod: trénink, ne zkouška; nikdo jiný výsledek nevidí | méně nervozity | S |
+| ✅ Smyčka zlepšení: mikro-cvičení na nejslabší oblast hned po výsledku (fáze 1, tahák formulací 1.8.0) | z hodnocení se stane trénink | M |
+| ✅ Vlastní pokrok: „Ověřování minule 2 → teď 3“, ukládá se v prohlížeči (fáze 1) | důvod se vrátit | S–M |
+| ✅ Užitečné čekání na hodnocení: kroky „čtu záznam… ověřuji citace…“ a tip (1.9.0) | čekání nepůsobí jako zaseknutí | S |
+| ✅ Vyladěný úvod: trénink, ne zkouška; nikdo jiný výsledek nevidí (1.9.0) | méně nervozity | S |
 
 ### Zásobník nápadů
 | Nápad | Náročnost |
 |---|---|
 | Z inzerátu na test za 15 minut: Claude navrhne novou roli včetně dat se záludnostmi, autor zkontroluje a zkalibruje (rámovat jako rozvoj, ne výběr uchazečů) | L |
-| „Jak by to udělal silný řešitel“: vedle sebe tvůj postup a silná ukázka s poznámkami | S–M |
-| Doptej se hodnotitele: „Proč?“ u skóre, odpověď jen s citacemi ze záznamu | M |
+| ✅ „Jak by to udělal silný řešitel“: vedle sebe tvůj postup a silná ukázka s poznámkami (1.8.0) | S–M |
+| ✅ Doptej se hodnotitele: „Proč?“ u skóre, odpověď jen s citacemi ze záznamu (1.9.0, `docs/PROMPTS.md` část 5) | M |
 | Veřejně měřená shoda AI s lidskými hodnotiteli (vyžaduje ukládání se souhlasem) | M |
-| Osobní karta na stažení: úroveň, silné stránky, dva kroky na příště | S |
-| Tahák formulací podle slabé oblasti | S |
-| Anonymní statistika: začátky, dokončení, kde lidé odpadají | S–M |
+| ✅ Osobní karta na stažení: úroveň, silné stránky, dva kroky na příště (1.8.0) | S |
+| ✅ Tahák formulací podle slabé oblasti (1.8.0) | S |
+| ✅ Anonymní statistika: začátky, dokončení, kde lidé odpadají (1.8.0) | S–M |
 | Další role a obtížnosti podle zpětné vazby testerů | M |
 | Anglická verze | M |
 | Dvouminutové video podle `docs/DEMO.md` | S |
@@ -142,9 +143,9 @@ První dva nápady pokrývá část 10 (fáze 1 a 2).
 
 ## 9. Otevřené otázky
 
-1. Vercel, nebo Cloudflare: rozhodne ověření limitu délky běhu (bod 4).
-2. Modely pro asistenta a hodnotitele (bod 5).
-3. Veřejný repozitář včetně klíče k záludnostem, nebo bez něj (bod 6).
+1. ✅ Vercel, nebo Cloudflare: Vercel s Fluid compute (bod 4).
+2. ✅ Modely pro asistenta a hodnotitele: Sonnet 5.5 a Opus 5.5 s úsilím `medium` (bod 5).
+3. ✅ Veřejný repozitář bez klíčů k záludnostem a bez ukázek (`scripts/export-public.mjs`).
 4. Kdy přidat ukládání výsledků. Až s ním přijde GDPR a souhlas uživatelů. Rozhodnuto: s účty ve fázi 4 části 10.
 
 ## 10. Trénink a pokrok (z ukázky produkt)

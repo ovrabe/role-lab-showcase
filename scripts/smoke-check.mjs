@@ -80,6 +80,12 @@ await check("statistika odmítne vymyšlenou událost", async () => {
   if (response.status !== 400) return `čekal jsem 400, přišlo ${response.status}`;
 });
 
+await check("vysvětlení skóre odmítne pokus bez hodnocení", async () => {
+  const session = { version: 1, roleId: "qa-release", startedAt: new Date().toISOString(), transcript: [], submission: "x", reflection: "", lastSavedSubmission: "x" };
+  const response = await post("/api/why", { roleId: "qa-release", session, dimensionId: "verification" });
+  if (response.status !== 400) return `čekal jsem 400, přišlo ${response.status}`;
+});
+
 for (const { name, ok, problem } of results) console.log(`${ok ? "✓" : "✗"} ${name}${ok ? "" : ` – ${problem}`}`);
 const failed = results.filter((result) => !result.ok).length;
 console.log(failed === 0 ? `\nVše v pořádku (${base}).` : `\n${failed} z ${results.length} kontrol neprošlo (${base}).`);

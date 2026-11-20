@@ -2,6 +2,7 @@ import type { RoleConfig } from "../roles/roleSchema";
 import type { StoredEvaluation } from "../evaluation/evaluationSchema";
 import type { Citation } from "./citations";
 import { CitationQuote } from "./CitationQuote";
+import { WhyScore, type WhyControls } from "./WhyScore";
 
 type DetailsProps = {
   role: RoleConfig;
@@ -18,6 +19,8 @@ type ReviewProps = {
   reviewScores: Record<string, number> | null;
   isReviewerMode: boolean;
   onScoreChange: (dimensionId: string, score: number) => void;
+  // "Proč tohle skóre?": only for the person's own result with Claude available.
+  why?: WhyControls;
 };
 
 export function DimensionList({
@@ -28,6 +31,7 @@ export function DimensionList({
   reviewScores,
   isReviewerMode,
   onScoreChange,
+  why,
 }: DetailsProps & ReviewProps) {
   const { output } = evaluation;
   return (
@@ -87,6 +91,7 @@ export function DimensionList({
                 </li>
               ))}
             </ul>
+            {why && <WhyScore dimensionId={dimension.id} why={why} />}
           </article>
         );
       })}

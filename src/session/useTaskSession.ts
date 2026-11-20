@@ -4,6 +4,7 @@ import type { ReviewerReview, TaskSession, TranscriptEvent } from "./sessionSche
 import { deleteSession, isAheadOf, loadSession, saveSession, sessionKey } from "./sessionStorage";
 import type { StoredEvaluation } from "../evaluation/evaluationSchema";
 import { track } from "../ai/track";
+import type { StoredWhy } from "../evaluation/whyAnswer";
 
 function createSession(roleId: string): TaskSession {
   const now = new Date().toISOString();
@@ -166,6 +167,11 @@ export function useTaskSession(role: RoleConfig) {
         const { review: _previous, ...rest } = current;
         return review ? { ...rest, review } : rest;
       });
+    },
+
+    // "Proč tohle skóre?": keeps the answer with the attempt, so it costs nothing a second time.
+    saveWhy(dimensionId: string, why: StoredWhy) {
+      setSession((current) => ({ ...current, whyAnswers: { ...current.whyAnswers, [dimensionId]: why } }));
     },
 
     restart() {

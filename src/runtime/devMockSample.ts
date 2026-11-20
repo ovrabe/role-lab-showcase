@@ -89,6 +89,14 @@ async function mockJson(input: MockInput, options: MockOptions = {}) {
   devWindow.mockNextEvaluatorError = undefined;
   if (errorCode) throw { code: errorCode, message: `Mock error ${errorCode}` };
   if (prompt.includes("<odpoved_na_vyzvu>")) return mockChallengeReply(prompt);
+  // "Proč tohle skóre?" (docs/PROMPTS.md, section 5): a short answer quoting the first message.
+  if (prompt.includes("<hodnoceni>Skóre")) {
+    const line = prompt.match(/^\[(\d+)\] user: (.+)$/m);
+    return {
+      answer: "Simulované vysvětlení: skóre odpovídá popisu úrovně, protože v záznamu chybí kontrola dat před výpočtem.",
+      quotes: line ? [{ turn: Number(line[1]), quote: line[2].split(" ").slice(0, 6).join(" ") }] : [],
+    };
+  }
   if (submission.includes("#spatny-tvar")) return { hodnoceni: "nevím" };
 
   const firstUserLine = prompt.match(/^\[(\d+)\] user \([^)]*\): (.+)$/m);
