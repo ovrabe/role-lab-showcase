@@ -14,7 +14,7 @@ Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé vol
 
 **Jak vznikl (30 s).** Otevři `?jak-vznikl`. Křivka práce: funkční prototyp po ~4,5 h aktivní práce, úplný prototyp za víkend (~9,5 h), veřejný web po ~16 h, dnešní stav ~45 h. Pak jedna věc podle publika: schéma a tabulka hrozeb (pro IT), cesta změny do produkce (pro vývojáře), rozhodnutí podle měření (pro vedení).
 
-**Co dál (10 s).** Teď trénink, ne zkouška. Další kroky: vlastní výzva podle struktury dat konkrétní firmy, vyšší obtížnosti u nových rolí, kalibrace na skutečných lidech.
+**Co dál (10 s).** Teď trénink, ne zkouška. Na úvodní stránce je i vlastní výzva (beta): úkol podle popisu vlastní práce, z tabulky odejde jen struktura. Další kroky: obtížnost 3 u dalších rolí, kalibrace na skutečných lidech.
 
 ## Když odkaz posíláš e-mailem
 

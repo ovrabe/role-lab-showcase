@@ -81,7 +81,7 @@ export function FeedbackDialog({ open, page, onClose }: FeedbackDialogProps) {
           <label className="block">
             <span className="block font-medium mb-1">E-mail (nepovinné)</span>
             <span className="block text-sm text-ink-muted mb-2">
-              Chceš vědět, jak autor s námětem naložil? Nech e-mail. Použije se jen k odpovědi na tuhle zprávu.
+              Chceš vědět, jak autor s námětem naložil? Nech e-mail. Použije se jen k odpovědi na tuhle zprávu a po odpovědi ho autor smaže.
             </span>
             <input
               type="email"
@@ -93,7 +93,7 @@ export function FeedbackDialog({ open, page, onClose }: FeedbackDialogProps) {
               className="w-full rounded-control border border-line bg-surface p-3 text-base"
             />
           </label>
-          <p className="text-sm text-ink-muted">Ukládá se jen to, co sem napíšeš, do soukromého seznamu námětů autora.</p>
+          <p className="text-sm text-ink-muted">Ukládá se jen to, co sem napíšeš, do soukromého seznamu námětů autora na GitHubu.</p>
           {state === "limit" && (
             <p role="alert" className="bg-notice text-notice-ink rounded-control p-3">
               Dnešní limit zpráv je vyčerpaný. Zkus to prosím zítra.

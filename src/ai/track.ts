@@ -10,7 +10,8 @@ import { apiHeaders } from "./apiHeaders";
 export type StatsEvent = "task_started" | "task_submitted" | "task_evaluated" | "challenge_evaluated";
 
 export function track(event: StatsEvent, id: string): void {
-  if (!isWebBuild) return;
+  // Generated custom tasks are not counted: the server knows only the fixed task ids.
+  if (!isWebBuild || id.startsWith("custom-")) return;
   try {
     void fetch("/api/stats", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ event, id }), keepalive: true }).catch(() => {});
   } catch {

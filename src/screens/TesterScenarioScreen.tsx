@@ -84,7 +84,7 @@ export function TesterScenarioScreen() {
         <ul className="card list-disc pl-10 space-y-2 text-sm">
           <li>Co napíšeš asistentovi, jde k AI (Claude) přes server aplikace. Nepiš tam osobní ani citlivé firemní údaje.</li>
           <li>Hodnocení celého úkolu jde udělat dvakrát za den, výzev zvládneš patnáct.</li>
-          <li>Odpovědi se odešlou tlačítkem dole do soukromého seznamu námětů autora.</li>
+          <li>Odpovědi se odešlou tlačítkem dole do soukromého seznamu námětů autora na GitHubu.</li>
         </ul>
         <p className="text-sm text-ink-muted" aria-live="polite">
           Zodpovězeno {answered} z {questionCount}
@@ -111,7 +111,7 @@ export function TesterScenarioScreen() {
         <label className="block">
           <span className="block font-medium mb-1">E-mail (nepovinné)</span>
           <span className="block text-sm text-ink-muted mb-2">
-            Chceš vědět, co se z tvých připomínek udělalo? Nech e-mail. Použije se jen k odpovědi autora.
+            Chceš vědět, co se z tvých připomínek udělalo? Nech e-mail. Použije se jen k odpovědi autora a po odpovědi ho autor smaže.
           </span>
           <input
             type="email"

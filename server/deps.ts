@@ -4,6 +4,7 @@ import { mockClaude } from "./mockClaude.js";
 import { memoryCounter, upstashCounter, type RateLimiter } from "./rateLimit.js";
 import { memoryFeedbackStore, upstashFeedbackStore, type FeedbackStore } from "./feedback.js";
 import { githubIssueTracker, memoryIssueTracker, type IssueTracker } from "./issues.js";
+import { memoryCustomTaskStore, upstashCustomTaskStore, type CustomTaskStore } from "./customTaskStore.js";
 
 /**
  * What the endpoints need, created once per server instance. Secrets come only from the
@@ -23,6 +24,8 @@ export type ServerDeps =
       // Where reports and feedback become backlog items. Optional: without it everything is
       // still saved in the feedback store, so a missing token loses nothing.
       issues: IssueTracker | null;
+      // Generated custom tasks (docs/SPEC.md, section 14), kept 30 days.
+      customTasks: CustomTaskStore;
     }
   | { misconfigured: string };
 
@@ -54,6 +57,7 @@ export function getServerDeps(): ServerDeps {
       },
       feedback: storeUrl && storeToken ? upstashFeedbackStore(storeUrl, storeToken) : memoryFeedbackStore(),
       issues: issuesToken && issuesRepository ? githubIssueTracker(issuesToken, issuesRepository) : onVercel ? null : memoryIssueTracker(),
+      customTasks: storeUrl && storeToken ? upstashCustomTaskStore(storeUrl, storeToken) : memoryCustomTaskStore(),
     };
   }
   return cached;

@@ -62,7 +62,7 @@ describe("issueFromFeedback", () => {
 
 describe("POST /api/feedback with the backlog", () => {
   afterEach(() => vi.restoreAllMocks());
-  const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1 }, total: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1 } };
+  const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 }, total: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 } };
   const limiter = (): RateLimiter => ({ counter: memoryCounter(), secret: "test", limits });
   const send = (body: unknown) =>
     new Request("http://localhost/api/feedback", {
@@ -99,7 +99,7 @@ describe("POST /api/feedback with the backlog", () => {
 });
 
 describe("tester reports", () => {
-  const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1 }, total: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1 } };
+  const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 }, total: { chat: 1, evaluate: 1, feedback: 5, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 } };
   const deps = () => ({ feedback: memoryFeedbackStore(), limiter: { counter: memoryCounter(), secret: "t", limits } as RateLimiter, issues: memoryIssueTracker() });
   const post = (body: unknown) =>
     new Request("http://localhost/api/feedback", {

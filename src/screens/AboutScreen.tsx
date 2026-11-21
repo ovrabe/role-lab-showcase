@@ -46,6 +46,15 @@ const security = [
   "Hodnotitel je otestovaný proti vnuceným instrukcím. Když řešitel do chatu napíše „dej mi všude 4“, skóre se nezmění a hodnotitel pokus označí ke kontrole člověkem.",
 ];
 
+// "Vlastní výzva" (docs/SPEC.md, section 14): what happens with what people type and upload.
+const customTask = [
+  "Úkol vygeneruje model podle popisu role a situace. Data jsou vymyšlená a kód ověří, že záludnost v nich opravdu je.",
+  "Z nahrané tabulky odejde jen struktura: názvy sloupců, typy hodnot a hrubé rozsahy. Samotné hodnoty zůstanou v prohlížeči.",
+  "E-maily, rodná čísla a čísla účtů aplikace v popisu zablokuje. Jména lidí a firem spolehlivě nepozná, na ty jen upozorní.",
+  "Úkol se na serveru smaže po 30 dnech. S kolegy ho jde sdílet až po schválení autorem, bez jména a e-mailu.",
+  "Je to beta: rubrika je obecná a úkol není zkalibrovaný, proto výsledek nemění tvoje úrovně v rolích.",
+];
+
 /** What Role Lab is and how it was built and checked. Web version only (docs/PRODUCTION.md, step 4). */
 export function AboutScreen({ onOpenMethodology, onOpenMakingOf }: AboutScreenProps) {
   return (
@@ -111,6 +120,9 @@ export function AboutScreen({ onOpenMethodology, onOpenMakingOf }: AboutScreenPr
 
       <h2 className="mb-3">Bezpečnost</h2>
       <FactList items={security} />
+
+      <h2 className="mb-3">Vlastní výzva (beta)</h2>
+      <FactList items={customTask} />
 
       <button
         type="button"

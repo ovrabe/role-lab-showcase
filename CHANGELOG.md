@@ -2,6 +2,22 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.0.0 – 21. 11. 2026
+
+Vlastní výzva (beta): úkol podle tvé práce.
+
+### Přidáno
+
+- Vlastní výzva ve webové verzi. Popíšeš svou roli a situaci a dostaneš úkol na 15 minut s vymyšlenými daty a jednou záludností. Řešíš ho s asistentem jako ostatní úkoly a dostaneš plné hodnocení.
+- Volitelně můžeš nahrát tabulku (CSV nebo Excel). Přečte se jen v prohlížeči a na server odejdou jen názvy sloupců, typy hodnot a hrubé rozsahy. Před odesláním uvidíš přesně, co odchází.
+- E-maily, rodná čísla a čísla účtů v popisu stránka zablokuje, u telefonních čísel upozorní.
+- Sdílení s kolegy: požádáš o schválení a po schválení autorem stejný odkaz otevře úkol i kolegům. Bez jména a e-mailu.
+- Úkol je označený „beta · nekalibrováno“, hodnotí se podle obecné rubriky a výsledek nemění tvoje úrovně v rolích. Jeden úkol denně, na serveru se smaže po 30 dnech.
+
+### Změněno
+
+- Délka odevzdání se čte ze zadání i tehdy, když limit začíná velkým písmenem.
+
 ## 1.12.0 – 21. 11. 2026
 
 Obtížnost 2 pro všechny role.

@@ -12,9 +12,12 @@ export const dailyLimits = {
   // Strong samples (exampleHandler.ts) cost no Claude call; the limit only stops scripts.
   // Anonymous statistics (statsHandler.ts): a few events per attempt, the limit only stops scripts.
   // "Proč tohle skóre?" uses the cheap model: a few questions per result are plenty.
-  perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15, example: 30, stats: 300, why: 15 },
+  // A custom task (docs/SPEC.md, section 14) is the dearest single call after the evaluator:
+  // about 0.2 $, so 5 a day keep most of the daily budget (spendBudget.ts) for the fixed tasks.
+  // Its status is read on every visit of the link; asking to share it opens a GitHub issue.
+  perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15, example: 30, stats: 300, why: 15, customTask: 1, customTaskStatus: 60, customTaskShare: 3 },
   // For everyone together: a ceiling on what one day can cost (and on feedback spam).
-  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300, example: 1000, stats: 20000, why: 300 },
+  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300, example: 1000, stats: 20000, why: 300, customTask: 5, customTaskStatus: 3000, customTaskShare: 30 },
 };
 
 export type LimitedAction = keyof typeof dailyLimits.perPerson;

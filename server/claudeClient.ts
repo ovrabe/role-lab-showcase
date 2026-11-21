@@ -19,6 +19,9 @@ export type ClaudeClient = {
   evaluate(prompt: string, options: CallOptions): Promise<string>;
   // The short-challenge evaluator: a short JSON answer from the cheaper model.
   evaluateChallenge(prompt: string, options: CallOptions): Promise<string>;
+  // The custom task generator (docs/PROMPTS.md, section 6): instructions and one message, JSON back.
+  // Optional, so the many small fakes in tests need not implement it.
+  generateCustomTask?(prompt: { system: string; user: string }, options: CallOptions): Promise<string>;
 };
 
 export type ClaudeError = { code: string; message: string; text?: string };
@@ -30,6 +33,9 @@ export const evaluatorModel = "claude-opus-5-5";
 // Short challenges (docs/PRODUCTION.md, part 10): one answer of a few sentences against a
 // short key. A small, fast model is enough and costs a fraction of a crown per evaluation.
 export const challengeModel = "claude-haiku-5-5";
+// Custom tasks (docs/SPEC.md, section 14): believable data and one checkable trap. Sonnet is a
+// fraction of Opus's price; the pilot decides whether it is good enough.
+export const generatorModel = "claude-sonnet-5-5";
 
 // A policy decline is retried on a fallback model chosen by the API itself (server-side
 // fallback, "default" form), so a rare false refusal does not end the person's turn.
@@ -118,6 +124,23 @@ export function anthropicClient(apiKey: string): ClaudeClient {
         );
         const message = await stream.finalMessage();
         await onUsage?.(evaluatorModel, message.usage);
+        if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined." } satisfies ClaudeError;
+        return message.content.map((block) => (block.type === "text" ? block.text : "")).join("");
+      } catch (error) {
+        if (typeof error === "object" && error !== null && "code" in error && !(error instanceof Error)) throw error;
+        throw toClaudeError(error);
+      }
+    },
+
+    async generateCustomTask(prompt, { signal, onUsage }) {
+      try {
+        // Streamed for the same reason as the evaluator: a long answer must not hit an HTTP timeout.
+        const stream = client.messages.stream(
+          { model: generatorModel, max_tokens: 16000, system: prompt.system, messages: [{ role: "user", content: prompt.user }] },
+          { signal },
+        );
+        const message = await stream.finalMessage();
+        await onUsage?.(generatorModel, message.usage);
         if (message.stop_reason === "refusal") throw { code: "refused", message: "Claude declined." } satisfies ClaudeError;
         return message.content.map((block) => (block.type === "text" ? block.text : "")).join("");
       } catch (error) {

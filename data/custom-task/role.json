@@ -1,0 +1,104 @@
+{
+  "id": "custom-task",
+  "title": "Vlastní výzva",
+  "context": "Úkol vygenerovaný podle vlastního popisu role a situace",
+  "rubric": [
+    {
+      "id": "framing",
+      "name": "Zadání a kontext",
+      "question": "Dává AI cíl, kontext, data a omezení, které potřebuje?",
+      "anchors": {
+        "1": "Vloží úkol bez kontextu nebo píše jednoslovné dotazy. AI musí hádat, co se po ní chce.",
+        "2": "Uvede cíl, ale chybí data nebo omezení, třeba formát, délka nebo adresát.",
+        "3": "Dá cíl, relevantní data a hlavní omezení. Výstup je použitelný bez velkých oprav.",
+        "4": "Navíc vysvětlí souvislosti situace a řekne, podle čeho se má rozhodovat."
+      }
+    },
+    {
+      "id": "decomposition",
+      "name": "Rozklad úkolu",
+      "question": "Rozdělí problém na kroky a každý krok zadá AI vhodně?",
+      "anchors": {
+        "1": "Chce celý výsledek jedním dotazem.",
+        "2": "Postupuje po krocích, ale nahodile. Nechá AI rozhodovat tam, kde má rozhodnout člověk, nebo ji nevyužije na výpočty.",
+        "3": "Postupuje logicky: projde data, spočítá, co je potřeba, zváží možnosti a dojde k závěru.",
+        "4": "Postup upravuje podle mezivýsledků. Výpočty a třídění nechá na AI, rozhodnutí si nechá."
+      }
+    },
+    {
+      "id": "verification",
+      "name": "Ověřování",
+      "question": "Kontroluje výstupy AI i samotná data?",
+      "anchors": {
+        "1": "Přebírá výstup bez kontroly.",
+        "2": "Obecně se ujišťuje („určitě?“), ale nic konkrétního neověří.",
+        "3": "Konkrétně ověří aspoň jedno číslo nebo tvrzení, nebo si nechá ukázat výpočet. Všimne si části neobvyklých hodnot v datech.",
+        "4": "Systematicky hledá neobvyklé hodnoty, odhalí ty podstatné a upraví podle nich závěr."
+      }
+    },
+    {
+      "id": "iteration",
+      "name": "Iterace",
+      "question": "Reaguje na výstup, upřesňuje, oponuje, chce alternativy?",
+      "anchors": {
+        "1": "Pošle jeden dotaz a na odpověď nereaguje.",
+        "2": "Opravuje jen formu: zkrať, přeformuluj.",
+        "3": "Opravuje obsah: doplní chybějící kritérium, nechá přepočítat.",
+        "4": "Aktivně oponuje, chce alternativy a rizika a vědomě mezi nimi vybírá."
+      }
+    },
+    {
+      "id": "judgment",
+      "name": "Úsudek a výsledek",
+      "question": "Je výsledek obhajitelný a je zřejmé, za čím stojí člověk?",
+      "anchors": {
+        "1": "Výsledek odporuje datům nebo je převzatý bez vlastního zdůvodnění.",
+        "2": "Je rozumný, ale stojí na zkreslených číslech nebo chybí zdůvodnění.",
+        "3": "Je obhajitelný, opírá se o data a zmíní hlavní riziko.",
+        "4": "Je obhajitelný, odliší fakta od předpokladů, pracuje s nejistotou a je psaný pro adresáta."
+      }
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "label": "Začíná",
+      "minAverage": 0,
+      "description": "AI používá nahodile a výsledek nekontroluje."
+    },
+    {
+      "level": 2,
+      "label": "Používá",
+      "minAverage": 1.75,
+      "description": "AI pomáhá, ale bez vedení a systematické kontroly."
+    },
+    {
+      "level": 3,
+      "label": "Pracuje s AI",
+      "minAverage": 2.5,
+      "description": "AI vede, ověřuje ji a výsledek je obhajitelný."
+    },
+    {
+      "level": 4,
+      "label": "Může učit ostatní",
+      "minAverage": 3.25,
+      "description": "S AI pracuje systematicky a postup se dá předat dál."
+    }
+  ],
+  "capRule": {
+    "description": "Pokud je Ověřování nebo Úsudek na úrovni 1, celková úroveň nemůže být vyšší než 2. Nekontrolovaný výstup AI v pracovním rozhodnutí je riziko bez ohledu na ostatní dovednosti.",
+    "dimensions": [
+      "verification",
+      "judgment"
+    ],
+    "ifScoreAtMost": 1,
+    "maxLevel": 2
+  },
+  "microExercises": {
+    "framing": "Přepiš svůj první dotaz podle šablony cíl, kontext, data, omezení, formát. Pošli obě verze a porovnej odpovědi.",
+    "decomposition": "Rozepiš úkol do čtyř kroků a každý zadej zvlášť. U každého kroku si poznamenej, jestli ho dělala AI, nebo rozhodnutí bylo na tobě.",
+    "verification": "Požádej AI, ať v datech najde tři nejpodezřelejší hodnoty. U každé rozhodni, jestli je to chyba, nebo realita, a proč.",
+    "iteration": "Požádej AI o nejsilnější protiargument ke svému doporučení. Rozhodni, jestli ho přijmeš, a doplň jednu větu do doporučení.",
+    "judgment": "Ke svému závěru připiš jednu větu: fakt z dat, ze kterého vychází, a předpoklad, který se může ukázat jako špatný."
+  }
+}

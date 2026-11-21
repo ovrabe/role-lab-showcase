@@ -14,6 +14,11 @@ import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
 import { budgetResponse, recordSpend } from "./spendBudget.js";
 import type { IssueTracker } from "./issues.js";
+import type { CustomTaskStore } from "./customTaskStore.js";
+import type { EvaluatorKey } from "../src/evaluation/evaluatorKeySchema.js";
+import type { MaterialTextLookup } from "../src/roles/parseRoles.js";
+import { composeCustomTask, customEvaluatorKey, customMaterialTexts, customTaskIdOf } from "../src/customTask/customTaskRole.js";
+import { publicPart } from "../src/customTask/generatedTask.js";
 
 /**
  * The two endpoints of the web build (docs/SPEC.md, section 13). Web-standard
@@ -39,7 +44,14 @@ const ChatRequest = z.object({ roleId: z.string(), transcript: Transcript });
 const EvaluateRequest = z.object({ roleId: z.string(), session: TaskSession });
 
 // issues: where an outage alert goes (server/claudeFailure.ts); optional, like in deps.ts.
-export type HandlerDeps = { content: ServerContent; claude: ClaudeClient; limiter: RateLimiter; issues?: IssueTracker | null };
+// customTasks: generated custom tasks (server/customTaskStore.ts); without it only the fixed tasks work.
+export type HandlerDeps = {
+  content: ServerContent;
+  claude: ClaudeClient;
+  limiter: RateLimiter;
+  issues?: IssueTracker | null;
+  customTasks?: CustomTaskStore;
+};
 
 /** One line of the chat stream (newline-delimited JSON). */
 export type ChatStreamEvent =
@@ -73,8 +85,26 @@ export function transcriptProblem(role: RoleConfig, transcript: TranscriptItem[]
   return null;
 }
 
-function findRole(content: ServerContent, roleId: string): RoleConfig | undefined {
-  return content.roles.activeRoles.find((role) => role.id === roleId);
+/** A task the server can run: its config, its material texts and (server only) its evaluator key. */
+type ResolvedTask = { role: RoleConfig; getMaterialText: MaterialTextLookup; getKey: () => EvaluatorKey | null };
+
+/**
+ * Finds the task by the id the page sends. A fixed task comes from data/; a generated one
+ * ("custom-<id>") is loaded from the store, so the page can never send its own task or key.
+ */
+async function resolveTask({ content, customTasks }: HandlerDeps, roleId: string): Promise<ResolvedTask | null> {
+  const fixed = content.roles.activeRoles.find((role) => role.id === roleId);
+  if (fixed) return { role: fixed, getMaterialText: content.getMaterialText, getKey: () => content.getEvaluatorKey(fixed.id) };
+  const customTaskId = customTaskIdOf(roleId);
+  if (!customTaskId || !customTasks || !/^[A-Za-z0-9_-]{12}$/.test(customTaskId)) return null;
+  const stored = await customTasks.load(customTaskId);
+  if (!stored) return null;
+  const texts = customMaterialTexts(customTaskId, publicPart(stored.task));
+  return {
+    role: composeCustomTask(content.customRole, customTaskId, publicPart(stored.task)),
+    getMaterialText: (file) => texts.get(file),
+    getKey: () => customEvaluatorKey(customTaskId, stored.task),
+  };
 }
 
 export function asClaudeError(error: unknown): ClaudeError {
@@ -85,17 +115,19 @@ export function asClaudeError(error: unknown): ClaudeError {
   return { code: "upstream_error", message: "Unexpected error." };
 }
 
-export async function handleChat(request: Request, { content, claude, limiter, issues }: HandlerDeps): Promise<Response> {
+export async function handleChat(request: Request, deps: HandlerDeps): Promise<Response> {
+  const { claude, limiter, issues } = deps;
   const body = await readJson(request);
   if (body instanceof Response) return body;
   const parsed = ChatRequest.safeParse(body);
   if (!parsed.success) return badRequest("invalid_request", "Invalid chat request.");
-  const role = findRole(content, parsed.data.roleId);
-  if (!role) return badRequest("unknown_role", "Unknown role.");
+  const task = await resolveTask(deps, parsed.data.roleId);
+  if (!task) return badRequest("unknown_role", "Unknown role.");
+  const { role } = task;
   const problem = transcriptProblem(role, parsed.data.transcript);
   if (problem) return badRequest("invalid_request", problem);
 
-  const fitted = fitTurnsToBudget(buildAssistantTurns(role, parsed.data.transcript, content.getMaterialText));
+  const fitted = fitTurnsToBudget(buildAssistantTurns(role, parsed.data.transcript, task.getMaterialText));
   if (!fitted) return badRequest("too_large", "Conversation does not fit the prompt budget.", 413);
   if (fitted.turns[fitted.turns.length - 1].role !== "user") return badRequest("invalid_request", "Last turn must be the person's.");
   const overBudget = await budgetResponse(limiter, request, issues);
@@ -129,15 +161,17 @@ export async function handleChat(request: Request, { content, claude, limiter, i
   });
 }
 
-export async function handleEvaluate(request: Request, { content, claude, limiter, issues }: HandlerDeps): Promise<Response> {
+export async function handleEvaluate(request: Request, deps: HandlerDeps): Promise<Response> {
+  const { claude, limiter, issues } = deps;
   // A whole attempt can be long (25 messages, long answers). The prompt is cut to its budget
   // anyway (src/prompts/evaluator.ts), so the body may be bigger than a chat call; Vercel takes 4.5 MB.
   const body = await readJson(request, 4_000_000);
   if (body instanceof Response) return body;
   const parsed = EvaluateRequest.safeParse(body);
   if (!parsed.success) return badRequest("invalid_request", "Invalid evaluation request.");
-  const role = findRole(content, parsed.data.roleId);
-  if (!role) return badRequest("unknown_role", "Unknown role.");
+  const task = await resolveTask(deps, parsed.data.roleId);
+  if (!task) return badRequest("unknown_role", "Unknown role.");
+  const { role } = task;
   const { session } = parsed.data;
   if (session.roleId !== role.id) return badRequest("invalid_request", "Session belongs to another role.");
   const problem = transcriptProblem(role, session.transcript);
@@ -148,7 +182,7 @@ export async function handleEvaluate(request: Request, { content, claude, limite
   if (!session.submittedAt) return badRequest("invalid_request", "Only a submitted attempt can be evaluated.");
   if (!isTimestamp(session.startedAt) || !isTimestamp(session.submittedAt)) return badRequest("invalid_request", "Invalid time of the attempt.");
 
-  const key = content.getEvaluatorKey(role.id);
+  const key = task.getKey();
   if (!key) return json({ kind: "missing_key" } satisfies EvaluateResponse);
   const overBudget = await budgetResponse(limiter, request, issues);
   if (overBudget) return overBudget;

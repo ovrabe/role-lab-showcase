@@ -16,12 +16,13 @@ flowchart LR
         evaluate["/api/evaluate<br/>/api/why, /api/example"]
         challenge["/api/challenge"]
         feedback["/api/feedback<br/>/api/stats"]
+        custom["/api/custom-task<br/>-status, -share"]
         content["Podklady, pokyny<br/>a klíče hodnotitele<br/>jen na serveru"]
     end
 
-    anthropic["Anthropic API<br/>asistent: Claude Sonnet<br/>hodnotitel: Claude Opus<br/>výzvy a vysvětlení skóre: Claude Haiku"]
-    upstash["Upstash Redis<br/>denní limity a rozpočet<br/>na osobu i celkem"]
-    github["GitHub Issues<br/>zpětná vazba, statistika,<br/>upozornění z provozu"]
+    anthropic["Anthropic API<br/>asistent a generátor vlastní výzvy: Claude Sonnet<br/>hodnotitel: Claude Opus<br/>výzvy a vysvětlení skóre: Claude Haiku"]
+    upstash["Upstash Redis<br/>denní limity a rozpočet<br/>vlastní výzvy na 30 dní"]
+    github["GitHub Issues<br/>zpětná vazba, statistika,<br/>žádosti o sdílení, upozornění"]
     fonts["Google Fonts"]
 
     browser -- "načtení" --> page
@@ -29,10 +30,11 @@ flowchart LR
     browser -- "záznam a výsledek" --> evaluate
     browser -- "krátká výzva" --> challenge
     browser -- "zpětná vazba, statistika" --> feedback
+    browser -- "popis a struktura tabulky" --> custom
     content -. "skládá pokyny" .-> chat & evaluate & challenge
-    chat & evaluate & challenge --> anthropic
-    chat & evaluate & challenge & feedback --> upstash
-    feedback --> github
+    chat & evaluate & challenge & custom --> anthropic
+    chat & evaluate & challenge & feedback & custom --> upstash
+    feedback & custom --> github
     browser -.-> fonts
 ```
 
@@ -42,6 +44,7 @@ flowchart LR
 - **Celkovou úroveň** počítá kód podle konfigurace role a ověřuje, že citace v záznamu opravdu jsou.
 - **Limity** se počítají pro každou osobu i celkem a nulují se každý den o půlnoci pražského času. Osoba je náhodné číslo, které si uloží prohlížeč. Jedna IP adresa má navíc strop zhruba čtyř lidí a ukládá se jen jako otisk, ne samotná adresa.
 - **Server** přijímá požadavky jen z vlastní stránky.
+- **Vlastní výzva** (beta): prohlížeč pošle popis role a situace a z tabulky jen strukturu, hodnoty z ní neopustí prohlížeč. Server vygeneruje úkol, ověří, že záludnost je v datech, a uloží ho na 30 dní pod náhodným id. Klíč k záludnosti zůstává na serveru. E-maily, rodná čísla a čísla účtů odmítne stránka i server. Sdílení s kolegy schvaluje autor příkazem `npm run custom-task`, který umí generování i vypnout.
 
 ## Verze v claude.ai
 

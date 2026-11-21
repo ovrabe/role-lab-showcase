@@ -3,6 +3,7 @@ import type { RoleLoadError } from "../roles/loadRoles";
 import { roleGroups } from "../roles/roleGroups";
 import { ProgressTeaser } from "../progress/ProgressTeaser";
 import { DailyChallengeCard } from "../challenges/DailyChallengeCard";
+import { CustomTaskCard } from "../customTask/CustomTaskCard";
 import type { ChallengeConfig } from "../challenges/challengeSchema";
 import { useState } from "react";
 import { MessageSquare } from "lucide-react";
@@ -23,6 +24,8 @@ type HomeScreenProps = {
   dailyChallenge: ChallengeConfig | null;
   onSelectChallenge: (challengeId: string) => void;
   onOpenChallengeMap: () => void;
+  // Web version only (docs/SPEC.md, section 14).
+  onOpenCustomTask?: () => void;
 };
 
 export function HomeScreen({
@@ -37,6 +40,7 @@ export function HomeScreen({
   dailyChallenge,
   onSelectChallenge,
   onOpenChallengeMap,
+  onOpenCustomTask,
 }: HomeScreenProps) {
   const roleCards = roleGroups(activeRoles);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
@@ -67,6 +71,8 @@ export function HomeScreen({
         </p>
       )}
       <RoleList groups={roleCards} onSelectRole={onSelectRole} />
+
+      {onOpenCustomTask && <CustomTaskCard onOpen={onOpenCustomTask} />}
 
       {/* Instead of a list of roles "coming soon": ask which role is missing. The answer
           lands in the author's backlog. The form needs the server, so web version only. */}

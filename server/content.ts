@@ -4,6 +4,8 @@ import { parseRoles, type LoadedRoles } from "../src/roles/parseRoles.js";
 import { findEvaluatorKey, type EvaluatorKey } from "../src/evaluation/evaluatorKeySchema.js";
 import { findChallengeKey, parseChallenges, type LoadedChallenges } from "../src/challenges/parseChallenges.js";
 import type { ChallengeKey } from "../src/challenges/challengeSchema.js";
+import type { RoleDefinition } from "../src/roles/roleSchema.js";
+import { parseCustomRole } from "../src/customTask/customTaskRole.js";
 
 /**
  * The web server's view of the role content (docs/SPEC.md, section 13): the same role
@@ -20,6 +22,8 @@ export type ServerContent = {
   getEvaluatorKey: (roleId: string) => EvaluatorKey | null;
   challenges: LoadedChallenges;
   getChallengeKey: (challengeId: string) => ChallengeKey | null;
+  // The generic rubric of generated custom tasks (docs/SPEC.md, section 14).
+  customRole: RoleDefinition;
 };
 
 function readJsonFiles(directory: string, suffix: string): Record<string, unknown> {
@@ -69,5 +73,6 @@ export function loadServerContent(root: string = process.cwd()): ServerContent {
     getEvaluatorKey: (roleId) => findEvaluatorKey(keyFiles, roleId),
     challenges: parseChallenges(readJsonFiles(join(dataDir, "challenges"), ".json")),
     getChallengeKey: (challengeId) => findChallengeKey(challengeKeyFiles, challengeId),
+    customRole: parseCustomRole(JSON.parse(readFileSync(join(dataDir, "custom-task", "role.json"), "utf8"))),
   };
 }

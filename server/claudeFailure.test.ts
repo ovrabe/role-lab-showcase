@@ -6,7 +6,7 @@ import { memoryCounter, takeFromLimit, type RateLimiter } from "./rateLimit";
 import { memoryIssueTracker } from "./issues";
 import { handleSampleError } from "../src/assistant/sampleErrors";
 
-const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1 }, total: { chat: 5, evaluate: 5, feedback: 5, challenge: 5, example: 1, stats: 1, why: 1 } };
+const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 }, total: { chat: 5, evaluate: 5, feedback: 5, challenge: 5, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 } };
 const now = () => new Date("2026-11-17T10:00:00Z");
 const limiter = (): RateLimiter => ({ counter: memoryCounter(), secret: "test", limits, now });
 const request = () => new Request("https://role-lab.test/api/evaluate", { method: "POST", headers: { "x-real-ip": "1.2.3.4" } });

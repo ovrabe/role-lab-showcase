@@ -10,6 +10,13 @@ const rawFiles = import.meta.glob("../../data/*/*.{csv,md}", {
 // Keys match the "file" paths used in role configs, e.g. "data/category-manager/x.csv".
 const filesByPath = new Map(Object.entries(rawFiles).map(([path, text]) => [path.replace("../../", ""), text]));
 
+// A generated custom task brings its own materials (src/customTask/savedCustomTask.ts).
+const registeredFiles = new Map<string, string>();
+
+export function registerMaterialTexts(texts: Map<string, string>): void {
+  for (const [file, text] of texts) registeredFiles.set(file, text);
+}
+
 export function getMaterialText(file: string): string | undefined {
-  return filesByPath.get(file);
+  return filesByPath.get(file) ?? registeredFiles.get(file);
 }

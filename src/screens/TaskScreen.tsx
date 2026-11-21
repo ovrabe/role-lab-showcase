@@ -20,6 +20,7 @@ import { RoleBadge } from "../components/RoleBadge";
 import { NextStepButton, StepGuide } from "../task/StepGuide";
 import { stepStates, taskProgress } from "../task/taskProgress";
 import { track } from "../ai/track";
+import { isCustomTask } from "../customTask/customTaskRole";
 
 type TaskScreenProps = {
   role: RoleConfig;
@@ -154,7 +155,10 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
         <div className="min-w-0">
           <p className="text-sm font-semibold text-accent">{role.title}</p>
           <h1 className="mb-1">{role.taskTitle}</h1>
-          <p className="text-ink-muted">{role.context}</p>
+          <p className="text-ink-muted">
+            {role.context}
+            {isCustomTask(role) && <span className="ml-2 rounded-full bg-paper px-2 py-0.5 text-sm">beta · nekalibrováno</span>}
+          </p>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-8">
@@ -175,7 +179,8 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
           onCancel={evaluation.cancel}
           onReviewChange={controls.saveReview}
           why={
-            backend && aiStatus === "available"
+            // "Proč tohle skóre?" knows only the fixed tasks (server/whyHandler.ts).
+            backend && aiStatus === "available" && !isCustomTask(role)
               ? {
                   answers: controls.session.whyAnswers ?? {},
                   async ask(dimensionId) {

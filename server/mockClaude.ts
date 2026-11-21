@@ -1,6 +1,7 @@
 import { devMockSample } from "../src/runtime/devMockSample.js";
 import { mockChallengeReply } from "../src/challenges/mockChallengeReply.js";
 import type { ClaudeClient } from "./claudeClient.js";
+import { sampleGeneratedTask } from "../src/customTask/sampleGeneratedTask.js";
 
 /**
  * A fake Claude for local development and tests: the same mock the page uses with
@@ -18,5 +19,8 @@ export const mockClaude: ClaudeClient = {
   },
   async evaluateChallenge(prompt) {
     return JSON.stringify(mockChallengeReply(prompt));
+  },
+  async generateCustomTask() {
+    return JSON.stringify(sampleGeneratedTask);
   },
 };

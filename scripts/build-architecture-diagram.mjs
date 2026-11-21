@@ -89,7 +89,7 @@ function diagram(t) {
     text(420, 229, "Serverové funkce", { size: 15, weight: 600, color: t.text }),
     text(560, 229, "· api/*.ts", { size: 13, color: t.muted }),
     // Every function in api/, four to a row. Keep in sync with the folder.
-    ...["/chat", "/evaluate", "/challenge", "/why", "/example", "/feedback", "/stats"].flatMap((name, index) => {
+    ...["/chat", "/evaluate", "/challenge", "/why", "/example", "/feedback", "/stats", "/custom-*"].flatMap((name, index) => {
       const x = 390 + (index % 4) * 98;
       const y = 250 + Math.floor(index / 4) * 42;
       return [
@@ -108,15 +108,15 @@ function diagram(t) {
     }),
 
     // External services
-    card(t, { x: 900, y: 130, width: 260, height: 136, iconName: "sparkle", title: "Anthropic API", lines: ["Asistent: Claude Sonnet", "Hodnotitel: Claude Opus", "Výzvy a vysvětlení: Haiku"] }),
-    card(t, { x: 900, y: 296, width: 260, height: 112, iconName: "database", title: "Upstash Redis", lines: ["Denní limity a rozpočet", "na osobu i celkem"] }),
-    card(t, { x: 900, y: 438, width: 260, height: 112, iconName: "page", title: "GitHub Issues", lines: ["Zpětná vazba, statistika", "a upozornění z provozu"] }),
+    card(t, { x: 900, y: 130, width: 260, height: 136, iconName: "sparkle", title: "Anthropic API", lines: ["Asistent a generátor: Sonnet", "Hodnotitel: Claude Opus", "Výzvy a vysvětlení: Haiku"] }),
+    card(t, { x: 900, y: 296, width: 260, height: 112, iconName: "database", title: "Upstash Redis", lines: ["Denní limity a rozpočet,", "vlastní výzvy na 30 dní"] }),
+    card(t, { x: 900, y: 438, width: 260, height: 112, iconName: "page", title: "GitHub Issues", lines: ["Zpětná vazba, žádosti", "o sdílení, upozornění"] }),
 
     // Flows
     arrow(t, { x1: 280, y: 140, x2: 372, step: 1, label: ["načte"] }),
     arrow(t, { x1: 280, y: 230, x2: 372, step: 2, label: ["zprávy,", "odevzdání"] }),
     arrow(t, { x1: 788, y: 222, x2: 900, step: 3, label: ["volání modelu"] }),
-    arrow(t, { x1: 788, y: 330, x2: 900, step: 4, label: ["počítadla"] }),
+    arrow(t, { x1: 788, y: 330, x2: 900, step: 4, label: ["počítadla,", "úkoly"] }),
     arrow(t, { x1: 810, y: 480, x2: 900, step: 5, label: ["upozornění"] }),
   ];
 

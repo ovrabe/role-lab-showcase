@@ -34,6 +34,8 @@
 <text x="533" y="312.5" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#a5b4fc" text-anchor="middle">/feedback</text>
 <rect x="586" y="292" width="90" height="32" rx="8" fill="#1e1b4b" stroke="#4f46e5"/>
 <text x="631" y="312.5" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#a5b4fc" text-anchor="middle">/stats</text>
+<rect x="684" y="292" width="90" height="32" rx="8" fill="#1e1b4b" stroke="#4f46e5"/>
+<text x="729" y="312.5" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#a5b4fc" text-anchor="middle">/custom-*</text>
 <text x="390" y="356" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Ověří původ, limity a citace, spočítá úroveň</text>
 <path d="M580 412V382" stroke="#9e6a03" stroke-width="1.5" stroke-dasharray="4 4"/>
 <path d="M575.5 389L580 381L584.5 389z" fill="#9e6a03"/>
@@ -46,19 +48,19 @@
 <rect x="900" y="130" width="260" height="136" rx="12" fill="#151b23" stroke="#3d444d"/>
 <g transform="translate(918 148)" fill="none" stroke="#a5b4fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" color="#a5b4fc"><path d="M10 1.5c.6 4.4 2.6 6.9 7.5 8.5-4.9 1.6-6.9 4.1-7.5 8.5-.6-4.4-2.6-6.9-7.5-8.5 4.9-1.6 6.9-4.1 7.5-8.5z"/></g>
 <text x="948" y="163" font-size="15" font-weight="600" fill="#e6edf3" text-anchor="start">Anthropic API</text>
-<text x="918" y="192" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Asistent: Claude Sonnet</text>
+<text x="918" y="192" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Asistent a generátor: Sonnet</text>
 <text x="918" y="212" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Hodnotitel: Claude Opus</text>
 <text x="918" y="232" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Výzvy a vysvětlení: Haiku</text>
 <rect x="900" y="296" width="260" height="112" rx="12" fill="#151b23" stroke="#3d444d"/>
 <g transform="translate(918 314)" fill="none" stroke="#a5b4fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" color="#a5b4fc"><ellipse cx="10" cy="4.5" rx="7" ry="2.75"/><path d="M3 4.5v11c0 1.5 3.1 2.75 7 2.75s7-1.25 7-2.75v-11M3 10c0 1.5 3.1 2.75 7 2.75s7-1.25 7-2.75"/></g>
 <text x="948" y="329" font-size="15" font-weight="600" fill="#e6edf3" text-anchor="start">Upstash Redis</text>
-<text x="918" y="358" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Denní limity a rozpočet</text>
-<text x="918" y="378" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">na osobu i celkem</text>
+<text x="918" y="358" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Denní limity a rozpočet,</text>
+<text x="918" y="378" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">vlastní výzvy na 30 dní</text>
 <rect x="900" y="438" width="260" height="112" rx="12" fill="#151b23" stroke="#3d444d"/>
 <g transform="translate(918 456)" fill="none" stroke="#a5b4fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" color="#a5b4fc"><path d="M5 1.5h7l4 4V18a.5.5 0 0 1-.5.5h-10.5A.5.5 0 0 1 4.5 18V2a.5.5 0 0 1 .5-.5z"/><path d="M12 1.5V5.5h4M7.5 10h5M7.5 13h5"/></g>
 <text x="948" y="471" font-size="15" font-weight="600" fill="#e6edf3" text-anchor="start">GitHub Issues</text>
-<text x="918" y="500" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Zpětná vazba, statistika</text>
-<text x="918" y="520" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">a upozornění z provozu</text>
+<text x="918" y="500" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Zpětná vazba, žádosti</text>
+<text x="918" y="520" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">o sdílení, upozornění</text>
 <path d="M280 140H365" stroke="#768390" stroke-width="1.5" fill="none"/>
 <path d="M364 135.5L372 140L364 144.5z" fill="#768390"/>
 <circle cx="326" cy="140" r="10" fill="#6366f1"/>
@@ -79,7 +81,8 @@
 <path d="M892 325.5L900 330L892 334.5z" fill="#768390"/>
 <circle cx="844" cy="330" r="10" fill="#6366f1"/>
 <text x="844" y="334.5" font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">4</text>
-<text x="844" y="310" font-size="12.5" font-weight="400" fill="#9198a1" text-anchor="middle">počítadla</text>
+<text x="844" y="294" font-size="12.5" font-weight="400" fill="#9198a1" text-anchor="middle">počítadla,</text>
+<text x="844" y="310" font-size="12.5" font-weight="400" fill="#9198a1" text-anchor="middle">úkoly</text>
 <path d="M810 480H893" stroke="#768390" stroke-width="1.5" fill="none"/>
 <path d="M892 475.5L900 480L892 484.5z" fill="#768390"/>
 <circle cx="855" cy="480" r="10" fill="#6366f1"/>
