@@ -134,7 +134,13 @@ export function DevelopmentChart() {
           {/* Phases under the axis, strong like the prototype area, light like the rest. */}
           <rect x={x(0)} y={bracketY - 3} width={x(prototypeIndex) - x(0) - 2} height={6} rx={3} className="fill-progress" />
           <rect x={x(prototypeIndex) + 2} y={bracketY - 3} width={x(lastIndex) - x(prototypeIndex) - 2} height={6} rx={3} className="fill-progress opacity-25" />
-          <text x={prototypeCenter} y={bracketY + 20} textAnchor="middle" className="fill-ink text-xs font-medium">
+          {/* On a phone the prototype phase is too narrow to centre its label without clipping it. */}
+          <text
+            x={isNarrow ? x(0) : prototypeCenter}
+            y={bracketY + 20}
+            textAnchor={isNarrow ? "start" : "middle"}
+            className="fill-ink text-xs font-medium"
+          >
             úplný prototyp · {formatHours(cumulative[prototypeIndex])}
           </text>
           <text x={restCenter} y={bracketY + 20} textAnchor="middle" className="fill-ink-muted text-xs">

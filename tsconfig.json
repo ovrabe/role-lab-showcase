@@ -14,5 +14,5 @@
     "noEmit": true,
     "types": ["vite/client"]
   },
-  "include": ["src", "docs/claude-runtime", "vite.config.ts"]
+  "include": ["src", "docs/claude-runtime", "vite.config.ts", "scripts/calibrate"]
 }

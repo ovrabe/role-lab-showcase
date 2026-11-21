@@ -13,9 +13,14 @@ const calibrationRows = [
   { task: "Rozhodnutí o spuštění 2. 11.", role: "Projektový manažer", difficulty: 3, weak: "1,2", medium: "2,4", strong: "3,6–3,8" },
   // Roles added in 1.4.0: one round per run so far, hence single numbers instead of ranges.
   { task: "Model pro třídění požadavků", role: "AI tech lead", difficulty: 1, weak: "1,0", medium: "1,2", strong: "4,0" },
+  // Difficulty 2 and 3 of the newer roles, calibrated through the Batch API (three rounds each).
+  { task: "Rozšířit chatbota na všechny zákazníky?", role: "AI tech lead", difficulty: 2, weak: "1,2", medium: "2,4", strong: "3,6" },
+  { task: "Přechod na nový model", role: "AI tech lead", difficulty: 3, weak: "1,2", medium: "2,2–2,4", strong: "3,6" },
   { task: "Kandidáti do druhého kola", role: "Recruiter", difficulty: 1, weak: "1,0", medium: "1,6", strong: "3,6" },
   { task: "Vítězná varianta landing page", role: "Marketér", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,6" },
   { task: "Ranní fronta požadavků", role: "IT helpdesk", difficulty: 1, weak: "1,0", medium: "1,6", strong: "2,8" },
+  { task: "Proč padá VPN", role: "IT helpdesk", difficulty: 2, weak: "1,0–1,2", medium: "2,0", strong: "3,0–3,2" },
+  { task: "Obnova po výpadku serveru", role: "IT helpdesk", difficulty: 3, weak: "1,0–1,2", medium: "1,6–1,8", strong: "3,4–3,6" },
   { task: "Vydat verzi 3.8?", role: "QA", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,4" },
   { task: "Citlivost izolátu na ciprofloxacin", role: "Molekulární biolog", difficulty: 1, weak: "1,0", medium: "1,6", strong: "3,4" },
   { task: "Odchylky od rozpočtu za říjen", role: "Controller", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,6" },

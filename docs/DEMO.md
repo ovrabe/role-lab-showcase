@@ -12,7 +12,7 @@ Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé vol
 
 **Hodnocení (50 s).** Na výsledku prohlídky klikni na citaci a nech záznam sjet na dané místo. Řekni: každé skóre dokládá citace, aplikace ověří, že v záznamu opravdu je. Celkovou úroveň počítá kód, ne model. Člověk může každé skóre upravit. Na vlastním výsledku je navíc „Proč tohle skóre?“ a silný pokus o stejný úkol pro srovnání.
 
-**Jak vznikl (30 s).** Otevři `?jak-vznikl`. Křivka práce: funkční prototyp po ~4,5 h aktivní práce, úplný prototyp za víkend (~9,5 h), veřejný web po ~16 h, dnešní stav ~44 h. Pak jedna věc podle publika: schéma a tabulka hrozeb (pro IT), cesta změny do produkce (pro vývojáře), rozhodnutí podle měření (pro vedení).
+**Jak vznikl (30 s).** Otevři `?jak-vznikl`. Křivka práce: funkční prototyp po ~4,5 h aktivní práce, úplný prototyp za víkend (~9,5 h), veřejný web po ~16 h, dnešní stav ~45 h. Pak jedna věc podle publika: schéma a tabulka hrozeb (pro IT), cesta změny do produkce (pro vývojáře), rozhodnutí podle měření (pro vedení).
 
 **Co dál (10 s).** Teď trénink, ne zkouška. Další kroky: vlastní výzva podle struktury dat konkrétní firmy, vyšší obtížnosti u nových rolí, kalibrace na skutečných lidech.
 

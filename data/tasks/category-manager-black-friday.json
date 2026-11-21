@@ -7,7 +7,7 @@
   "timeLimitMinutes": 45,
   "brief": {
     "situation": "Dnes je pondělí 19. 10. 2026. Jsi category manager pro pánské vůně na českém e-shopu s kosmetikou. Black Friday je v týdnu od 23. 11. Vedoucí chce do středy 21. 10. návrh objednávky pánských vůní a marketing čeká na odpověď, jestli bude na jeho akce dost zboží.",
-    "task": "Navrhni, které produkty a kolik kusů objednat, aby zboží vystačilo do konce týdne Black Friday (neděle 29. 11.) Na nákup máš nejvýš 1 200 000 Kč v nákupních cenách. Objednávky odejdou ve středu 21. 10. Odpověz zároveň marketingu na jeho plán akcí.",
+    "task": "Navrhni, které produkty a kolik kusů objednat, aby zboží vystačilo do konce týdne Black Friday (neděle 29. 11.). Na nákup máš nejvýš 1 200 000 Kč v nákupních cenách. Objednávky odejdou ve středu 21. 10. Odpověz zároveň marketingu na jeho plán akcí.",
     "deliverable": "Návrh pro vedoucí na jednu stranu, nejvýš 2 500 znaků: objednávka (produkt, kusy, částka), zdůvodnění, rizika a odpověď marketingu.",
     "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
     "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."

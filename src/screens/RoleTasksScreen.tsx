@@ -8,6 +8,7 @@ import { loadProgress } from "../progress/progressStorage";
 import { loadSession } from "../session/sessionStorage";
 import { roleStatus, taskProgress } from "../task/taskProgress";
 import { isParticipantBuild } from "../buildFlags";
+import { firstSentence } from "../roles/firstSentence";
 
 type RoleTasksScreenProps = {
   tasks: RoleConfig[];
@@ -15,8 +16,6 @@ type RoleTasksScreenProps = {
   onSelectTask: (taskId: string) => void;
 };
 
-// The first sentence of what to do: enough to tell the tasks apart at a glance.
-const firstSentence = (text: string) => text.match(/^.*?[.!?](\s|$)/)?.[0].trim() ?? text;
 
 /** The tasks of one role, easiest first, with what each needs to open (phase 3). */
 export function RoleTasksScreen({ tasks, sweepPosition, onSelectTask }: RoleTasksScreenProps) {

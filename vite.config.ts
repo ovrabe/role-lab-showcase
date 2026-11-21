@@ -149,6 +149,7 @@ export default defineConfig(({ mode }) => ({
       ...(hasPrivateData
         ? []
         : [
+            "scripts/calibrate/batchCalibration.test.ts",
             "server/challengeHandler.test.ts",
             "server/content.test.ts",
             "server/exampleHandler.test.ts",

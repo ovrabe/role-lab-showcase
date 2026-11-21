@@ -1,7 +1,7 @@
 {
   "name": "role-lab",
   "private": true,
-  "version": "1.10.1",
+  "version": "1.11.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck:server": "tsc -p tsconfig.server.json",
-    "smoke": "node scripts/smoke-check.mjs"
+    "smoke": "node scripts/smoke-check.mjs",
+    "calibrate": "node scripts/calibrate.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",

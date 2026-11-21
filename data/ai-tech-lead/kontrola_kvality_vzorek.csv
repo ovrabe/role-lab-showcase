@@ -1,0 +1,41 @@
+id_konverzace,kategorie,vysledek_kontroly,poznamka
+K-10214,objednavky,správně,Dohledal stav objednávky a odhad doručení.
+K-10233,objednavky,správně,
+K-10251,vraceni,správně,"Vysvětlil postup vrácení, uvedl lhůtu 30 dní od převzetí."
+K-10262,doprava,částečně,"Správný dopravce, ale neuvedl cenu doručení na Slovensko."
+K-10288,platby,správně,
+K-10305,objednavky,správně,
+K-10317,ostatni,špatně,"Dotaz na velkoobchodní ceny, měl předat obchodnímu oddělení."
+K-10342,vraceni,správně,"Zákazník se ptal, jestli stihne vrátit boty. Odpověď: ano, lhůta je 30 dní."
+K-10356,doprava,správně,
+K-10371,objednavky,správně,
+K-10389,platby,částečně,"Faktura dohledaná, ale nenabídl opravu fakturační adresy."
+K-10402,objednavky,správně,
+K-10418,vraceni,částečně,"Správně předal reklamaci člověku, ale až po třech dotazech."
+K-10436,doprava,správně,
+K-10447,objednavky,správně,
+K-10463,ostatni,správně,Otevírací doba výdejního místa.
+K-10478,vraceni,správně,"Vrácení bez udání důvodu do 30 dní, odkaz na formulář."
+K-10495,objednavky,správně,
+K-10507,platby,správně,
+K-10521,doprava,částečně,Uvedl starou adresu výdejního místa v Brně.
+K-10538,objednavky,správně,
+K-10549,vraceni,správně,"Výměna velikosti, postup správně."
+K-10566,objednavky,špatně,"Tvrdil, že objednávka je odeslaná, ve skutečnosti čekala na platbu."
+K-10580,doprava,správně,
+K-10597,ostatni,částečně,"Dotaz na dárkový poukaz, odpověď obecná."
+K-10611,objednavky,správně,
+K-10628,vraceni,správně,"Zákazník chtěl vrátit zboží po 20 dnech, chatbot potvrdil, že je to v lhůtě 30 dní."
+K-10640,platby,správně,
+K-10655,objednavky,správně,
+K-10671,doprava,správně,
+K-10688,objednavky,správně,
+K-10702,vraceni,správně,Postup vrácení přes výdejní místo.
+K-10719,ostatni,správně,
+K-10733,objednavky,správně,
+K-10746,platby,špatně,"Slíbil vrácení platby do 3 dnů, správně je do 14 dnů."
+K-10760,doprava,správně,
+K-10777,objednavky,správně,
+K-10791,doprava,částečně,Neodlišil doručení na adresu a do boxu.
+K-10805,objednavky,správně,
+K-10820,ostatni,správně,

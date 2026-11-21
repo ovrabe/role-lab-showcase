@@ -11,3 +11,6 @@ dist-web/
 # Secrets and local Vercel settings never go to git (docs/PRODUCTION.md)
 .env*
 .vercel/
+
+# Calibration results reveal the data traps (npm run calibrate); never in git or the public copy.
+calibration-results/

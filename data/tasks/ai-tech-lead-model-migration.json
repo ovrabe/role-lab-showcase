@@ -1,0 +1,60 @@
+{
+  "id": "ai-tech-lead-model-migration",
+  "roleId": "ai-tech-lead",
+  "title": "Přechod na nový model",
+  "difficulty": 3,
+  "assistantContext": "zaměstnanci softwarové firmy",
+  "timeLimitMinutes": 45,
+  "brief": {
+    "situation": "Jsi AI tech lead ve firmě, která provozuje e-shopovou platformu. Model Lark S dnes třídí požadavky zákaznické podpory do front a pohání chatbota v nápovědě. Dodavatel oznámil, že ho 15. 2. 2027 ukončí. Tým porovnal dvě náhrady a navrhuje Lark S2 od stejného dodavatele.",
+    "task": "Doporuč technické ředitelce, kterým modelem Lark S nahradit a jak přechod naplánovat. Nejdražší chyba je pořád stížnost s právním rizikem v běžné frontě. Pro chatbota platí, že 95 % odpovědí musí přijít do 4 sekund. Na provoz modelů je nejvýš 20 000 Kč měsíčně.",
+    "deliverable": "Doporučení pro technickou ředitelku na jednu stranu, nejvýš 2 500 znaků: který model, proč, co stojí, plán přechodu s termíny a hlavní rizika.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "oznameni-dodavatele",
+      "title": "Oznámení dodavatele o ukončení Lark S",
+      "file": "data/ai-tech-lead/oznameni_dodavatele.md",
+      "type": "markdown"
+    },
+    {
+      "id": "porovnani-nahrad",
+      "title": "Porovnání náhrad od týmu",
+      "file": "data/ai-tech-lead/porovnani_nahrad.md",
+      "type": "markdown"
+    },
+    {
+      "id": "vysledky-pozadavky",
+      "title": "Výsledky testu po jednotlivých požadavcích",
+      "file": "data/ai-tech-lead/vysledky_po_pozadavcich.csv",
+      "type": "csv",
+      "rows": 300,
+      "period": "300 požadavků z října 2026, test 17.–18. 11. 2026",
+      "dictionary": [
+        { "column": "id_pozadavku", "meaning": "Číslo požadavku v systému podpory" },
+        { "column": "kategorie", "meaning": "Fronta, do které požadavek patří podle lidí z podpory" },
+        { "column": "spravne_lark_s2", "meaning": "1, když Lark S2 zařadil požadavek do správné fronty, jinak 0" },
+        { "column": "spravne_quill_mini", "meaning": "1, když Quill Mini zařadil požadavek do správné fronty, jinak 0" }
+      ]
+    },
+    {
+      "id": "mereni-provozu",
+      "title": "Měření ve stínovém provozu",
+      "file": "data/ai-tech-lead/mereni_provozu.csv",
+      "type": "csv",
+      "rows": 6,
+      "period": "Týden 9.–15. 11. 2026, modely běžely souběžně s Lark S bez vlivu na zákazníky",
+      "dictionary": [
+        { "column": "model", "meaning": "Měřený model" },
+        { "column": "pouziti", "meaning": "trideni = třídění požadavků podpory, chatbot = chatbot v nápovědě" },
+        { "column": "volani_mesicne", "meaning": "Kolik volání modelu má toto použití za měsíc" },
+        { "column": "prum_vstupnich_tokenu", "meaning": "Průměrný počet tokenů, které model při jednom volání přečte (pokyny, ukázky, dotaz)" },
+        { "column": "prum_vystupnich_tokenu", "meaning": "Průměrný počet tokenů, které model při jednom volání napíše" },
+        { "column": "latence_median_s", "meaning": "Polovina odpovědí přišla rychleji než tato doba v sekundách" },
+        { "column": "latence_p95_s", "meaning": "95 % odpovědí přišlo rychleji než tato doba v sekundách" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "id": "it-helpdesk-vpn",
+  "roleId": "it-helpdesk",
+  "title": "Proč padá VPN",
+  "difficulty": 2,
+  "assistantContext": "zaměstnanci IT oddělení výrobní firmy",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Je pátek 4. 12. 2026 ráno. Pracuješ na IT helpdesku výrobní firmy se 400 zaměstnanci. Od začátku týdne si lidé stěžují, že jim padá VPN. Kolega z první linie si myslí, že to způsobila obnova certifikátu VPN portálu v úterý ráno.",
+    "task": "Zjisti, co výpadky způsobuje a koho nejvíc zasahují, a navrhni, co udělat. Vedoucí IT chce dnes do oběda rozhodnout, jak dál.",
+    "deliverable": "Zpráva pro vedoucí IT, nejvýš 2 500 znaků: pravděpodobná příčina a jak jsi na ni přišel, koho výpadky zasahují nejvíc a co navrhuješ udělat jako první.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "pozadavky",
+      "title": "Požadavky k VPN z portálu",
+      "file": "data/it-helpdesk/vpn_pozadavky.csv",
+      "type": "csv",
+      "rows": 23,
+      "period": "požadavky od 1. do 3. 12. 2026",
+      "dictionary": [
+        {
+          "column": "pozadavek",
+          "meaning": "Číslo požadavku"
+        },
+        {
+          "column": "zalozeno",
+          "meaning": "Kdy uživatel požadavek založil (pražský čas)"
+        },
+        {
+          "column": "oddeleni",
+          "meaning": "Oddělení uživatele"
+        },
+        {
+          "column": "predmet",
+          "meaning": "Předmět požadavku"
+        },
+        {
+          "column": "text",
+          "meaning": "Co uživatel napsal"
+        },
+        {
+          "column": "poznamka_technika",
+          "meaning": "Poznámka technika z první linie"
+        }
+      ]
+    },
+    {
+      "id": "monitoring",
+      "title": "Monitoring VPN po dnech",
+      "file": "data/it-helpdesk/vpn_monitoring.csv",
+      "type": "csv",
+      "rows": 11,
+      "period": "23. 11.–3. 12. 2026",
+      "dictionary": [
+        {
+          "column": "datum",
+          "meaning": "Den měření"
+        },
+        {
+          "column": "den",
+          "meaning": "Den v týdnu"
+        },
+        {
+          "column": "spojeni_klientska_vpn",
+          "meaning": "Kolik spojení přes klientskou VPN (práce z domova a na cestách) ten den začalo"
+        },
+        {
+          "column": "neocekavana_odpojeni_klientska_vpn",
+          "meaning": "Kolikrát brána spojení klientské VPN ukončila, aniž by se uživatel odhlásil"
+        },
+        {
+          "column": "vypadky_tunelu_kolin",
+          "meaning": "Kolikrát spadl tunel mezi centrálou a pobočkou Kolín. Noc se počítá ke dni, kdy začala."
+        },
+        {
+          "column": "delka_vypadku_tunelu_min",
+          "meaning": "Celková délka výpadků tunelu v minutách"
+        }
+      ]
+    },
+    {
+      "id": "zmeny",
+      "title": "Změny v síti",
+      "file": "data/it-helpdesk/zmeny_v_siti.md",
+      "type": "markdown"
+    },
+    {
+      "id": "telefonaty",
+      "title": "Telefonáty na helpdesk",
+      "file": "data/it-helpdesk/telefonaty_helpdesk.csv",
+      "type": "csv",
+      "rows": 11,
+      "period": "30. 11.–3. 12. 2026, včetně noční pohotovostní linky",
+      "dictionary": [
+        {
+          "column": "cas",
+          "meaning": "Kdy hovor přišel (pražský čas)"
+        },
+        {
+          "column": "volajici",
+          "meaning": "Odkud volali"
+        },
+        {
+          "column": "tema",
+          "meaning": "Téma hovoru podle technika"
+        },
+        {
+          "column": "poznamka",
+          "meaning": "Co volající řekl"
+        }
+      ]
+    }
+  ]
+}

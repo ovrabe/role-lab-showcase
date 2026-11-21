@@ -2,6 +2,20 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.11.0 – 21. 11. 2026
+
+Vyšší obtížnosti pro AI tech leada a IT helpdesk.
+
+### Přidáno
+
+- AI tech lead, obtížnost 2: „Rozšířit chatbota na všechny zákazníky?“ (asi 30 minut). Obtížnost 3: „Přechod na nový model“ (asi 45 minut), odemkne se po úrovni 3 v obtížnosti 2.
+- IT helpdesk, obtížnost 2: „Proč padá VPN“ (asi 30 minut). Obtížnost 3: „Obnova po výpadku serveru“ (asi 45 minut), odemkne se po úrovni 3 v obtížnosti 2.
+- Všechny čtyři úkoly jsou zkalibrované na slabém, středním a silném pokusu ve třech kolech.
+
+### Opraveno
+
+- Popis na kartě úkolu se už neusekne na tečce v datu.
+
 ## 1.10.1 – 20. 11. 2026
 
 Sjednocené údaje a přesnější počítadlo.

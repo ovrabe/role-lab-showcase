@@ -1,0 +1,60 @@
+{
+  "id": "ai-tech-lead-chatbot-pilot",
+  "roleId": "ai-tech-lead",
+  "title": "Rozšířit chatbota na všechny zákazníky?",
+  "difficulty": 2,
+  "assistantContext": "zaměstnanci softwarové firmy",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Jsi AI tech lead ve firmě, která provozuje e-shopovou platformu. Čtyři týdny běžel pilot chatbota, který odpovídá zákazníkům e-shopu z článků nápovědy. Chatbot pro 20 % zákazníků běží dál. Produktová manažerka podpory navrhuje pustit ho po vánoční sezoně, od 1. 2. 2027, všem zákazníkům.",
+    "task": "Doporuč produktové ředitelce, jestli chatbota od 1. 2. 2027 rozšířit na všechny zákazníky, v jakém rozsahu a za jakých podmínek. Uveď, kolik to ušetří a jaká jsou rizika. Ředitelka chce rozhodnout v pátek.",
+    "deliverable": "Doporučení pro produktovou ředitelku na jednu stranu, nejvýš 2 500 znaků. Musí být srozumitelné i bez tabulek.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "souhrn-pilotu",
+      "title": "Souhrn pilotu od produktové manažerky",
+      "file": "data/ai-tech-lead/pilot_chatbota_souhrn.md",
+      "type": "markdown"
+    },
+    {
+      "id": "vysledky-tydny",
+      "title": "Výsledky pilotu po týdnech",
+      "file": "data/ai-tech-lead/pilot_chatbota_tydny.csv",
+      "type": "csv",
+      "rows": 20,
+      "period": "4 týdny, 19. 10.–15. 11. 2026, 20 % zákazníků e-shopu",
+      "dictionary": [
+        { "column": "tyden_od", "meaning": "Pondělí, kterým týden začíná" },
+        { "column": "kategorie", "meaning": "Téma dotazu podle chatbota" },
+        { "column": "konverzaci", "meaning": "Kolik konverzací s chatbotem v týdnu začalo" },
+        { "column": "predano_cloveku", "meaning": "Kolik konverzací chatbot předal člověku z podpory" },
+        { "column": "odesel_bez_reakce", "meaning": "Kolik zákazníků po odpovědi chatbota odešlo a nenapsalo další zprávu ani nic neohodnotilo" },
+        { "column": "kontaktoval_podporu_do_48h", "meaning": "Kolik zákazníků, jejichž konverzace nebyla předaná ani opuštěná, se do 48 hodin ozvalo podpoře e-mailem nebo telefonem" },
+        { "column": "kliknul_pomohlo", "meaning": "Kolik zákazníků na konci kliklo na „Pomohlo mi to“" }
+      ]
+    },
+    {
+      "id": "kontrola-kvality",
+      "title": "Kontrola kvality: vzorek 40 konverzací",
+      "file": "data/ai-tech-lead/kontrola_kvality_vzorek.csv",
+      "type": "csv",
+      "rows": 40,
+      "period": "Náhodný vzorek z pilotu, kontrola 16.–17. 11. 2026",
+      "dictionary": [
+        { "column": "id_konverzace", "meaning": "Číslo konverzace v nástroji chatbota" },
+        { "column": "kategorie", "meaning": "Téma dotazu podle chatbota" },
+        { "column": "vysledek_kontroly", "meaning": "Hodnocení odpovědi týmem kvality: správně, částečně, nebo špatně" },
+        { "column": "poznamka", "meaning": "Poznámka hodnotitele z týmu kvality" }
+      ]
+    },
+    {
+      "id": "zmeny-podminek",
+      "title": "Změny obchodních podmínek od 1. 10. 2026",
+      "file": "data/ai-tech-lead/zmeny_obchodnich_podminek.md",
+      "type": "markdown"
+    }
+  ]
+}

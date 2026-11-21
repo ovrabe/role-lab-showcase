@@ -1,0 +1,69 @@
+{
+  "id": "it-helpdesk-recovery",
+  "roleId": "it-helpdesk",
+  "title": "Obnova po výpadku serveru",
+  "difficulty": 3,
+  "assistantContext": "zaměstnanci IT oddělení výrobní firmy",
+  "timeLimitMinutes": 45,
+  "brief": {
+    "situation": "Je sobota 12. 12. 2026, 6:30. V noci ve 2:40 odešlo diskové pole v serverovně a s ním všechny systémy, které na něm běžely: ERP, řízení výroby, sklad, e-mail i souborový server. Máš dnes pohotovost a vedoucí IT je na horách se slabým signálem.",
+    "task": "Připrav plán obnovy: co obnovit v jakém pořadí, z jakých záloh, kde a kdy co poběží. Uveď, o jaká data firma přijde, a co potřebuješ, aby vedoucí IT schválil.",
+    "deliverable": "Plán obnovy pro výrobního ředitele a vedoucí IT, nejvýš 2 500 znaků. Výrobní ředitel ho chce do 9:00.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "pozadavky-vyroby",
+      "title": "E-mail od výrobního ředitele",
+      "file": "data/it-helpdesk/pozadavky_vyroby.md",
+      "type": "markdown"
+    },
+    {
+      "id": "zalohy",
+      "title": "Přehled záloh",
+      "file": "data/it-helpdesk/zalohy_prehled.csv",
+      "type": "csv",
+      "rows": 9,
+      "period": "poslední zálohy před výpadkem 12. 12. 2026",
+      "dictionary": [
+        {
+          "column": "system",
+          "meaning": "Zálohovaný systém"
+        },
+        {
+          "column": "cas_zalohy",
+          "meaning": "Kdy záloha proběhla"
+        },
+        {
+          "column": "typ",
+          "meaning": "Plná záloha, přírůstková (jen změny) nebo transakční log databáze"
+        },
+        {
+          "column": "stav",
+          "meaning": "Výsledek zálohy podle zálohovacího nástroje"
+        },
+        {
+          "column": "velikost_gb",
+          "meaning": "Velikost zálohy v GB"
+        },
+        {
+          "column": "umisteni",
+          "meaning": "Kde je záloha uložená"
+        }
+      ]
+    },
+    {
+      "id": "systemy",
+      "title": "Systémy na vypadlém poli a záložní server",
+      "file": "data/it-helpdesk/systemy_a_zavislosti.md",
+      "type": "markdown"
+    },
+    {
+      "id": "smlouva",
+      "title": "Smlouva o podpoře diskového pole",
+      "file": "data/it-helpdesk/smlouva_podpora_pole.md",
+      "type": "markdown"
+    }
+  ]
+}

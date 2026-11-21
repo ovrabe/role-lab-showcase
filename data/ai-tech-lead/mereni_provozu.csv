@@ -1,0 +1,7 @@
+model,pouziti,volani_mesicne,prum_vstupnich_tokenu,prum_vystupnich_tokenu,latence_median_s,latence_p95_s
+Lark S,trideni,12000,900,40,0.9,1.8
+Lark S2,trideni,12000,2400,260,2.1,5.9
+Quill Mini,trideni,12000,900,45,1.0,2.0
+Lark S,chatbot,14000,3000,180,1.4,2.9
+Lark S2,chatbot,14000,3000,520,2.6,7.8
+Quill Mini,chatbot,14000,3000,190,1.5,3.2
