@@ -2,6 +2,23 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.1.0 – 21. 11. 2026
+
+Vlastní výzva pro testery a spolehlivější hodnocení.
+
+### Přidáno
+
+- Sdílení s kolegy jde vyžádat i přímo pod výsledkem vlastní výzvy.
+- „Proč tohle skóre?“ funguje i u vlastních výzev.
+- Scénář pro testery má nepovinný krok s vlastní výzvou.
+- Denní anonymní statistika pro autora počítá i vlastní výzvy: kolik se jich vygenerovalo, ohodnotilo a kolikrát se žádalo o sdílení.
+- Stránka Jak vznikl má milník Verze 2.0 a dvě nová rozhodnutí.
+
+### Opraveno
+
+- Když hodnotitel vrátí nečitelnou odpověď, server se sám zeptá znovu. Když se to nepovede ani napodruhé, pokus se do denního limitu nepočítá.
+- Vlastní výzva popisuje pracoviště gramaticky úplnou větou.
+
 ## 2.0.0 – 21. 11. 2026
 
 Vlastní výzva (beta): úkol podle tvé práce.

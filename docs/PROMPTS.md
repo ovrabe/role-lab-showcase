@@ -260,6 +260,7 @@ Zadání:
 - Všechno je vymyšlené. Firmy, produkty a lidé mají smyšlená neutrální jména, žádné skutečné značky ani osoby.
 - Piš česky. V zadání tykej („Jsi…“, „Rozhodni…“). Piš genderově neutrálně: o tom, kdo úkol řeší, nepoužívej minulý čas („narazil jsi“), přídavná jména v rodě („jistý“, „připravený“) ani tvary s lomítkem.
 - Zadání ani podklady nesmí naznačovat, že v datech je chyba nebo něco nejasného. Nechtěj ani větu o spolehlivosti dat nebo upozornění k datům. Člověk to musí zjistit kontrolou dat.
+- roleContext: jedna krátká a gramaticky úplná věta o pracovišti, třeba „Síť tří kaváren ve středně velkém městě.“
 - situation: 2 až 3 věty, kdo jsi, co se děje a kdy (den a měsíc). Roli napiš tak, jak ji uvádí popis, včetně rodu („Jsi HR specialistka“).
 - task: první věta začíná slovesem v rozkazovacím způsobu a říká, co udělat. Pak nejvýš dvě věty s omezeními.
 - deliverable: krátký výstup pro konkrétního adresáta, končí slovy „nejvýš 800 znaků.“

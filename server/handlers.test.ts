@@ -181,10 +181,25 @@ describe("POST /api/evaluate", () => {
     expect(body.kind).toBe("ok");
   });
 
-  it("reports an unreadable reply as invalid", async () => {
-    const { claude } = fakeClaude("Omlouvám se, nevím.");
+  it("asks once more when the reply is not readable JSON", async () => {
+    const replies = ["{ nedokončené", JSON.stringify(session.evaluation!.output)];
+    let calls = 0;
+    const claude: ClaudeClient = { ...fakeClaude().claude, evaluate: async () => replies[calls++] };
     const body = (await (await handleEvaluate(post("/api/evaluate", { roleId: role.id, session }), deps(claude))).json()) as EvaluateResponse;
-    expect(body).toEqual({ kind: "invalid", problems: ["invalid_json"] });
+    expect(body.kind).toBe("ok");
+    expect(calls).toBe(2);
+  });
+
+  it("reports a reply unreadable twice as invalid and gives the day's attempt back", async () => {
+    let calls = 0;
+    const claude: ClaudeClient = { ...fakeClaude().claude, evaluate: async () => (calls++, "Omlouvám se, nevím.") };
+    // One shared counter: the person's two evaluations a day.
+    const shared = { content, claude, limiter: { counter: memoryCounter(), secret: "test" } };
+    for (let round = 0; round < 3; round++) {
+      const body = (await (await handleEvaluate(post("/api/evaluate", { roleId: role.id, session }), shared)).json()) as EvaluateResponse;
+      expect(body).toEqual({ kind: "invalid", problems: ["invalid_json"] });
+    }
+    expect(calls).toBe(6);
   });
 
   it("reports a reply of the wrong shape as invalid", async () => {

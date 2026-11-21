@@ -13,7 +13,7 @@ export type ScenarioStep = { title: string; minutes: string; todo: string; quest
 const agree: [string, string] = ["nesouhlasím", "souhlasím"];
 
 // Ordered as why, what, how, what if: what the app is for, how it works, how it feels to use,
-// and what the tester gets out of it. About 10 minutes; the full role task is an optional extra.
+// and what the tester gets out of it. About 10 minutes; the custom task and the full role task are optional extras.
 export const scenarioSteps: ScenarioStep[] = [
   {
     title: "Proč: k čemu Role Lab je",
@@ -61,6 +61,17 @@ export const scenarioSteps: ScenarioStep[] = [
       { id: "q20", type: "text", text: "Objevila se nějaká chyba? Popiš, co byl tvůj krok, co se mělo stát a co se stalo." },
       { id: "q21", type: "line", text: "Tvoje role nebo obor" },
       { id: "q22", type: "line", text: "Zařízení a prohlížeč" },
+    ],
+  },
+  {
+    title: "Navíc, když máš čas: vlastní výzva (beta)",
+    minutes: "5 minut, nepovinné",
+    todo: "Na úvodu sjeď pod role a klikni na kartu „Vlastní výzva“. Popiš svou roli a situaci z práce, jestli chceš, nahraj tabulku jako vzor, a vygeneruj úkol. Generování trvá do minuty a jde jednou denně. Řešit ho nemusíš, stačí si ho prohlédnout.",
+    questions: [
+      { id: "q32", type: "line", text: "Role a situace v tvém popisu, stručně" },
+      { id: "q33", type: "scale", text: "Vygenerovaný úkol odpovídá tvé práci.", ends: agree },
+      { id: "q34", type: "scale", text: "Je jasné, co z popisu a tabulky odchází na server.", ends: agree },
+      { id: "q35", type: "text", text: "Co by stálo za změnu na vlastní výzvě?" },
     ],
   },
   {

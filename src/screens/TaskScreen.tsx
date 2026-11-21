@@ -20,7 +20,8 @@ import { RoleBadge } from "../components/RoleBadge";
 import { NextStepButton, StepGuide } from "../task/StepGuide";
 import { stepStates, taskProgress } from "../task/taskProgress";
 import { track } from "../ai/track";
-import { isCustomTask } from "../customTask/customTaskRole";
+import { customTaskIdOf, isCustomTask } from "../customTask/customTaskRole";
+import { SharePanel } from "../customTask/SharePanel";
 
 type TaskScreenProps = {
   role: RoleConfig;
@@ -170,28 +171,35 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
 
       {controls.session.submittedAt ? (
         // Submitted work is locked; only "Začít znovu" starts a new attempt.
-        <EvaluationView
-          role={role}
-          session={controls.session}
-          run={evaluation.run}
-          aiStatus={aiStatus}
-          onEvaluate={() => evaluation.evaluate(controls.session)}
-          onCancel={evaluation.cancel}
-          onReviewChange={controls.saveReview}
-          why={
-            // "Proč tohle skóre?" knows only the fixed tasks (server/whyHandler.ts).
-            backend && aiStatus === "available" && !isCustomTask(role)
-              ? {
-                  answers: controls.session.whyAnswers ?? {},
-                  async ask(dimensionId) {
-                    const outcome = await backend.explainScore(role, controls.session, dimensionId, new AbortController().signal);
-                    if (outcome.kind === "ok") controls.saveWhy(dimensionId, outcome.why);
-                    return outcome;
-                  },
-                }
-              : undefined
-          }
-        />
+        <>
+          <EvaluationView
+            role={role}
+            session={controls.session}
+            run={evaluation.run}
+            aiStatus={aiStatus}
+            onEvaluate={() => evaluation.evaluate(controls.session)}
+            onCancel={evaluation.cancel}
+            onReviewChange={controls.saveReview}
+            why={
+              backend && aiStatus === "available"
+                ? {
+                    answers: controls.session.whyAnswers ?? {},
+                    async ask(dimensionId) {
+                      const outcome = await backend.explainScore(role, controls.session, dimensionId, new AbortController().signal);
+                      if (outcome.kind === "ok") controls.saveWhy(dimensionId, outcome.why);
+                      return outcome;
+                    },
+                  }
+                : undefined
+            }
+          />
+          {/* After solving is the best moment to decide whether colleagues should get the task too. */}
+          {isCustomTask(role) && controls.session.evaluation && (
+            <div className="mt-10 max-w-2xl">
+              <SharePanel id={customTaskIdOf(role.id) ?? ""} />
+            </div>
+          )}
+        </>
       ) : isWide ? (
         <WideTaskLayout panels={panels} leftTab={leftTab} onSelect={selectTab} />
       ) : (

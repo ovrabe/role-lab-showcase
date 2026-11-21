@@ -13,12 +13,15 @@ import type { RateLimiter } from "./rateLimit.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
 import { budgetResponse, recordSpend } from "./spendBudget.js";
+import { giveBackToLimit } from "./rateLimit.js";
 import type { IssueTracker } from "./issues.js";
 import type { CustomTaskStore } from "./customTaskStore.js";
 import type { EvaluatorKey } from "../src/evaluation/evaluatorKeySchema.js";
 import type { MaterialTextLookup } from "../src/roles/parseRoles.js";
 import { composeCustomTask, customEvaluatorKey, customMaterialTexts, customTaskIdOf } from "../src/customTask/customTaskRole.js";
 import { publicPart } from "../src/customTask/generatedTask.js";
+import { isCustomTask } from "../src/customTask/customTaskRole.js";
+import { countCustomTask } from "./statsHandler.js";
 
 /**
  * The two endpoints of the web build (docs/SPEC.md, section 13). Web-standard
@@ -92,7 +95,7 @@ type ResolvedTask = { role: RoleConfig; getMaterialText: MaterialTextLookup; get
  * Finds the task by the id the page sends. A fixed task comes from data/; a generated one
  * ("custom-<id>") is loaded from the store, so the page can never send its own task or key.
  */
-async function resolveTask({ content, customTasks }: HandlerDeps, roleId: string): Promise<ResolvedTask | null> {
+export async function resolveTask({ content, customTasks }: HandlerDeps, roleId: string): Promise<ResolvedTask | null> {
   const fixed = content.roles.activeRoles.find((role) => role.id === roleId);
   if (fixed) return { role: fixed, getMaterialText: content.getMaterialText, getKey: () => content.getEvaluatorKey(fixed.id) };
   const customTaskId = customTaskIdOf(roleId);
@@ -189,22 +192,34 @@ export async function handleEvaluate(request: Request, deps: HandlerDeps): Promi
   const limited = await limitResponse(limiter, "evaluate", request);
   if (limited) return limited;
 
-  let reply: string;
-  try {
-    reply = await claude.evaluate(buildEvaluatorPrompt(role, key, session), {
-      signal: request.signal,
-      onUsage: (model, usage) => recordSpend(limiter, request, model, usage),
-    });
-  } catch (error) {
-    const failure = asClaudeError(error);
-    await handleClaudeFailure({ limiter, issues }, "evaluate", request, failure);
-    return json({ kind: "error", code: failure.code, message: failure.message } satisfies EvaluateResponse);
+  // A reply that is not readable JSON (about 1 in 90 in calibration) gets one more try; the
+  // person should not lose one of the day's two evaluations to a glitch of the model.
+  const prompt = buildEvaluatorPrompt(role, key, session);
+  let raw: unknown;
+  for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
+    let reply: string;
+    try {
+      reply = await claude.evaluate(prompt, {
+        signal: request.signal,
+        onUsage: (model, usage) => recordSpend(limiter, request, model, usage),
+      });
+    } catch (error) {
+      const failure = asClaudeError(error);
+      await handleClaudeFailure({ limiter, issues }, "evaluate", request, failure);
+      return json({ kind: "error", code: failure.code, message: failure.message } satisfies EvaluateResponse);
+    }
+    raw = parseJsonReply(reply);
+    if (raw === undefined) console.warn(`Evaluation attempt ${attempt}: reply is not readable JSON.`);
   }
-
-  const raw = parseJsonReply(reply);
-  if (raw === undefined) return json({ kind: "invalid", problems: ["invalid_json"] } satisfies EvaluateResponse);
+  if (raw === undefined) {
+    // Our model failed twice, not the person: the attempt is given back.
+    await giveBackToLimit(limiter, "evaluate", request);
+    return json({ kind: "invalid", problems: ["invalid_json"] } satisfies EvaluateResponse);
+  }
   const result = validateEvaluation(raw, role, key.traps, session.transcript, session.submission, session.reflection);
   if (!result.ok) return json({ kind: "invalid", problems: result.problems } satisfies EvaluateResponse);
+
+  if (isCustomTask(role)) await countCustomTask(limiter, "evaluated");
 
   // Revealed only now, after submission: what each trap was, for the result screen.
   const keyTraps = key.traps.map((trap) => ({

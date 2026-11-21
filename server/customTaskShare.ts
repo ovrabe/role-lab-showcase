@@ -4,6 +4,7 @@ import { badRequest, json, limitResponse, readJson } from "./http.js";
 import type { CustomTaskDeps } from "./customTaskHandler.js";
 import type { StoredCustomTask } from "./customTaskStore.js";
 import type { Issue } from "./issues.js";
+import { countCustomTask } from "./statsHandler.js";
 
 /**
  * Sharing a custom task (docs/SPEC.md, section 14). The link ?vlastni-vyzva=<id> is both the
@@ -82,5 +83,6 @@ export async function handleCustomTaskShare(request: Request, { limiter, customT
       console.error("Creating the share issue failed:", error);
     }
   }
+  await countCustomTask(limiter, "shared");
   return json({ kind: "ok", status: "pending" } satisfies CustomTaskStatusResponse);
 }

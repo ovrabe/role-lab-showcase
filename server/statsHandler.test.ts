@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { handleStats } from "./statsHandler";
+import { countCustomTask, handleStats } from "./statsHandler";
 import { loadServerContent } from "./content";
 import { memoryCounter, type RateLimiter } from "./rateLimit";
 import { memoryIssueTracker } from "./issues";
@@ -42,5 +42,16 @@ describe("anonymous statistics", () => {
     expect(issue.body).toContain(`| ${task.title}: ${task.taskTitle} | 2 | 1 | 1 |`);
     expect(issue.body).toContain("Ohodnocené výzvy: 1.");
     expect(issue.labels).toEqual(["statistika"]);
+  });
+
+  it("counts custom tasks together, without ids, and reports them the next day", async () => {
+    const { deps, issues, setDay } = setup();
+    await countCustomTask(deps.limiter, "generated");
+    await countCustomTask(deps.limiter, "generated");
+    await countCustomTask(deps.limiter, "evaluated");
+    await countCustomTask(deps.limiter, "shared");
+    setDay("2026-11-18T08:00:00Z");
+    await handleStats(post({ event: "task_started", id: task.id }), deps);
+    expect(issues.issues[0].body).toContain("Vlastní výzvy: vygenerováno 2, ohodnoceno 1, žádostí o sdílení 1.");
   });
 });

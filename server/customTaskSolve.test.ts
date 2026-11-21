@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { handleChat, handleEvaluate, type EvaluateResponse } from "./handlers";
+import { handleWhy, type WhyResponse } from "./whyHandler";
 import { loadServerContent } from "./content";
 import { memoryCounter } from "./rateLimit";
 import { memoryCustomTaskStore } from "./customTaskStore";
@@ -93,6 +94,18 @@ describe("custom task: evaluation", () => {
     expect(sent.prompt).toContain("Postupuje logicky: projde data");
     expect(sent.prompt).toContain(sampleGeneratedTask.judgmentMarkers[0]);
     expect(body.evaluation.keyTraps).toEqual([expect.objectContaining({ id: "T1_past", title: sampleGeneratedTask.trap.title })]);
+  });
+
+  it("explains a score of an evaluated custom task (\"Proč tohle skóre?\")", async () => {
+    const { deps } = await setup();
+    const evaluated = (await (await handleEvaluate(post("/api/evaluate", { roleId, session }), deps)).json()) as EvaluateResponse;
+    if (evaluated.kind !== "ok") throw new Error("evaluation failed");
+    const sentWhy: string[] = [];
+    const whyDeps = { ...deps, claude: { ...deps.claude, evaluateChallenge: async (prompt: string) => (sentWhy.push(prompt), JSON.stringify({ answer: "Data byla zkontrolovaná.", quotes: [] })) } };
+    const body = (await (await handleWhy(post("/api/why", { roleId, session: { ...session, evaluation: evaluated.evaluation }, dimensionId: "verification" }), whyDeps)).json()) as WhyResponse;
+    expect(body).toEqual({ kind: "ok", why: { answer: "Data byla zkontrolovaná.", quotes: [] } });
+    // The explanation gets the generic rubric, never the trap.
+    expect(sentWhy[0]).not.toContain(sampleGeneratedTask.trap.whatIsWrong);
   });
 
   it("refuses a session of another task", async () => {

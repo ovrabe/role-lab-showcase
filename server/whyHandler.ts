@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TaskSession } from "../src/session/sessionSchema.js";
 import { buildWhyPrompt } from "../src/prompts/why.js";
 import { validateWhyReply, type StoredWhy } from "../src/evaluation/whyAnswer.js";
-import { asClaudeError, isTimestamp, parseJsonReply, transcriptProblem, type HandlerDeps } from "./handlers.js";
+import { asClaudeError, isTimestamp, parseJsonReply, resolveTask, transcriptProblem, type HandlerDeps } from "./handlers.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { budgetResponse, recordSpend } from "./spendBudget.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
@@ -17,12 +17,14 @@ const WhyRequest = z.object({ roleId: z.string().max(60), session: TaskSession, 
 
 export type WhyResponse = { kind: "ok"; why: StoredWhy } | { kind: "error"; code: string; message: string };
 
-export async function handleWhy(request: Request, { content, claude, limiter, issues }: HandlerDeps): Promise<Response> {
+export async function handleWhy(request: Request, deps: HandlerDeps): Promise<Response> {
+  const { claude, limiter, issues } = deps;
   const body = await readJson(request, 4_000_000);
   if (body instanceof Response) return body;
   const parsed = WhyRequest.safeParse(body);
   if (!parsed.success) return badRequest("invalid_request", "Invalid request.");
-  const role = content.roles.activeRoles.find((candidate) => candidate.id === parsed.data.roleId);
+  // A fixed task or a generated custom task, the same lookup as chat and evaluation.
+  const role = (await resolveTask(deps, parsed.data.roleId))?.role;
   if (!role) return badRequest("unknown_role", "Unknown role.");
   const { session, dimensionId } = parsed.data;
   if (session.roleId !== role.id) return badRequest("invalid_request", "Session belongs to another role.");

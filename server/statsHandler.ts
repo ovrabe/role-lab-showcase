@@ -9,12 +9,28 @@ import type { RateLimiter } from "./rateLimit.js";
  * were started, submitted and evaluated per task, and how many challenges were evaluated.
  * Only totals per day and task are stored, no identity and no text; they expire after two days.
  * The first event of a new day files a backlog issue with yesterday's numbers.
+ * Custom tasks are counted by the server itself (countCustomTask), as daily totals only.
  */
 const events = ["task_started", "task_submitted", "task_evaluated", "challenge_evaluated"] as const;
 const StatsRequest = z.object({ event: z.enum(events), id: z.string().max(80) });
 
 const pragueDay = (date: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Prague" }).format(date);
 const key = (day: string, event: string, id: string) => `stats:${day}:${event}:${id}`;
+
+// Custom tasks have random ids, so they are counted together: how many were generated,
+// evaluated and asked to be shared. Called by the server, never by the page.
+const customEvents = ["generated", "evaluated", "shared"] as const;
+type CustomEvent = (typeof customEvents)[number];
+const customKey = (day: string, event: CustomEvent) => key(day, `custom_${event}`, "all");
+
+export async function countCustomTask(limiter: RateLimiter, event: CustomEvent): Promise<void> {
+  if (!limiter.counter.add) return;
+  try {
+    await limiter.counter.add(customKey(pragueDay((limiter.now ?? (() => new Date()))()), event), 1);
+  } catch (error) {
+    console.error("Custom task statistics failed:", error);
+  }
+}
 
 export async function handleStats(
   request: Request,
@@ -54,11 +70,12 @@ async function fileYesterday(content: ServerContent, limiter: RateLimiter, issue
   const counts = await limiter.counter.readMany(tasks.flatMap((task) => taskEvents.map((event) => key(day, event, task.id))));
   const challenges = await limiter.counter.readMany(content.challenges.challenges.map((challenge) => key(day, "challenge_evaluated", challenge.id)));
   const challengeTotal = challenges.reduce((sum, value) => sum + value, 0);
+  const [generated, customEvaluated, shared] = await limiter.counter.readMany(customEvents.map((event) => customKey(day, event)));
 
   const rows = tasks
     .map((task, index) => ({ task, started: counts[index * 3], submitted: counts[index * 3 + 1], evaluated: counts[index * 3 + 2] }))
     .filter((row) => row.started + row.submitted + row.evaluated > 0);
-  if (rows.length === 0 && challengeTotal === 0) return;
+  if (rows.length === 0 && challengeTotal === 0 && generated + customEvaluated + shared === 0) return;
 
   const sum = (field: "started" | "submitted" | "evaluated") => rows.reduce((total, row) => total + row[field], 0);
   const date = new Date(`${day}T12:00:00Z`).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric", year: "numeric" });
@@ -71,6 +88,8 @@ async function fileYesterday(content: ServerContent, limiter: RateLimiter, issue
     `| **Celkem** | **${sum("started")}** | **${sum("submitted")}** | **${sum("evaluated")}** |`,
     "",
     `Ohodnocené výzvy: ${challengeTotal}.`,
+    "",
+    `Vlastní výzvy: vygenerováno ${generated}, ohodnoceno ${customEvaluated}, žádostí o sdílení ${shared}.`,
     "",
     "Velký rozdíl mezi „Začato“ a „Odevzdáno“ ukazuje, kde lidé odpadají. Po přečtení issue zavři.",
   ].join("\n");

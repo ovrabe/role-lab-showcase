@@ -14,7 +14,7 @@ export type EvaluationRun =
   | { status: "failed"; message: string; canRetry: boolean }
   | { status: "cancelled" };
 
-const invalidReplyMessage = "Hodnotitel vrátil neúplnou odpověď. Zkus hodnocení spustit znovu.";
+const invalidReplyMessage = "Hodnotitel vrátil neúplnou odpověď. Pokus se nepočítá, zkus hodnocení spustit znovu.";
 const blockedMessage =
   "Volání Clauda není pro tuhle stránku povolené, takže hodnocení nemůže proběhnout. Odevzdaný text zůstává uložený.";
 

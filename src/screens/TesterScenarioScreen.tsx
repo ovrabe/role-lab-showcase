@@ -83,7 +83,7 @@ export function TesterScenarioScreen() {
         </a>
         <ul className="card list-disc pl-10 space-y-2 text-sm">
           <li>Co napíšeš asistentovi, jde k AI (Claude) přes server aplikace. Nepiš tam osobní ani citlivé firemní údaje.</li>
-          <li>Hodnocení celého úkolu jde udělat dvakrát za den, výzev zvládneš patnáct.</li>
+          <li>Hodnocení celého úkolu jde udělat dvakrát za den, výzev zvládneš patnáct a vlastní výzvu jde vygenerovat jednou.</li>
           <li>Odpovědi se odešlou tlačítkem dole do soukromého seznamu námětů autora na GitHubu.</li>
         </ul>
         <p className="text-sm text-ink-muted" aria-live="polite">

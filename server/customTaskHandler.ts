@@ -9,6 +9,7 @@ import { budgetResponse, recordSpend } from "./spendBudget.js";
 import { giveBackToLimit } from "./rateLimit.js";
 import type { CustomTaskStore } from "./customTaskStore.js";
 import { hasBlockingData } from "../src/customTask/sensitiveData.js";
+import { countCustomTask } from "./statsHandler.js";
 
 /**
  * POST /api/custom-task (docs/SPEC.md, section 14): a description in, a generated task out.
@@ -78,6 +79,7 @@ export async function handleCustomTask(request: Request, { claude, limiter, issu
         console.error("Custom task store failed:", error);
         return badRequest("service_unavailable", "Could not store the task.", 503);
       }
+      await countCustomTask(limiter, "generated");
       return json({ kind: "ok", id, task: publicPart(checked.task) } satisfies CustomTaskResponse);
     }
     problems = checked.problems;
