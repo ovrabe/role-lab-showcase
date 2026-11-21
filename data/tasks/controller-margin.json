@@ -1,0 +1,105 @@
+{
+  "id": "controller-margin",
+  "roleId": "controller",
+  "title": "Proč klesla marže řady Hydraulika",
+  "difficulty": 2,
+  "assistantContext": "zaměstnanci finančního oddělení výrobní firmy",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Dnes je čtvrtek 14. 1. 2027. Jsi controller ve strojírenské firmě. Marže produktové řady Hydraulika byla v prosinci výrazně pod plánem. Obchodní ředitel to svádí na zdražení oceli a navrhuje od února zdražit celou řadu o 5 %.",
+    "task": "Vysvětli finanční ředitelce, proč marže řady Hydraulika v prosinci klesla a jak velkou část poklesu způsobila která příčina. Navrhni, co s tím dělat, a posuď návrh obchodu.",
+    "deliverable": "Podklad pro finanční ředitelku, nejvýš 2 500 znaků: příčiny poklesu marže s čísly a doporučení.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "prodeje",
+      "title": "Hydraulika: prodeje a marže, prosinec 2026",
+      "file": "data/controller/hydraulika_prosinec_2026.csv",
+      "type": "csv",
+      "rows": 3,
+      "period": "prosinec 2026, plán a skutečnost",
+      "dictionary": [
+        {
+          "column": "varianta",
+          "meaning": "Varianta výrobku řady Hydraulika"
+        },
+        {
+          "column": "cena_za_kus",
+          "meaning": "Prodejní cena za kus v Kč"
+        },
+        {
+          "column": "ks_plan",
+          "meaning": "Plánovaný prodej v kusech"
+        },
+        {
+          "column": "ks_skutecnost",
+          "meaning": "Skutečný prodej v kusech"
+        },
+        {
+          "column": "trzby_plan",
+          "meaning": "Plánované tržby v Kč"
+        },
+        {
+          "column": "trzby_skutecnost",
+          "meaning": "Skutečné tržby v Kč"
+        },
+        {
+          "column": "naklady_plan",
+          "meaning": "Plánované náklady v Kč"
+        },
+        {
+          "column": "naklady_skutecnost",
+          "meaning": "Skutečné náklady v Kč"
+        },
+        {
+          "column": "marze_pct_plan",
+          "meaning": "Plánovaná marže v %"
+        },
+        {
+          "column": "marze_pct_skutecnost",
+          "meaning": "Skutečná marže v %"
+        }
+      ]
+    },
+    {
+      "id": "naklady",
+      "title": "Hydraulika: struktura nákladů na kus",
+      "file": "data/controller/hydraulika_naklady.md",
+      "type": "markdown"
+    },
+    {
+      "id": "kurzy",
+      "title": "Nákupy v EUR a kurzy",
+      "file": "data/controller/nakupy_eur_kurzy.csv",
+      "type": "csv",
+      "rows": 3,
+      "period": "říjen–prosinec 2026",
+      "dictionary": [
+        {
+          "column": "mesic",
+          "meaning": "Měsíc"
+        },
+        {
+          "column": "nakupy_eur",
+          "meaning": "Nákupy dílů pro řadu Hydraulika v EUR"
+        },
+        {
+          "column": "kurz_rozpocet",
+          "meaning": "Kurz Kč/EUR použitý v rozpočtu"
+        },
+        {
+          "column": "kurz_skutecny",
+          "meaning": "Průměrný skutečný kurz Kč/EUR v měsíci"
+        }
+      ]
+    },
+    {
+      "id": "obchod",
+      "title": "Poznámka obchodního ředitele",
+      "file": "data/controller/poznamka_obchodu.md",
+      "type": "markdown"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+test,oblast,behu_za_14_dni,padu,padu_mezi_2_a_4_h,oznacen_jako_nestabilni
+platba_karta_uspech,platby,28,22,22,ano
+platba_karta_zamitnuti,platby,28,21,21,ano
+platba_3ds_overeni,platby,28,24,23,ano
+platba_apple_pay,platby,28,19,19,ano
+platba_google_pay,platby,28,20,20,ano
+vraceni_platby,platby,28,18,18,ano
+platba_na_splatky,platby,28,22,21,ano
+platba_darkovy_poukaz,platby,28,17,17,ano
+kosik_pridani_stejne_polozky,kosik,28,2,1,ano
+kosik_odebrani_polozky,kosik,28,0,0,ne
+pokladna_doprava,pokladna,28,1,1,ne
+prihlaseni_heslo,ucet,28,0,0,ne

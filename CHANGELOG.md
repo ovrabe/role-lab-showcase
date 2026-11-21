@@ -2,6 +2,23 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 1.12.0 – 21. 11. 2026
+
+Obtížnost 2 pro všechny role.
+
+### Přidáno
+
+- Marketér, obtížnost 2: „Rozpočet na lednový výprodej“.
+- Recruiter, obtížnost 2: „Proč nemůžeme obsadit Data engineera“.
+- QA, obtížnost 2: „Nestabilní testy“.
+- Molekulární biolog, obtížnost 2: „Působí látka K-12 proti zánětu?“.
+- Controller, obtížnost 2: „Proč klesla marže řady Hydraulika“.
+- Všech pět úkolů trvá asi 30 minut a je zkalibrovaných na slabém, středním a silném pokusu ve třech kolech.
+
+### Změněno
+
+- Role molekulárního biologa zahrnuje kromě antibiotické rezistence i imunologii.
+
 ## 1.11.0 – 21. 11. 2026
 
 Vyšší obtížnosti pro AI tech leada a IT helpdesk.

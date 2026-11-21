@@ -1,6 +1,6 @@
 // Evaluator calibration through the Message Batches API (half price). Calls the real Claude.
 //   npm run calibrate                              one round of every task (about 2 $)
-//   npm run calibrate -- --task it-helpdesk-queue  one task
+//   npm run calibrate -- --task it-helpdesk-queue  one task (or several, separated by commas)
 //   npm run calibrate -- --rounds 3                three rounds (stability check)
 // An interrupted run resumes the same batch on the next start with the same options.
 import { spawnSync } from "node:child_process";

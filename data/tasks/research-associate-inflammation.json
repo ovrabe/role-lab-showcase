@@ -1,0 +1,69 @@
+{
+  "id": "research-associate-inflammation",
+  "roleId": "research-associate",
+  "title": "Působí látka K-12 proti zánětu?",
+  "difficulty": 2,
+  "assistantContext": "zaměstnanci imunologické skupiny výzkumného ústavu",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Je středa 13. 1. 2027. Pracuješ jako molekulární biolog ve skupině imunologie. Skupina testuje protizánětlivou látku K-12 na myším modelu zánětu břišní dutiny. Ze slezin se měřila hladina cytokinu IL-6 a aktivita enzymu myeloperoxidázy (MPO), podle které se pozná, kolik neutrofilů do tkáně proniklo.",
+    "task": "Posuď, jestli data podporují závěr kolegyně, že K-12 snížila zánět ve slezině o více než 40 %. Navrhni, co napsat do průběžné zprávy pro grantovou agenturu, kterou je potřeba odeslat v pátek, a co případně zopakovat.",
+    "deliverable": "Stanovisko pro vedoucí skupiny, nejvýš 2 500 znaků: jestli závěr platí, proč, co napsat do zprávy a co zopakovat.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "vysledky",
+      "title": "Výsledky ze slezin",
+      "file": "data/research-associate/slezina_vysledky.csv",
+      "type": "csv",
+      "rows": 12,
+      "period": "odběr 11. 1. 2027, 24 h po vyvolání zánětu",
+      "dictionary": [
+        {
+          "column": "mys",
+          "meaning": "Označení myši"
+        },
+        {
+          "column": "skupina",
+          "meaning": "kontrola = jen nosný roztok, K-12 = testovaná látka"
+        },
+        {
+          "column": "il6_pg_na_ml",
+          "meaning": "Koncentrace IL-6 v homogenátu sleziny (pg/ml)"
+        },
+        {
+          "column": "bilkovina_mg_na_ml",
+          "meaning": "Celková bílkovina v homogenátu (mg/ml)"
+        },
+        {
+          "column": "mpo_u_na_mg_bilkoviny",
+          "meaning": "Aktivita MPO na mg bílkoviny"
+        },
+        {
+          "column": "datum_mereni_mpo",
+          "meaning": "Kdy se MPO měřila"
+        }
+      ]
+    },
+    {
+      "id": "denik",
+      "title": "Laboratorní deník",
+      "file": "data/research-associate/laboratorni_denik.md",
+      "type": "markdown"
+    },
+    {
+      "id": "protokol",
+      "title": "Protokol: zánětové markery ve slezině",
+      "file": "data/research-associate/protokol_zanet.md",
+      "type": "markdown"
+    },
+    {
+      "id": "souhrn",
+      "title": "Souhrn výsledků K-12 (koncept)",
+      "file": "data/research-associate/souhrn_k12.md",
+      "type": "markdown"
+    }
+  ]
+}

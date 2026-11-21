@@ -17,13 +17,18 @@ const calibrationRows = [
   { task: "Rozšířit chatbota na všechny zákazníky?", role: "AI tech lead", difficulty: 2, weak: "1,2", medium: "2,4", strong: "3,6" },
   { task: "Přechod na nový model", role: "AI tech lead", difficulty: 3, weak: "1,2", medium: "2,2–2,4", strong: "3,6" },
   { task: "Kandidáti do druhého kola", role: "Recruiter", difficulty: 1, weak: "1,0", medium: "1,6", strong: "3,6" },
+  { task: "Proč nemůžeme obsadit Data engineera", role: "Recruiter", difficulty: 2, weak: "1,2", medium: "1,8–2,0", strong: "3,0" },
   { task: "Vítězná varianta landing page", role: "Marketér", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,6" },
+  { task: "Rozpočet na lednový výprodej", role: "Marketér", difficulty: 2, weak: "1,2", medium: "1,8–2,0", strong: "3,4–3,6" },
   { task: "Ranní fronta požadavků", role: "IT helpdesk", difficulty: 1, weak: "1,0", medium: "1,6", strong: "2,8" },
   { task: "Proč padá VPN", role: "IT helpdesk", difficulty: 2, weak: "1,0–1,2", medium: "2,0", strong: "3,0–3,2" },
   { task: "Obnova po výpadku serveru", role: "IT helpdesk", difficulty: 3, weak: "1,0–1,2", medium: "1,6–1,8", strong: "3,4–3,6" },
   { task: "Vydat verzi 3.8?", role: "QA", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,4" },
+  { task: "Nestabilní testy", role: "QA", difficulty: 2, weak: "1,0–1,2", medium: "1,6–1,8", strong: "2,8" },
   { task: "Citlivost izolátu na ciprofloxacin", role: "Molekulární biolog", difficulty: 1, weak: "1,0", medium: "1,6", strong: "3,4" },
+  { task: "Působí látka K-12 proti zánětu?", role: "Molekulární biolog", difficulty: 2, weak: "1,0–1,2", medium: "1,8–2,2", strong: "3,0–3,2" },
   { task: "Odchylky od rozpočtu za říjen", role: "Controller", difficulty: 1, weak: "1,0", medium: "1,4", strong: "3,6" },
+  { task: "Proč klesla marže řady Hydraulika", role: "Controller", difficulty: 2, weak: "1,2", medium: "1,6", strong: "2,8" },
 ];
 
 const fairness = [

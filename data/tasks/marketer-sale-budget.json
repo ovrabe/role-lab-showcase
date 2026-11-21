@@ -1,0 +1,85 @@
+{
+  "id": "marketer-sale-budget",
+  "roleId": "marketer",
+  "title": "Rozpočet na lednový výprodej",
+  "difficulty": 2,
+  "assistantContext": "zaměstnanci marketingu e-shopu s oblečením",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Dnes je pondělí 7. 12. 2026. Pracuješ v marketingu e-shopu s oblečením. Od 8. do 31. 1. 2027 poběží lednový výprodej a na reklamu je 400 000 Kč. Agentura poslala návrh, jak rozpočet rozdělit podle výsledků podzimních kampaní.",
+    "task": "Navrhni vedoucí marketingu, jak rozpočet 400 000 Kč rozdělit mezi kanály, a zdůvodni to. Vedoucí chce peníze dát tam, kde opravdu přinesou prodeje navíc.",
+    "deliverable": "Návrh rozdělení rozpočtu pro vedoucí marketingu, nejvýš 2 500 znaků: částka pro každý kanál a proč.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "vykon-kanalu",
+      "title": "Výkon kanálů, podzim 2026",
+      "file": "data/marketer/kanaly_podzim_2026.csv",
+      "type": "csv",
+      "rows": 5,
+      "period": "kampaně 5. 10.–29. 11. 2026",
+      "dictionary": [
+        {
+          "column": "kanal",
+          "meaning": "Reklamní kanál"
+        },
+        {
+          "column": "naklady_czk",
+          "meaning": "Kolik kanál stál"
+        },
+        {
+          "column": "objednavky",
+          "meaning": "Objednávky připsané kanálu (poslední kliknutí před nákupem)"
+        },
+        {
+          "column": "trzby_czk",
+          "meaning": "Tržby z těchto objednávek před vratkami"
+        },
+        {
+          "column": "navratnost_roas",
+          "meaning": "Tržby děleno náklady"
+        }
+      ]
+    },
+    {
+      "id": "vratky",
+      "title": "Vratky podle kanálů",
+      "file": "data/marketer/vratky_podle_kanalu.csv",
+      "type": "csv",
+      "rows": 5,
+      "period": "objednávky z podzimních kampaní, vratky do 6. 12. 2026",
+      "dictionary": [
+        {
+          "column": "kanal",
+          "meaning": "Reklamní kanál"
+        },
+        {
+          "column": "objednavky",
+          "meaning": "Objednávky připsané kanálu"
+        },
+        {
+          "column": "vracene_objednavky",
+          "meaning": "Kolik objednávek zákazníci vrátili"
+        },
+        {
+          "column": "vraceno_czk",
+          "meaning": "Kolik tržeb se vrátilo"
+        }
+      ]
+    },
+    {
+      "id": "test-prirustku",
+      "title": "Test přírůstku: remarketing a vyhledávání značky",
+      "file": "data/marketer/test_prirustku.md",
+      "type": "markdown"
+    },
+    {
+      "id": "navrh-agentury",
+      "title": "Návrh agentury: rozpočet na lednový výprodej",
+      "file": "data/marketer/navrh_agentury.md",
+      "type": "markdown"
+    }
+  ]
+}

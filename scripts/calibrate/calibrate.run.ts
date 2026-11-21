@@ -32,15 +32,16 @@ const formatUsd = (value: number) => `${value.toFixed(2).replace(".", ",")} $`;
 const mark = (passed: boolean | null) => (passed === null ? "–" : passed ? "ano" : "NE");
 
 it("calibrates the evaluator through the Message Batches API", async () => {
-  const taskFilter = process.env.CALIBRATE_TASK?.trim() || null;
+  // One task id or several separated by commas.
+  const taskFilter = process.env.CALIBRATE_TASK?.trim() ? process.env.CALIBRATE_TASK.split(",").map((id) => id.trim()) : null;
   const rounds = Number(process.env.CALIBRATE_ROUNDS ?? "1");
   if (!Number.isInteger(rounds) || rounds < 1 || rounds > 3) throw new Error("Počet kol musí být 1 až 3.");
 
   const content = loadServerContent(root);
   const tasks = content.roles.activeRoles
-    .filter((role) => taskFilter === null || role.id === taskFilter)
+    .filter((role) => taskFilter === null || taskFilter.includes(role.id))
     .map((role) => ({ role, runs: loadCalibrationRuns(role), key: content.getEvaluatorKey(role.id) }));
-  if (tasks.length === 0) throw new Error(`Úkol „${taskFilter}“ neexistuje.`);
+  if (tasks.length === 0 || (taskFilter && tasks.length !== taskFilter.length)) throw new Error(`Některý z úkolů „${taskFilter?.join(", ")}“ neexistuje.`);
   for (const task of tasks) {
     if (task.runs.length === 0) throw new Error(`Úkol ${task.role.id} nemá kalibrační pokusy ve fixtures/.`);
     if (!task.key) throw new Error(`Úkol ${task.role.id} nemá klíč hodnotitele.`);

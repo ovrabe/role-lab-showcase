@@ -1,0 +1,101 @@
+{
+  "id": "recruiter-hiring-funnel",
+  "roleId": "recruiter",
+  "title": "Proč nemůžeme obsadit Data engineera",
+  "difficulty": 2,
+  "assistantContext": "zaměstnanci HR ve středně velké firmě",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Dnes je pondělí 11. 1. 2027. Jsi recruiter ve středně velké firmě. Pozice Data engineer je volná od září a šest kandidátů nabídku odmítlo. Hiring manager je přesvědčený, že nabízíme málo peněz, a chce zvýšit mzdu o 15 % a víc inzerovat na pracovním portálu.",
+    "task": "Navrhni HR ředitelce, co v náboru na tuto pozici změnit, aby se ji podařilo obsadit do konce března. Zdůvodni to daty.",
+    "deliverable": "Návrh pro HR ředitelku, nejvýš 2 500 znaků: proč se pozici nedaří obsadit, co změnit a co naopak nedělat.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "trychtyr",
+      "title": "Nábor podle zdrojů kandidátů",
+      "file": "data/recruiter/trychtyr_data_engineer.csv",
+      "type": "csv",
+      "rows": 3,
+      "period": "1. 9.–31. 12. 2026",
+      "dictionary": [
+        {
+          "column": "zdroj",
+          "meaning": "Odkud kandidát přišel"
+        },
+        {
+          "column": "uchazecu",
+          "meaning": "Kolik lidí se přihlásilo"
+        },
+        {
+          "column": "telefonicky_pohovor",
+          "meaning": "Kolik prošlo na telefonický pohovor"
+        },
+        {
+          "column": "technicky_pohovor",
+          "meaning": "Kolik prošlo na technický pohovor"
+        },
+        {
+          "column": "nabidka",
+          "meaning": "Kolik dostalo nabídku"
+        },
+        {
+          "column": "prijato",
+          "meaning": "Kolik nabídku přijalo"
+        },
+        {
+          "column": "naklady_na_inzerci_czk",
+          "meaning": "Kolik stála inzerce v tomto zdroji"
+        }
+      ]
+    },
+    {
+      "id": "nabidky",
+      "title": "Nabídky a odpovědi kandidátů",
+      "file": "data/recruiter/nabidky_data_engineer.csv",
+      "type": "csv",
+      "rows": 6,
+      "period": "nabídky od září do prosince 2026",
+      "dictionary": [
+        {
+          "column": "kandidat",
+          "meaning": "Kód kandidáta"
+        },
+        {
+          "column": "zdroj",
+          "meaning": "Odkud kandidát přišel"
+        },
+        {
+          "column": "technicky_pohovor",
+          "meaning": "Datum technického pohovoru"
+        },
+        {
+          "column": "nabidka",
+          "meaning": "Datum, kdy kandidát dostal nabídku"
+        },
+        {
+          "column": "odpoved",
+          "meaning": "Datum odpovědi kandidáta"
+        },
+        {
+          "column": "vysledek",
+          "meaning": "Jak kandidát odpověděl"
+        }
+      ]
+    },
+    {
+      "id": "odmitnuti",
+      "title": "Odmítnuté nabídky: poznámky z rozhovorů",
+      "file": "data/recruiter/odmitnute_nabidky.md",
+      "type": "markdown"
+    },
+    {
+      "id": "mzdy",
+      "title": "Mzdy datových inženýrů v Praze",
+      "file": "data/recruiter/mzdy_data_engineer.md",
+      "type": "markdown"
+    }
+  ]
+}

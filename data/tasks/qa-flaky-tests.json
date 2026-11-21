@@ -1,0 +1,107 @@
+{
+  "id": "qa-flaky-tests",
+  "roleId": "qa",
+  "title": "Nestabilní testy",
+  "difficulty": 2,
+  "assistantContext": "zaměstnanci firmy, která vyvíjí e-shopovou aplikaci",
+  "timeLimitMinutes": 30,
+  "brief": {
+    "situation": "Je pondělí 18. 1. 2027. Máš na starosti testování e-shopové aplikace. Noční automatické testy poslední dva týdny často padají a vývojáři jim přestávají věřit. Vedoucí vývoje navrhuje vypnout všech devět testů, které tým označil jako nestabilní.",
+    "task": "Rozhodni, které testy vypnout, které opravit nebo přesunout a co nahlásit jako chybu v aplikaci. Vedoucí vývoje chce odpověď dnes.",
+    "deliverable": "Doporučení pro vedoucí vývoje, nejvýš 2 500 znaků: co udělat s každou skupinou testů a proč.",
+    "howToWork": "Můžeš používat AI asistenta. Pracuj s ním jako v běžný den. Hodnotíme výsledek i to, jak s asistentem pracuješ.",
+    "dataNote": "Podklady najdeš v záložce Podklady. Do konverzace je můžeš přiložit tlačítkem, vložit jejich část, nebo je nepoužít vůbec."
+  },
+  "materials": [
+    {
+      "id": "nocni",
+      "title": "Noční testy za 14 dní",
+      "file": "data/qa/nocni_testy_14_dni.csv",
+      "type": "csv",
+      "rows": 12,
+      "period": "noci 4.–17. 1. 2027, běh ve 2:00 a opakování ve 3:30",
+      "dictionary": [
+        {
+          "column": "test",
+          "meaning": "Název automatického testu"
+        },
+        {
+          "column": "oblast",
+          "meaning": "Část aplikace, kterou test ověřuje"
+        },
+        {
+          "column": "behu_za_14_dni",
+          "meaning": "Kolikrát test v nočních bězích běžel"
+        },
+        {
+          "column": "padu",
+          "meaning": "Kolikrát spadl"
+        },
+        {
+          "column": "padu_mezi_2_a_4_h",
+          "meaning": "Kolik pádů bylo mezi 2:00 a 4:00"
+        },
+        {
+          "column": "oznacen_jako_nestabilni",
+          "meaning": "Jestli ho tým označil jako nestabilní"
+        }
+      ]
+    },
+    {
+      "id": "denni",
+      "title": "Denní běhy vybraných testů",
+      "file": "data/qa/denni_behy_vybrane_testy.csv",
+      "type": "csv",
+      "rows": 3,
+      "period": "denní běhy z větví vývojářů, 4.–17. 1. 2027",
+      "dictionary": [
+        {
+          "column": "test",
+          "meaning": "Název automatického testu"
+        },
+        {
+          "column": "behu_pres_den_za_14_dni",
+          "meaning": "Kolikrát test běžel přes den"
+        },
+        {
+          "column": "padu_pres_den",
+          "meaning": "Kolikrát přes den spadl"
+        }
+      ]
+    },
+    {
+      "id": "chyby",
+      "title": "Ukázky chyb z nočních běhů",
+      "file": "data/qa/ukazky_chyb.md",
+      "type": "markdown"
+    },
+    {
+      "id": "podpora",
+      "title": "Požadavky zákaznické podpory ke košíku",
+      "file": "data/qa/pozadavky_podpory_kosik.csv",
+      "type": "csv",
+      "rows": 5,
+      "period": "6.–14. 1. 2027",
+      "dictionary": [
+        {
+          "column": "pozadavek",
+          "meaning": "Číslo požadavku zákaznické podpory"
+        },
+        {
+          "column": "datum",
+          "meaning": "Kdy zákazník napsal"
+        },
+        {
+          "column": "text",
+          "meaning": "Co zákazník napsal"
+        }
+      ]
+    },
+    {
+      "id": "brana",
+      "title": "Oznámení poskytovatele plateb",
+      "file": "data/qa/oznameni_platebni_brany.md",
+      "type": "markdown"
+    }
+  ]
+}
