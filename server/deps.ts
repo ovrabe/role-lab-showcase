@@ -1,4 +1,4 @@
-import { memoryAdminLog, upstashAdminLog, type AdminLog } from "./adminHandler.js";
+import { memoryAdminLog, memorySummaryCache, upstashAdminLog, upstashSummaryCache, type AdminLog, type SummaryCache } from "./adminHandler.js";
 import { memoryMetrics, upstashMetrics } from "./metrics.js";
 import { loadServerContent, type ServerContent } from "./content.js";
 import { anthropicClient, type ClaudeClient } from "./claudeClient.js";
@@ -31,6 +31,7 @@ export type ServerDeps =
       // The admin page (server/adminHandler.ts): its secret token and its action log.
       adminToken: string | undefined;
       adminLog: AdminLog;
+      summaryCache: SummaryCache;
     }
   | { misconfigured: string };
 
@@ -72,6 +73,7 @@ export function getServerDeps(): ServerDeps {
       // (vite.config.ts sets ROLE_LAB_DEV_SERVER), never in a deployed build wherever it runs.
       adminToken: process.env.ADMIN_TOKEN?.trim() || (process.env.ROLE_LAB_DEV_SERVER === "1" && !onVercel ? localAdminToken : undefined),
       adminLog: storeUrl && storeToken ? upstashAdminLog(storeUrl, storeToken) : memoryAdminLog(),
+      summaryCache: storeUrl && storeToken ? upstashSummaryCache(storeUrl, storeToken) : memorySummaryCache(),
     };
   }
   return cached;

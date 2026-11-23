@@ -2,6 +2,21 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.4.0 – 23. 11. 2026
+
+Přehled adminu s AI.
+
+### Přidáno
+
+- Přehled v adminu ve vzhledu aplikace: shrnutí za období, co řešit, hlavní čísla s trendem proti předchozímu období, průchod úkolem, pět dovedností, zdraví provozu a nejaktivnější úkoly.
+- AI shrnutí za období: Claude ho napíše z anonymních součtů a uloží na den.
+- Zeptat se na data: otázka vlastními slovy, Claude odpoví ze stejných součtů. Nejvýš 50 volání denně.
+- Verze pro claude.ai mají na úvodu kartu Vlastní výzva, která vede na webovou verzi.
+
+### Změněno
+
+- AI v adminu se počítá zvlášť a nečerpá denní rozpočet určený pro úkoly.
+
 ## 2.3.1 – 23. 11. 2026
 
 ### Bezpečnost

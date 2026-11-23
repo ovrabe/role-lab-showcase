@@ -104,12 +104,12 @@ export function AdminScreen() {
       </nav>
       {error && <p role="alert" className="rounded-control bg-notice p-3 text-sm text-notice-ink">{error}</p>}
       {!data && !error && <p className="text-ink-muted">Načítám…</p>}
-      {data && tab === "overview" && <OverviewTab data={data} />}
+      {data && tab === "overview" && <OverviewTab data={data} token={token} onOpenTab={setTab} />}
       {data && tab === "tasks" && <TasksTab data={data} />}
       {data && tab === "models" && <ModelsTab data={data} />}
       {data && tab === "approvals" && <ApprovalsTab data={data} token={token} onChanged={() => void load()} />}
       {data && tab === "feedback" && <FeedbackTab data={data} />}
-      {data && <p className="text-xs text-ink-muted">Stav k {new Date(data.generatedAt).toLocaleString("cs-CZ")}. Data jsou anonymní denní součty, uchovávají se 90 dní.</p>}
+      {data && <p className="text-xs text-ink-muted">Stav k {new Date(data.generatedAt).toLocaleString("cs-CZ")}.</p>}
     </section>
   );
 }

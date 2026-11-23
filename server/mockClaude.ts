@@ -18,6 +18,10 @@ export const mockClaude: ClaudeClient = {
     return JSON.stringify(parsed);
   },
   async evaluateChallenge(prompt) {
+    // The admin summary goes through the same quick model (server/adminHandler.ts).
+    if (prompt.startsWith("Píšeš krátké shrnutí provozu")) {
+      return JSON.stringify({ headline: "Simulované shrnutí: provoz je klidný.", details: "Tohle napsala simulace pro vývoj, ne Claude. Skutečné shrnutí vznikne na webu z anonymních součtů." });
+    }
     return JSON.stringify(mockChallengeReply(prompt));
   },
   async generateCustomTask() {

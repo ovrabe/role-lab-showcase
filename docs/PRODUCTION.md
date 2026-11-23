@@ -226,6 +226,14 @@ Schváleno 22. 11. 2026. Autor chce vidět návštěvnost, průběh a výsledky 
 - **Kde je token:** v prohlížeči jen po dobu otevřené karty (sessionStorage).
 - **Co admin umí:** ukazuje součty, schvaluje sdílení vlastních výzev a vypíná generování. Každou akci zapisuje do logu.
 
+### AI v adminu
+
+- **Shrnutí za období:** nahoře na Přehledu. Píše ho Claude Haiku z anonymních součtů (pokyny v `docs/PROMPTS.md`, oddíl 7) a server ho uloží na den.
+- **Zeptat se na data:** otázka vlastními slovy. Odpovídá Claude Sonnet ze stejných součtů (pokyny v oddílu 8). Otázky se neukládají.
+- **Limit:** shrnutí i otázky mají dohromady nejvýš 50 volání denně.
+- **Útrata:** obojí se měří a v záložce Modely a útrata má vlastní řádky. Do denního rozpočtu testerů (`server/spendBudget.ts`) se ale nepočítá, aby autorovy otázky nemohly testerům vyčerpat peníze.
+- **Co jde k modelu:** jen součty. Zpětná vazba, kontakty ani texty od lidí ne.
+
 ### Kontrola bezpečnosti adminu (23. 11. 2026)
 
 | Útok | Ochrana | Ověřeno |

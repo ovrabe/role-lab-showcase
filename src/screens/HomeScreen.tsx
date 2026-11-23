@@ -72,7 +72,8 @@ export function HomeScreen({
       )}
       <RoleList groups={roleCards} onSelectRole={onSelectRole} />
 
-      {onOpenCustomTask && <CustomTaskCard onOpen={onOpenCustomTask} />}
+      {/* Web: opens the custom task here. claude.ai pages: a link to the web version. */}
+      <CustomTaskCard onOpen={onOpenCustomTask} />
 
       {/* Instead of a list of roles "coming soon": ask which role is missing. The answer
           lands in the author's backlog. The form needs the server, so web version only. */}

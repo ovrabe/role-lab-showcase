@@ -1,3 +1,11 @@
+import { adminAskInstructions, buildAdminAskMessage, cleanAdminAnswer, maxQuestionChars } from "../src/prompts/adminAsk.js";
+import { askData } from "../src/admin/askContext.js";
+import type { AdminOverview as AskOverview } from "../src/admin/adminApi.js";
+import type { ClaudeClient } from "./claudeClient.js";
+import { measureCall } from "./metrics.js";
+import { asClaudeError, parseJsonReply } from "./handlers.js";
+import { digest } from "../src/admin/digest.js";
+import { buildAdminSummaryPrompt, validateAdminSummary, type AdminSummary } from "../src/prompts/adminSummary.js";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { badRequest, json, readJson } from "./http.js";
@@ -31,7 +39,23 @@ const AdminRequest = z.discriminatedUnion("action", [
   z.object({ action: z.literal("overview"), days: z.number().int().min(1).max(maxDays).default(30) }),
   z.object({ action: z.literal("decide_share"), id: z.string().regex(/^[A-Za-z0-9_-]{12}$/), decision: z.enum(["approved", "rejected"]) }),
   z.object({ action: z.literal("generation"), off: z.boolean() }),
+  // The AI summary of the period; cached for the day, refresh asks for a new one.
+  z.object({ action: z.literal("summary"), days: z.number().int().min(1).max(maxDays).default(30), refresh: z.boolean().default(false) }),
+  // "Zeptat se na data": a question in the author's own words about the same totals.
+  z.object({ action: z.literal("ask"), days: z.number().int().min(1).max(maxDays).default(30), question: z.string().trim().min(3).max(maxQuestionChars) }),
 ]);
+
+// The author's AI calls (summaries and questions) together: plenty for one person, a ceiling for
+// a leaked token. They are measured in the metrics (their own lines in "Modely a útrata") but
+// kept out of the testers' daily budget (spendBudget.ts), so the author's evening of questions
+// can never use up the money the testers' attempts need.
+const maxAiCallsPerDay = 50;
+
+/** Counts one AI call of the admin; false when today's ceiling is reached. */
+async function takeAiCall(limiter: RateLimiter, now: Date): Promise<boolean> {
+  if (!limiter.counter.add) return true;
+  return (await limiter.counter.add(`admin:ai:${pragueDay(now)}`, 1)) <= maxAiCallsPerDay;
+}
 
 export type AdminDeps = {
   content: ServerContent;
@@ -43,7 +67,36 @@ export type AdminDeps = {
   adminToken: string | undefined;
   // Where the action log lives; without it the log is kept in memory (tests).
   adminLog?: AdminLog;
+  // Writes the AI summary (claude.evaluateChallenge = the quick model) and keeps it for a day.
+  claude?: Partial<Pick<ClaudeClient, "evaluateChallenge" | "chat">>;
+  summaryCache?: SummaryCache;
 };
+
+export type SummaryCache = { get(key: string): Promise<string | null>; set(key: string, value: string): Promise<void> };
+
+export function memorySummaryCache(): SummaryCache {
+  const values = new Map<string, string>();
+  return {
+    async get(key) {
+      return values.get(key) ?? null;
+    },
+    async set(key, value) {
+      values.set(key, value);
+    },
+  };
+}
+
+export function upstashSummaryCache(url: string, token: string): SummaryCache {
+  return {
+    async get(key) {
+      const [value] = await upstashTransaction(url, token, [["GET", key]]);
+      return typeof value === "string" ? value : null;
+    },
+    async set(key, value) {
+      await upstashTransaction(url, token, [["SET", key, value, "EX", String(24 * 60 * 60)]]);
+    },
+  };
+}
 
 export type AdminLog = { add(entry: { at: string; action: string; detail?: string }): Promise<void>; recent(limit: number): Promise<{ at: string; action: string; detail?: string }[]> };
 
@@ -115,6 +168,8 @@ export async function handleAdmin(request: Request, deps: AdminDeps): Promise<Re
   const request_ = parsed.data;
 
   if (request_.action === "overview") return json(await overview(deps, log, request_.days, now));
+  if (request_.action === "summary") return summary(request, deps, request_.days, request_.refresh, now);
+  if (request_.action === "ask") return ask(request, deps, log, request_.days, request_.question, now);
   if (request_.action === "decide_share") {
     const record = await deps.customTasks.decideShare(request_.id, request_.decision, now.toISOString());
     if (!record) return badRequest("not_found", "Task not found or expired.", 404);
@@ -148,6 +203,8 @@ async function alertFailedLogin({ issues }: AdminDeps, failures: number) {
 export type AdminOverview = {
   generatedAt: string;
   days: { day: string; metrics: MetricEntries; visitors: number }[];
+  // The same number of days just before, for the trends on the overview.
+  previousDays: { day: string; metrics: MetricEntries; visitors: number }[];
   budget: { perIpUsd: number; totalUsd: number; spentTodayUsd: number };
   limits: typeof dailyLimits;
   tasks: { id: string; roleTitle: string; taskTitle: string; difficulty: number }[];
@@ -159,20 +216,14 @@ export type AdminOverview = {
 
 async function overview(deps: AdminDeps, log: AdminLog, dayCount: number, now: Date): Promise<AdminOverview> {
   const { limiter, content } = deps;
-  const days = Array.from({ length: dayCount }, (_, index) => pragueDay(new Date(now.getTime() - index * 24 * 60 * 60 * 1000)));
-  const metrics = limiter.metrics;
-  const perDay = await Promise.all(
-    days.map(async (day) => ({
-      day,
-      metrics: metrics ? await metrics.readDay(day) : {},
-      visitors: metrics ? await metrics.countUnique(day, "visitors") : 0,
-    })),
-  );
+  const perDay = await readDays(limiter, dayCount, 0, now);
+  const previousDays = await readDays(limiter, dayCount, dayCount, now);
   const spentToday = limiter.counter.add ? (await limiter.counter.add(`spend:${pragueDay(now)}:total`, 0)) / 1_000_000 : 0;
   const pending = await deps.customTasks.listPending();
   return {
     generatedAt: now.toISOString(),
     days: perDay,
+    previousDays,
     budget: { perIpUsd: dailyBudgetUsd.perIp, totalUsd: dailyBudgetUsd.total, spentTodayUsd: spentToday },
     limits: limiter.limits ?? dailyLimits,
     tasks: content.roles.activeRoles.map((role) => ({ id: role.id, roleTitle: role.title, taskTitle: role.taskTitle, difficulty: role.difficulty })),
@@ -192,4 +243,75 @@ async function overview(deps: AdminDeps, log: AdminLog, dayCount: number, now: D
     feedback: await deps.feedback.recent(50),
     log: await log.recent(30),
   };
+}
+
+const dayMs = 24 * 60 * 60 * 1000;
+
+/** dayCount days ending skip days before today, newest first. Metrics older than 90 days are gone. */
+async function readDays(limiter: RateLimiter, dayCount: number, skip: number, now: Date) {
+  const metrics = limiter.metrics;
+  const days = Array.from({ length: dayCount }, (_, index) => pragueDay(new Date(now.getTime() - (index + skip) * dayMs)));
+  return Promise.all(
+    days.map(async (day) => ({
+      day,
+      metrics: metrics ? await metrics.readDay(day) : {},
+      visitors: metrics ? await metrics.countUnique(day, "visitors") : 0,
+    })),
+  );
+}
+
+async function summary(request: Request, deps: AdminDeps, dayCount: number, refresh: boolean, now: Date): Promise<Response> {
+  const { limiter, claude } = deps;
+  const cache = deps.summaryCache ?? memorySummaryCache();
+  const key = `admin:summary:${pragueDay(now)}:${dayCount}`;
+  if (!refresh) {
+    const cached = await cache.get(key);
+    if (cached) return json({ ...(JSON.parse(cached) as AdminSummary), cached: true });
+  }
+  if (!claude?.evaluateChallenge) return badRequest("unavailable", "Summary is not available.", 503);
+  // Only a new summary counts; a cached one costs nothing.
+  if (!(await takeAiCall(limiter, now))) return badRequest("limit_daily", "Too many AI calls today.", 429);
+  const current = await readDays(limiter, dayCount, 0, now);
+  const previous = await readDays(limiter, dayCount, dayCount, now);
+  const prompt = buildAdminSummaryPrompt(current.at(-1)!.day, current[0].day, digest(current), digest(previous));
+  const call = measureCall(limiter.metrics, "adminSummary");
+  try {
+    const reply = await claude.evaluateChallenge(prompt, {
+      signal: request.signal,
+      onUsage: async (model, usage) => call.usage(model, usage),
+    });
+    const result = validateAdminSummary(parseJsonReply(reply));
+    await call.finish(result ? "ok" : "invalid_json");
+    if (!result) return badRequest("invalid_reply", "The summary could not be read.", 502);
+    await cache.set(key, JSON.stringify(result));
+    return json({ ...result, cached: false });
+  } catch (error) {
+    const failure = asClaudeError(error);
+    await call.finish(failure.code);
+    return badRequest(failure.code, "The summary could not be written.", 502);
+  }
+}
+
+async function ask(request: Request, deps: AdminDeps, log: AdminLog, dayCount: number, question: string, now: Date): Promise<Response> {
+  const { limiter, claude } = deps;
+  if (!claude?.chat) return badRequest("unavailable", "Questions are not available.", 503);
+  if (!(await takeAiCall(limiter, now))) return badRequest("limit_daily", "Too many AI calls today.", 429);
+  const data = await overview(deps, log, dayCount, now);
+  const message = buildAdminAskMessage(question, data.days.at(-1)!.day, data.days[0].day, dayCount, askData(data as unknown as AskOverview));
+  const call = measureCall(limiter.metrics, "adminAsk");
+  let answer = "";
+  try {
+    await claude.chat([{ role: "user", content: `${adminAskInstructions}\n\n${message}` }], {
+      signal: request.signal,
+      onDelta: (text) => (answer += text),
+      onUsage: async (model, usage) => call.usage(model, usage),
+    });
+  } catch (error) {
+    const failure = asClaudeError(error);
+    await call.finish(failure.code);
+    return badRequest(failure.code, "The question could not be answered.", 502);
+  }
+  const clean = cleanAdminAnswer(answer);
+  await call.finish(clean ? "ok" : "empty_completion");
+  return clean ? json({ answer: clean }) : badRequest("invalid_reply", "Empty answer.", 502);
 }

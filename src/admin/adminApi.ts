@@ -30,6 +30,7 @@ export type FeedbackItem =
 export type AdminOverview = {
   generatedAt: string;
   days: DayMetrics[];
+  previousDays: DayMetrics[];
   budget: { perIpUsd: number; totalUsd: number; spentTodayUsd: number };
   limits: { perPerson: Record<string, number>; total: Record<string, number> };
   tasks: { id: string; roleTitle: string; taskTitle: string; difficulty: number }[];
@@ -44,7 +45,7 @@ export type AdminResult<T> = { ok: true; value: T } | { ok: false; message: stri
 const messages: Record<number, string> = {
   401: "Token nesedí.",
   404: "Admin není zapnutý: ve Vercelu chybí ADMIN_TOKEN (aspoň 32 znaků).",
-  429: "Příliš mnoho chybných pokusů z této adresy. Zkus to zítra.",
+  429: "Dnešní limit je vyčerpaný. Zkus to zítra.",
 };
 
 async function post<T>(token: string, body: unknown): Promise<AdminResult<T>> {
@@ -55,7 +56,10 @@ async function post<T>(token: string, body: unknown): Promise<AdminResult<T>> {
       body: JSON.stringify(body),
     });
     if (response.ok) return { ok: true, value: (await response.json()) as T };
-    return { ok: false, message: messages[response.status] ?? `Server odpověděl chybou ${response.status}.`, signOut: response.status === 401 || response.status === 429 };
+    const code = ((await response.json().catch(() => ({}))) as { error?: { code?: string } }).error?.code;
+    // A wrong token or a blocked address ends the session; a used-up daily limit does not.
+    if (code === "too_many_attempts") return { ok: false, message: "Příliš mnoho chybných pokusů z této adresy. Zkus to zítra.", signOut: true };
+    return { ok: false, message: messages[response.status] ?? `Server odpověděl chybou ${response.status}.`, signOut: response.status === 401 };
   } catch {
     return { ok: false, message: "Server neodpovídá. Zkontroluj připojení." };
   }
@@ -63,4 +67,7 @@ async function post<T>(token: string, body: unknown): Promise<AdminResult<T>> {
 
 export const fetchOverview = (token: string, days: number) => post<AdminOverview>(token, { action: "overview", days });
 export const decideShare = (token: string, id: string, decision: "approved" | "rejected") => post<{ ok: true }>(token, { action: "decide_share", id, decision });
+export type AdminSummary = { headline: string; details: string; cached: boolean };
+export const fetchSummary = (token: string, days: number, refresh = false) => post<AdminSummary>(token, { action: "summary", days, refresh });
+export const askData = (token: string, days: number, question: string) => post<{ answer: string }>(token, { action: "ask", days, question });
 export const setGeneration = (token: string, off: boolean) => post<{ ok: true }>(token, { action: "generation", off });

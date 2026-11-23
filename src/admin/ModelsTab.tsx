@@ -1,19 +1,19 @@
 import { endpointStats, group, modelStats, series, spendOfDay, sumDays } from "./aggregate";
 import { count, DataTable, DayBars, percent, usd } from "./AdminParts";
 import type { AdminOverview } from "./adminApi";
+import { endpointNames } from "./attention";
+import { OperationsTables } from "./OperationsTables";
 
 // "Modely a útrata": speed and reliability per endpoint, tokens and dollars per model, and why
 // the custom task generator refused its own answers.
-
-const endpointNames: Record<string, string> = {
-  chat: "Asistent", evaluate: "Hodnocení", challenge: "Výzvy", why: "Proč tohle skóre?", customTask: "Generátor vlastní výzvy",
-};
 
 export function ModelsTab({ data }: { data: AdminOverview }) {
   const total = sumDays(data.days);
   const endpoints = endpointStats(total);
   const models = modelStats(total);
   const spend = models.reduce((sum, row) => sum + row.usd, 0);
+  // Cost per attempt counts only what the testers' use costs, not the author's admin questions.
+  const testerSpend = models.filter((row) => !row.endpoint.startsWith("admin")).reduce((sum, row) => sum + row.usd, 0);
   const evaluated = Object.entries(total).reduce((sum, [name, value]) => (/^outcome\.[^.]+\.count$/.test(name) ? sum + value : sum), 0);
   const rejected = Object.entries(group(total, "customTask.rejected.")).sort((a, b) => b[1] - a[1]);
 
@@ -21,7 +21,7 @@ export function ModelsTab({ data }: { data: AdminOverview }) {
     <div className="space-y-6">
       <DayBars title="Útrata po dnech" points={series(data.days, (day) => spendOfDay(day.metrics))} format={usd} />
       <p className="text-sm text-ink-muted">
-        Celkem {usd(spend)}. {evaluated > 0 ? `Na jeden ohodnocený pokus připadá ${usd(spend / evaluated)} (asistent, hodnocení i ostatní volání).` : ""}
+        Celkem {usd(spend)}. {evaluated > 0 ? `Na jeden ohodnocený pokus připadá ${usd(testerSpend / evaluated)} (asistent, hodnocení i ostatní volání, bez adminu).` : ""}
       </p>
       <h2 className="text-base font-semibold">Rychlost a spolehlivost</h2>
       <DataTable
@@ -44,6 +44,7 @@ export function ModelsTab({ data }: { data: AdminOverview }) {
       <p className="text-xs text-ink-muted">Cena je spočítaná z tokenů podle ceníku v kódu (server/spendBudget.ts), skutečnou fakturu ukazuje konzole Anthropicu.</p>
       <h2 className="text-base font-semibold">Odmítnuté odpovědi generátoru vlastní výzvy</h2>
       <DataTable head={["Důvod", "Počet"]} rows={rejected.map(([reason, value]) => [reason, count(value)])} empty="Generátor nic neodmítl." />
+      <OperationsTables total={total} />
     </div>
   );
 }

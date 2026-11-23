@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { handleAdmin, memoryAdminLog, type AdminDeps, type AdminOverview } from "./adminHandler";
+import { handleAdmin, memoryAdminLog, memorySummaryCache, type AdminDeps, type AdminOverview } from "./adminHandler";
 import { loadServerContent } from "./content";
 import { memoryCounter } from "./rateLimit";
 import { memoryMetrics, pragueDay } from "./metrics";
@@ -19,7 +19,7 @@ async function setup(...args: [string | undefined] | []) {
   const issues = memoryIssueTracker();
   const feedback = memoryFeedbackStore();
   const adminLog = memoryAdminLog();
-  const deps: AdminDeps = { content, limiter: { counter: memoryCounter(), secret: "s", metrics }, feedback, customTasks, issues, adminToken, adminLog };
+  const deps: AdminDeps = { content, limiter: { counter: memoryCounter(), secret: "s", metrics }, feedback, customTasks, issues, adminToken, adminLog, summaryCache: memorySummaryCache() };
   return { deps, metrics, customTasks, issues, feedback, adminLog };
 }
 
@@ -92,5 +92,72 @@ describe("/api/admin", () => {
     const { deps } = await setup();
     expect((await call(deps, { action: "delete_everything" })).status).toBe(400);
     expect((await call(deps, { action: "decide_share", id: "../x", decision: "approved" })).status).toBe(400);
+  });
+
+  it("writes the AI summary from totals only, keeps it for the day, and refreshes on request", async () => {
+    const { deps, metrics } = await setup();
+    await metrics.add(pragueDay(new Date()), { "screen.home": 4, "funnel.qa.started": 2 });
+    const prompts: string[] = [];
+    deps.claude = { evaluateChallenge: async (prompt: string) => (prompts.push(prompt), JSON.stringify({ headline: "Klid.", details: "Málo dat." })) } as AdminDeps["claude"];
+    const first = await (await call(deps, { action: "summary", days: 7 })).json();
+    expect(first).toEqual({ headline: "Klid.", details: "Málo dat.", cached: false });
+    expect(prompts[0]).toContain('"started":2');
+    expect(await (await call(deps, { action: "summary", days: 7 })).json()).toMatchObject({ cached: true });
+    expect(prompts).toHaveLength(1);
+    await call(deps, { action: "summary", days: 7, refresh: true });
+    expect(prompts).toHaveLength(2);
+  });
+
+  it("returns the previous period for trends", async () => {
+    const { deps } = await setup();
+    const body = (await (await call(deps, { action: "overview", days: 7 })).json()) as AdminOverview;
+    expect(body.previousDays).toHaveLength(7);
+    expect(body.previousDays[0].day < body.days.at(-1)!.day).toBe(true);
+  });
+
+  it("answers a question about the data from totals only, within a daily limit", async () => {
+    const { deps, metrics, feedback } = await setup();
+    await metrics.add(pragueDay(new Date()), { "funnel.qa-release.started": 3 });
+    await feedback.save({ kind: "note", message: "Tajný vzkaz", contact: "jana@firma.cz", at: "2026-11-23T10:00:00.000Z" });
+    const sent: string[] = [];
+    deps.claude = {
+      async chat(turns, { onDelta }) {
+        sent.push(turns[0].content);
+        onDelta("Odpadají ");
+        onDelta("na začátku.");
+        return { truncated: false };
+      },
+    };
+    const response = await call(deps, { action: "ask", days: 7, question: "Kde lidé odpadají?" });
+    expect(await response.json()).toEqual({ answer: "Odpadají na začátku." });
+    expect(sent[0]).toContain("<otazka>Kde lidé odpadají?</otazka>");
+    expect(sent[0]).toContain('"zacato":3');
+    // Feedback texts and contacts never reach the model.
+    expect(sent[0]).not.toContain("Tajný vzkaz");
+    expect(sent[0]).not.toContain("jana@firma.cz");
+    expect((await call(deps, { action: "ask", days: 7, question: "?" })).status).toBe(400);
+  });
+
+  it("keeps the author's AI calls out of the testers' budget and caps them together at 50 a day", async () => {
+    const { deps, metrics } = await setup();
+    deps.claude = {
+      evaluateChallenge: async (_prompt, options) => (await options.onUsage?.("claude-haiku-5-5", { input_tokens: 1000, output_tokens: 100 }), JSON.stringify({ headline: "A", details: "B" })),
+      async chat(_turns, { onDelta, onUsage }) {
+        await onUsage?.("claude-sonnet-5-5", { input_tokens: 10000, output_tokens: 500 });
+        onDelta("Odpověď.");
+        return { truncated: false };
+      },
+    };
+    expect((await call(deps, { action: "summary", days: 7 })).status).toBe(200);
+    expect((await call(deps, { action: "ask", days: 7, question: "Jak to jde?" })).status).toBe(200);
+    // Measured in the metrics...
+    const day = await metrics.readDay(pragueDay(new Date()));
+    expect(day["spend.adminAsk.claude-sonnet-5-5"]).toBeGreaterThan(0);
+    // ...but not in the testers' daily budget.
+    expect(await deps.limiter.counter.add!(`spend:${pragueDay(new Date())}:total`, 0)).toBe(0);
+    for (let index = 2; index < 50; index++) await call(deps, { action: "ask", days: 7, question: "Další?" });
+    expect((await call(deps, { action: "ask", days: 7, question: "Ještě?" })).status).toBe(429);
+    // A cached summary still opens.
+    expect((await call(deps, { action: "summary", days: 7 })).status).toBe(200);
   });
 });
