@@ -6,6 +6,7 @@ const base: AdminOverview = {
   generatedAt: "2026-11-23T10:00:00.000Z",
   days: [],
   previousDays: [],
+  notifications: { slack: false, morning: false },
   budget: { perIpUsd: 1.5, totalUsd: 3, spentTodayUsd: 0 },
   limits: { perPerson: {}, total: {} },
   tasks: [],

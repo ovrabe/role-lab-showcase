@@ -2,6 +2,20 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.5.0 – 23. 11. 2026
+
+Upozornění do Slacku.
+
+### Přidáno
+
+- Okamžitá upozornění pro autora do kanálu ve Slacku: čekající žádost o sdílení, útrata přes 70 % denního stropu, selhávající volání modelu, nová zpětná vazba, neúspěšné přihlášení do adminu a chyba na stránce. Každý druh přijde nejvýš jednou za hodinu.
+- Ranní přehled ve Slacku: AI shrnutí za 7 dní, včerejší čísla a počet věcí k řešení.
+- Admin ukazuje, jestli je Slack připojený.
+
+### Bezpečnost
+
+- Do Slacku jde jen druh události, počty a odkaz do adminu. Texty od lidí, kontakty ani názvy vlastních výzev ne.
+
 ## 2.4.0 – 23. 11. 2026
 
 Přehled adminu s AI.

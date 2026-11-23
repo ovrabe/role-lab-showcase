@@ -1,3 +1,4 @@
+import { notify } from "./notify.js";
 import { adminAskInstructions, buildAdminAskMessage, cleanAdminAnswer, maxQuestionChars } from "../src/prompts/adminAsk.js";
 import { askData } from "../src/admin/askContext.js";
 import type { AdminOverview as AskOverview } from "../src/admin/adminApi.js";
@@ -155,6 +156,7 @@ export async function handleAdmin(request: Request, deps: AdminDeps): Promise<Re
     if (!tokenMatches(given, adminToken)) {
       const failures = (await limiter.counter.add?.(failKey, 1)) ?? 1;
       if ((await limiter.counter.add?.(`alert:${pragueDay(now)}:admin_login`, 1)) === 1) await alertFailedLogin(deps, failures);
+      await notify(limiter, "admin_login", `:lock: Neúspěšné přihlášení do adminu (${failures}. pokus z jedné adresy dnes).`, request);
       return badRequest("unauthorized", "Wrong token.", 401);
     }
   } catch (error) {
@@ -205,6 +207,8 @@ export type AdminOverview = {
   days: { day: string; metrics: MetricEntries; visitors: number }[];
   // The same number of days just before, for the trends on the overview.
   previousDays: { day: string; metrics: MetricEntries; visitors: number }[];
+  // Whether Slack notifications and the morning message are set up in the Vercel settings.
+  notifications: { slack: boolean; morning: boolean };
   budget: { perIpUsd: number; totalUsd: number; spentTodayUsd: number };
   limits: typeof dailyLimits;
   tasks: { id: string; roleTitle: string; taskTitle: string; difficulty: number }[];
@@ -214,7 +218,7 @@ export type AdminOverview = {
   log: { at: string; action: string; detail?: string }[];
 };
 
-async function overview(deps: AdminDeps, log: AdminLog, dayCount: number, now: Date): Promise<AdminOverview> {
+export async function overview(deps: AdminDeps, log: AdminLog, dayCount: number, now: Date): Promise<AdminOverview> {
   const { limiter, content } = deps;
   const perDay = await readDays(limiter, dayCount, 0, now);
   const previousDays = await readDays(limiter, dayCount, dayCount, now);
@@ -224,6 +228,7 @@ async function overview(deps: AdminDeps, log: AdminLog, dayCount: number, now: D
     generatedAt: now.toISOString(),
     days: perDay,
     previousDays,
+    notifications: { slack: Boolean(limiter.notifier), morning: (process.env.CRON_SECRET?.trim().length ?? 0) >= 16 },
     budget: { perIpUsd: dailyBudgetUsd.perIp, totalUsd: dailyBudgetUsd.total, spentTodayUsd: spentToday },
     limits: limiter.limits ?? dailyLimits,
     tasks: content.roles.activeRoles.map((role) => ({ id: role.id, roleTitle: role.title, taskTitle: role.taskTitle, difficulty: role.difficulty })),
@@ -248,7 +253,7 @@ async function overview(deps: AdminDeps, log: AdminLog, dayCount: number, now: D
 const dayMs = 24 * 60 * 60 * 1000;
 
 /** dayCount days ending skip days before today, newest first. Metrics older than 90 days are gone. */
-async function readDays(limiter: RateLimiter, dayCount: number, skip: number, now: Date) {
+export async function readDays(limiter: RateLimiter, dayCount: number, skip: number, now: Date) {
   const metrics = limiter.metrics;
   const days = Array.from({ length: dayCount }, (_, index) => pragueDay(new Date(now.getTime() - (index + skip) * dayMs)));
   return Promise.all(
@@ -260,36 +265,41 @@ async function readDays(limiter: RateLimiter, dayCount: number, skip: number, no
   );
 }
 
-async function summary(request: Request, deps: AdminDeps, dayCount: number, refresh: boolean, now: Date): Promise<Response> {
+export type SummaryOutcome = { ok: true; summary: AdminSummary; cached: boolean } | { ok: false; code: string; status: number };
+
+/** The AI summary of the last dayCount days: from today's cache, or newly written by the quick model. */
+export async function writeSummary(deps: AdminDeps, dayCount: number, refresh: boolean, now: Date, signal?: AbortSignal): Promise<SummaryOutcome> {
   const { limiter, claude } = deps;
   const cache = deps.summaryCache ?? memorySummaryCache();
   const key = `admin:summary:${pragueDay(now)}:${dayCount}`;
   if (!refresh) {
     const cached = await cache.get(key);
-    if (cached) return json({ ...(JSON.parse(cached) as AdminSummary), cached: true });
+    if (cached) return { ok: true, summary: JSON.parse(cached) as AdminSummary, cached: true };
   }
-  if (!claude?.evaluateChallenge) return badRequest("unavailable", "Summary is not available.", 503);
+  if (!claude?.evaluateChallenge) return { ok: false, code: "unavailable", status: 503 };
   // Only a new summary counts; a cached one costs nothing.
-  if (!(await takeAiCall(limiter, now))) return badRequest("limit_daily", "Too many AI calls today.", 429);
+  if (!(await takeAiCall(limiter, now))) return { ok: false, code: "limit_daily", status: 429 };
   const current = await readDays(limiter, dayCount, 0, now);
   const previous = await readDays(limiter, dayCount, dayCount, now);
   const prompt = buildAdminSummaryPrompt(current.at(-1)!.day, current[0].day, digest(current), digest(previous));
   const call = measureCall(limiter.metrics, "adminSummary");
   try {
-    const reply = await claude.evaluateChallenge(prompt, {
-      signal: request.signal,
-      onUsage: async (model, usage) => call.usage(model, usage),
-    });
+    const reply = await claude.evaluateChallenge(prompt, { signal: signal ?? new AbortController().signal, onUsage: async (model, usage) => call.usage(model, usage) });
     const result = validateAdminSummary(parseJsonReply(reply));
     await call.finish(result ? "ok" : "invalid_json");
-    if (!result) return badRequest("invalid_reply", "The summary could not be read.", 502);
+    if (!result) return { ok: false, code: "invalid_reply", status: 502 };
     await cache.set(key, JSON.stringify(result));
-    return json({ ...result, cached: false });
+    return { ok: true, summary: result, cached: false };
   } catch (error) {
     const failure = asClaudeError(error);
     await call.finish(failure.code);
-    return badRequest(failure.code, "The summary could not be written.", 502);
+    return { ok: false, code: failure.code, status: 502 };
   }
+}
+
+async function summary(request: Request, deps: AdminDeps, dayCount: number, refresh: boolean, now: Date): Promise<Response> {
+  const outcome = await writeSummary(deps, dayCount, refresh, now, request.signal);
+  return outcome.ok ? json({ ...outcome.summary, cached: outcome.cached }) : badRequest(outcome.code, "The summary could not be written.", outcome.status);
 }
 
 async function ask(request: Request, deps: AdminDeps, log: AdminLog, dayCount: number, question: string, now: Date): Promise<Response> {

@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 import type { MetricsStore } from "./metrics.js";
+import type { Notifier } from "./notify.js";
 import { upstashTransaction } from "./upstash.js";
 
 /**
@@ -46,6 +47,8 @@ export type RateLimiter = {
   // Anonymous daily metrics for the admin page (server/metrics.ts). Kept here because every
   // handler already has the limiter; without it nothing is measured.
   metrics?: MetricsStore | null;
+  // Slack notifications for the author (server/notify.ts); kept here for the same reason.
+  notifier?: Notifier | null;
 };
 
 const keyLifetimeSeconds = 2 * 24 * 60 * 60;

@@ -1,3 +1,4 @@
+import { notify } from "./notify.js";
 import { addMetrics } from "./metrics.js";
 import { createHmac } from "node:crypto";
 import { badRequest } from "./http.js";
@@ -12,6 +13,8 @@ import type { IssueTracker } from "./issues.js";
  * ceiling is reached: per IP address, so one source cannot use up the day, and in total.
  */
 export const dailyBudgetUsd = { perIp: 1.5, total: 3 };
+// Share of the daily ceiling at which the author gets a Slack notification.
+const budgetWarningShare = 0.7;
 
 // Dollars per million tokens (Claude API docs, November 2026). One token costs that many
 // millionths of a dollar, so the counters hold whole micro-dollars.
@@ -83,6 +86,12 @@ export async function recordSpend(limiter: RateLimiter, request: Request, model:
   const cost = costMicroUsd(model, usage);
   try {
     for (const { key } of budgetKeys(limiter, request)) await limiter.counter.add(key, cost);
+    const day = pragueDay(limiter);
+    const spent = await limiter.counter.add(`spend:${day}:total`, 0);
+    // Once a day, when the day's spending first passes 70 % of the ceiling.
+    if (spent >= budgetWarningShare * dailyBudgetUsd.total * 1_000_000 && (await limiter.counter.add(`alert:${day}:budget_warning`, 1)) === 1) {
+      await notify(limiter, "budget", `:money_with_wings: Dnešní útrata je ${(spent / 1_000_000).toFixed(2).replace(".", ",")} $ z ${dailyBudgetUsd.total} $ (přes 70 % stropu).`, request);
+    }
   } catch (error) {
     console.error("Recording the spend failed:", error);
   }

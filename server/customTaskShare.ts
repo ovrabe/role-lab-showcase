@@ -1,3 +1,4 @@
+import { notify } from "./notify.js";
 import { z } from "zod";
 import { publicPart, type PublicGeneratedTask } from "../src/customTask/generatedTask.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
@@ -84,5 +85,7 @@ export async function handleCustomTaskShare(request: Request, { limiter, customT
     }
   }
   await countCustomTask(limiter, "shared");
+  // Only that a request waits; the task's title comes from what a person typed, so it stays out.
+  await notify(limiter, "share", ":inbox_tray: Čeká žádost o sdílení vlastní výzvy.", request);
   return json({ kind: "ok", status: "pending" } satisfies CustomTaskStatusResponse);
 }

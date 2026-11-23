@@ -1,3 +1,4 @@
+import { slackNotifier } from "./notify.js";
 import { memoryAdminLog, memorySummaryCache, upstashAdminLog, upstashSummaryCache, type AdminLog, type SummaryCache } from "./adminHandler.js";
 import { memoryMetrics, upstashMetrics } from "./metrics.js";
 import { loadServerContent, type ServerContent } from "./content.js";
@@ -65,6 +66,8 @@ export function getServerDeps(): ServerDeps {
         // The API key is already a server-only secret; reusing it saves setting another one.
         secret: apiKey ?? "local-development",
         metrics: storeUrl && storeToken ? upstashMetrics(storeUrl, storeToken) : memoryMetrics(),
+        // Slack for the author: only when a webhook is set in the Vercel settings.
+        notifier: process.env.SLACK_WEBHOOK_URL?.trim() ? slackNotifier(process.env.SLACK_WEBHOOK_URL.trim()) : null,
       },
       feedback: storeUrl && storeToken ? upstashFeedbackStore(storeUrl, storeToken) : memoryFeedbackStore(),
       issues: issuesToken && issuesRepository ? githubIssueTracker(issuesToken, issuesRepository) : onVercel ? null : memoryIssueTracker(),

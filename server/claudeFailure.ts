@@ -1,3 +1,4 @@
+import { notify } from "./notify.js";
 import type { ClaudeError } from "./claudeClient.js";
 import type { IssueTracker } from "./issues.js";
 import { giveBackToLimit, type LimitedAction, type RateLimiter } from "./rateLimit.js";
@@ -26,6 +27,10 @@ export async function handleClaudeFailure(
 ): Promise<void> {
   if (error.code === "cancelled") return;
   console.error(`Claude call failed (${action}): ${error.code} – ${error.message}`);
+  // The person's own mistakes (too long, refused) are not an outage; these are.
+  if (ourOutages.has(error.code) || error.code === "overloaded") {
+    await notify(limiter, "model_error", `:warning: Volání modelu selhává (${action}: ${error.code}). Podrobnosti v adminu, záložka Modely a útrata.`, request);
+  }
 
   if (ourOutages.has(error.code) && !error.text) {
     try {

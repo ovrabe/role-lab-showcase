@@ -1,3 +1,4 @@
+import { notify } from "./notify.js";
 import { z } from "zod";
 import type { ServerContent } from "./content.js";
 import type { IssueTracker } from "./issues.js";
@@ -68,6 +69,9 @@ export async function handleStats(
       : { [`funnel.${id}.${taskEvent.data.event.replace("task_", "")}`]: 1 }
     : pageEventMetrics(pageEvent!.data!, id);
   await addMetrics(limiter.metrics, metrics, now);
+  if (pageEvent?.success && pageEvent.data.event === "client_error") {
+    await notify(limiter, "page_error", ":bug: Na stránce nastala chyba. Počty jsou v adminu, Modely a útrata › Bezpečnost a chyby stránky.", request);
+  }
   try {
     await limiter.metrics?.addUnique(metricsDay(now), "visitors", dailyVisitorMark(request, limiter.secret, metricsDay(now)));
   } catch (error) {

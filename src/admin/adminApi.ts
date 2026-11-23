@@ -31,6 +31,7 @@ export type AdminOverview = {
   generatedAt: string;
   days: DayMetrics[];
   previousDays: DayMetrics[];
+  notifications: { slack: boolean; morning: boolean };
   budget: { perIpUsd: number; totalUsd: number; spentTodayUsd: number };
   limits: { perPerson: Record<string, number>; total: Record<string, number> };
   tasks: { id: string; roleTitle: string; taskTitle: string; difficulty: number }[];

@@ -166,7 +166,10 @@ export function OverviewTab({ data, token, onOpenTab }: { data: AdminOverview; t
 
       <p className="text-sm text-ink-muted">
         Verze {appVersion}
-        {releaseDate ? ` · vydáno ${releaseDate}` : ""} · anonymní denní součty, uchovávají se 90 dní
+        {releaseDate ? ` · vydáno ${releaseDate}` : ""} · anonymní denní součty, uchovávají se 90 dní ·{" "}
+        {data.notifications.slack
+          ? `upozornění do Slacku zapnutá${data.notifications.morning ? ", ranní zpráva kolem 8:00" : ", ranní zpráva vypnutá (chybí CRON_SECRET)"}`
+          : "Slack není připojený (SLACK_WEBHOOK_URL)"}
       </p>
     </div>
   );

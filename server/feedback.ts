@@ -1,3 +1,4 @@
+import { notify } from "./notify.js";
 import { z } from "zod";
 import { DimensionId } from "../src/roles/roleSchema.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
@@ -121,6 +122,9 @@ export async function handleFeedback(
     console.error("Saving feedback failed:", error);
     return badRequest("upstream_error", "Feedback could not be saved.", 503);
   }
+  // Only the kind: the text and any contact stay in the admin, never in Slack.
+  const kindName = { note: "vzkaz", evaluation: "hodnocení výsledku", tester: "odpovědi testera" }[entry.kind];
+  await notify(limiter, "feedback", `:speech_balloon: Nová zpětná vazba: ${kindName}.`, request);
   // The backlog copy is a convenience: the note is already saved, so a GitHub outage is only logged.
   const issue = issueFromFeedback(entry);
   if (issues && issue) {

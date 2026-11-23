@@ -234,6 +234,19 @@ Schváleno 22. 11. 2026. Autor chce vidět návštěvnost, průběh a výsledky 
 - **Útrata:** obojí se měří a v záložce Modely a útrata má vlastní řádky. Do denního rozpočtu testerů (`server/spendBudget.ts`) se ale nepočítá, aby autorovy otázky nemohly testerům vyčerpat peníze.
 - **Co jde k modelu:** jen součty. Zpětná vazba, kontakty ani texty od lidí ne.
 
+### Upozornění do Slacku
+
+- **Okamžitá upozornění** do kanálu za `SLACK_WEBHOOK_URL` (nastavení Vercelu, jen Production), každý druh nejvýš jednou za hodinu:
+  - čeká žádost o sdílení,
+  - útrata přesáhla 70 % denního stropu (jednou denně),
+  - volání modelu selhává (výpadek, přetížení),
+  - přišla zpětná vazba (jen její druh),
+  - neúspěšné přihlášení do adminu,
+  - chyba na stránce.
+- **Ranní zpráva:** Vercel jednou denně kolem 8:00 (v létě kolem 9:00) zavolá `/api/cron-morning` s tajným `CRON_SECRET`. Zpráva obsahuje AI shrnutí za 7 dní, včerejší čísla a počet věcí k řešení.
+- **Co do Slacku jde:** jen druh události, počty a odkaz do adminu. Žádné texty od lidí, názvy vlastních výzev ani kontakty.
+- **Bez `SLACK_WEBHOOK_URL`** se nic neposílá. Admin dole ukazuje, jestli je Slack připojený.
+
 ### Kontrola bezpečnosti adminu (23. 11. 2026)
 
 | Útok | Ochrana | Ověřeno |
