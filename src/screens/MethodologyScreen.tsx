@@ -3,7 +3,7 @@ import { isParticipantBuild, isWebBuild } from "../buildFlags";
 import type { RoleConfig } from "../roles/roleSchema";
 import { RoleRubric } from "../methodology/RoleRubric";
 import { AiIcon } from "../components/AiIcon";
-import { Ban, Calculator, Database, FileSearch, HardDrive, ShieldAlert, Wallet, type LucideIcon } from "lucide-react";
+import { Ban, BarChart3, Calculator, Database, FileSearch, HardDrive, ShieldAlert, Wallet, type LucideIcon } from "lucide-react";
 
 type MethodologyScreenProps = {
   roles: RoleConfig[];
@@ -103,7 +103,11 @@ const webDataFacts = [
   },
   {
     icon: HardDrive,
-    text: "Průběh úkolu se ukládá jen ve tvém prohlížeči. Server z konverzace nic neukládá. Kvůli dennímu limitu si nejdéle dva dny pamatuje jen počet pokusů a otisk IP adresy a náhodného čísla, které si vygeneroval tvůj prohlížeč. Z otisku původní hodnotu zjistit nejde a náhodné číslo s tebou nijak nesouvisí. Díky němu má vlastní limit každý, i když sdílíte jednu síť. Pro autora se navíc počítá, kolikrát se úkol začal, odevzdal a ohodnotil, jen jako denní součty bez identity a bez textů. Výsledek si můžeš stáhnout.",
+    text: "Průběh úkolu se ukládá jen ve tvém prohlížeči. Server z konverzace nic neukládá. Kvůli dennímu limitu si nejdéle dva dny pamatuje jen počet pokusů a otisk IP adresy a náhodného čísla, které si vygeneroval tvůj prohlížeč. Z otisku původní hodnotu zjistit nejde a náhodné číslo s tebou nijak nesouvisí. Díky němu má vlastní limit každý, i když sdílíte jednu síť. Výsledek si můžeš stáhnout.",
+  },
+  {
+    icon: BarChart3,
+    text: "Aby šla aplikace zlepšovat, počítají se 90 dní anonymní denní součty: které obrazovky se otevírají, jak úkoly probíhají a dopadají (úroveň, skóre, nalezené záludnosti), jak rychle a za kolik odpovídají modely a kolik nastalo chyb. Počet návštěvníků se odhaduje z otisku, který se každý den mění, takže návštěvy nejde spojit mezi dny. Návštěvnost a rychlost načítání měří také Vercel Web Analytics, bez cookies. Texty, jména ani IP adresy se nikde neukládají.",
   },
   {
     icon: ShieldAlert,

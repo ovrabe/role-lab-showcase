@@ -1,3 +1,4 @@
+import { addMetrics } from "./metrics.js";
 import { createHmac } from "node:crypto";
 import { badRequest } from "./http.js";
 import type { RateLimiter } from "./rateLimit.js";
@@ -64,6 +65,7 @@ export async function budgetResponse(limiter: RateLimiter, request: Request, iss
     for (const { key, max, code } of budgetKeys(limiter, request)) {
       if ((await limiter.counter.add(key, 0)) >= max) {
         await alertOnce(limiter, issues, code);
+        await addMetrics(limiter.metrics, { [`budget.refused.${code}`]: 1 });
         return badRequest(code, "Daily budget reached.", 429);
       }
     }

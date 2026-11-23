@@ -1,3 +1,4 @@
+import { addMetrics } from "./metrics.js";
 import { takeFromLimit, type LimitedAction, type RateLimiter } from "./rateLimit.js";
 
 /**
@@ -49,5 +50,7 @@ export async function limitResponse(limiter: RateLimiter, action: LimitedAction,
     console.error("Rate limit counter failed:", error);
     return badRequest("service_unavailable", "Limit counter unavailable.", 503);
   }
-  return code ? badRequest(code, "Daily limit reached.", 429) : null;
+  if (!code) return null;
+  await addMetrics(limiter.metrics, { [`limit.${action}.${code}`]: 1 });
+  return badRequest(code, "Daily limit reached.", 429);
 }

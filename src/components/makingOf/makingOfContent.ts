@@ -3,7 +3,7 @@
 // statusDate, figures, commitsPerDay. No money amounts on purpose (the author's decision):
 // they make the project read as a hobby; mechanisms like limits and budgets stay.
 
-export const statusDate = "21. 11. 2026";
+export const statusDate = "23. 11. 2026";
 
 export const sourceCodeUrl = "https://github.com/ovrabe/role-lab-showcase";
 
@@ -18,10 +18,10 @@ export const benefits = [
 export const figures = [
   { value: "9 / 22 / 15", label: "rolí, úkolů a výzev" },
   { value: "< 1 min", label: "trvá hodnocení" },
-  { value: "26", label: "releasů za 8 dní" },
+  { value: "27", label: "releasů za 10 dní" },
   { value: "3", label: "Claude modely podle úlohy" },
   { value: "11", label: "kontrol webu po každém releasu" },
-  { value: "824", label: "automatických testů" },
+  { value: "836", label: "automatických testů" },
 ];
 
 /**
@@ -44,6 +44,7 @@ export const workingDays: { month: number; day: number; commits: number; hours: 
   { month: 11, day: 17, commits: 31, hours: 2.14 },
   { month: 11, day: 20, commits: 30, hours: 5.26 },
   { month: 11, day: 21, commits: 18, hours: 3.78 },
+  { month: 11, day: 23, commits: 3, hours: 0.54 },
 ];
 
 /** The prototype phase, highlighted in the chart: up to the full prototype (3. 10.). */
@@ -136,7 +137,7 @@ export const decisions = [
 export const pipeline = [
   { title: "Specifikace", detail: "SPEC.md · PROMPTS.md", icon: "spec" },
   { title: "Kód a revize", detail: "Claude Code · 4 revizní agenti", icon: "code" },
-  { title: "Testy a kalibrace", detail: "824 testů · 22 úkolů", icon: "tests" },
+  { title: "Testy a kalibrace", detail: "836 testů · 22 úkolů", icon: "tests" },
   { title: "Sestavení", detail: "kontrola tajných dat · CSP", icon: "build" },
   { title: "Release", detail: "semver · changelog", icon: "release" },
   { title: "Produkce", detail: "Vercel · 11 kontrol", icon: "production" },

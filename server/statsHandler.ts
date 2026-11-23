@@ -3,6 +3,8 @@ import type { ServerContent } from "./content.js";
 import type { IssueTracker } from "./issues.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import type { RateLimiter } from "./rateLimit.js";
+import { addMetrics, pragueDay as metricsDay, type MetricEntries } from "./metrics.js";
+import { dailyVisitorMark, PageEvent, pageEventMetrics } from "./pageEvents.js";
 
 /**
  * Anonymous daily statistics for the author (web version, src/ai/track.ts): how many attempts
@@ -10,6 +12,8 @@ import type { RateLimiter } from "./rateLimit.js";
  * Only totals per day and task are stored, no identity and no text; they expire after two days.
  * The first event of a new day files a backlog issue with yesterday's numbers.
  * Custom tasks are counted by the server itself (countCustomTask), as daily totals only.
+ * The same events, and the page events of pageEvents.ts, also go into the 90-day metrics for
+ * the admin page, together with an estimate of unique visitors (no identity is kept).
  */
 const events = ["task_started", "task_submitted", "task_evaluated", "challenge_evaluated"] as const;
 const StatsRequest = z.object({ event: z.enum(events), id: z.string().max(80) });
@@ -38,20 +42,40 @@ export async function handleStats(
 ): Promise<Response> {
   const body = await readJson(request, 1_000);
   if (body instanceof Response) return body;
-  const parsed = StatsRequest.safeParse(body);
-  if (!parsed.success) return badRequest("invalid_request", "Invalid event.");
-  const { event, id } = parsed.data;
-  // Only ids that exist, so nobody can fill the store with made-up keys.
-  const known =
-    event === "challenge_evaluated"
+  const taskEvent = StatsRequest.safeParse(body);
+  const pageEvent = taskEvent.success ? null : PageEvent.safeParse(body);
+  if (!taskEvent.success && !pageEvent?.success) return badRequest("invalid_request", "Invalid event.");
+  const id = taskEvent.success ? taskEvent.data.id : pageEvent!.data!.id;
+  // Only ids that exist, so nobody can fill the store with made-up keys. Generated custom
+  // tasks are reported together as "custom" (src/ai/track.ts).
+  const isTask = (taskId: string) => taskId === "custom" || content.roles.activeRoles.some((role) => role.id === taskId);
+  const known = taskEvent.success
+    ? taskEvent.data.event === "challenge_evaluated"
       ? content.challenges.challenges.some((challenge) => challenge.id === id)
-      : content.roles.activeRoles.some((role) => role.id === id);
+      : isTask(id)
+    : ["task_step", "attempt", "review_change"].includes(pageEvent!.data!.event)
+      ? isTask(id)
+      : true;
   if (!known) return badRequest("invalid_request", "Unknown id.");
   if (!limiter.counter.add) return json({ ok: true });
   const limited = await limitResponse(limiter, "stats", request);
   if (limited) return limited;
 
   const now = (limiter.now ?? (() => new Date()))();
+  const metrics: MetricEntries = taskEvent.success
+    ? taskEvent.data.event === "challenge_evaluated"
+      ? {}
+      : { [`funnel.${id}.${taskEvent.data.event.replace("task_", "")}`]: 1 }
+    : pageEventMetrics(pageEvent!.data!, id);
+  await addMetrics(limiter.metrics, metrics, now);
+  try {
+    await limiter.metrics?.addUnique(metricsDay(now), "visitors", dailyVisitorMark(request, limiter.secret, metricsDay(now)));
+  } catch (error) {
+    console.error("Counting visitors failed:", error);
+  }
+  // The daily backlog issue below knows only the fixed tasks and challenges.
+  if (!taskEvent.success) return json({ ok: true });
+  const { event } = taskEvent.data;
   try {
     await limiter.counter.add(key(pragueDay(now), event, id), 1);
     if ((await limiter.counter.add(`alert:${pragueDay(now)}:stats`, 1)) === 1) await fileYesterday(content, limiter, issues, now);

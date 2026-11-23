@@ -197,3 +197,31 @@ První dva nápady pokrývá část 10 (fáze 1 a 2).
 - Jen CSV a Excel. Názvy sloupců se do pokynů vkládají jako data, stejně jako záznam do hodnotitele (ochrana proti vnuceným instrukcím).
 
 **Otevřené otázky:** model a cena krátkých výzev, seznam odznaků, limity pro výzvy, kdy dobít kredit a jaký měsíční rozpočet.
+
+## 11. Měření a admin (od verze 2.2)
+
+Schváleno 22. 11. 2026. Autor chce vidět návštěvnost, průběh a výsledky úkolů, výkon a útratu modelů, chyby, zpětnou vazbu a věci ke schválení na jedné webové stránce. Sbírá se co nejvíc, ale jen v podobě, která nepotřebuje souhlas.
+
+### Co se měří
+
+- **Vlastní počítadla** (`server/metrics.ts`, `server/outcomeMetrics.ts`, `server/pageEvents.ts`): denní součty v Upstash (Frankfurt), 90 dní. Obrazovky, kroky úkolu, výsledky hodnocení po úkolech (úroveň, skóre oblastí, stav záludností, délka, počet zpráv), pořadí pokusu a změna úrovně, ruční úpravy skóre, volání modelů (doba, tokeny, cena, výsledek), chyby podle kódu, zásahy limitů a rozpočtu, zablokované citlivé údaje, vlastní výzvy, chyby na stránce, dokončená prohlídka.
+- **Unikátní návštěvníci:** odhad (HyperLogLog) z otisku adresy a prohlížeče s klíčem, který se mění každý den. Otisk se neukládá a návštěvy nejde spojit mezi dny.
+- **Vercel Web Analytics a Speed Insights:** zdroj návštěvy, země, zařízení, prohlížeč, rychlost načítání. Bez cookies, skripty z vlastní domény. Z adresy se odstraní hodnoty parametrů (`src/ai/vercelInsights.ts`), zůstávají jen UTM značky.
+
+**Co se neměří:** texty konverzací a odevzdání, jména, e-maily, IP adresy, nic, co spojuje jednoho člověka v čase.
+
+### Proč to nepotřebuje souhlas
+
+- **Do zařízení se kvůli statistice nic neukládá ani se z něj nečte** (ePrivacy, § 89 zákona o elektronických komunikacích). Náhodné id v prohlížeči slouží jen denním limitům, tedy ochraně služby. Na statistiku se nepoužívá.
+- **Oprávněný zájem** (čl. 6 odst. 1 písm. f GDPR):
+  - **Účel:** provoz, bezpečnost a zlepšování aplikace (hledání chyb, ladění úkolů a hodnotitele, kontrola nákladů).
+  - **Nezbytnost:** bez součtů nejde poznat, kde lidé odpadají, který úkol je špatně nastavený nebo kdy model zpomalí. Užší varianta (jen chyby) by na to nestačila.
+  - **Vyvážení:** data jsou agregovaná a bez identity, krátce uchovávaná (90 dní) a lidé o nich vědí ze stránky Jak hodnotíme. Dopad na soukromí je zanedbatelný.
+- **Zpracovatelé:** Vercel (hosting, analytika), Upstash (databáze, EU), Anthropic (modely), GitHub (upozornění pro autora).
+
+### Admin
+
+- **Kroky:** admin API `/api/admin` a stránka `?admin`, obojí s tajným tokenem `ADMIN_TOKEN` z nastavení Vercelu.
+- **Ochrana tokenu:** porovnání v konstantním čase, nejvýš 10 chybných pokusů z adresy za den, upozornění v GitHub Issues.
+- **Kde je token:** v prohlížeči jen po dobu otevřené karty (sessionStorage).
+- **Co admin umí:** ukazuje součty, schvaluje sdílení vlastních výzev a vypíná generování. Každou akci zapisuje do logu.

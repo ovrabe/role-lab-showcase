@@ -1,3 +1,4 @@
+import { addMetrics, measureCall } from "./metrics.js";
 import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { buildGeneratorPrompt } from "../src/customTask/generatorPrompt.js";
@@ -47,7 +48,10 @@ export async function handleCustomTask(request: Request, { claude, limiter, issu
   if (!parsed.success) return badRequest("invalid_request", "Invalid custom task request.");
   if (!claude.generateCustomTask) return badRequest("unavailable", "Custom tasks are not available.", 503);
   // The page blocks these already; a request that skipped it is refused before anything is stored.
-  if (hasBlockingData(describeRequest(parsed.data))) return badRequest("sensitive_data", "The description contains personal data.");
+  if (hasBlockingData(describeRequest(parsed.data))) {
+    await addMetrics(limiter.metrics, { "security.sensitive_data_blocked": 1 });
+    return badRequest("sensitive_data", "The description contains personal data.");
+  }
 
   if (await customTasks.isGenerationOff()) return badRequest("custom_tasks_off", "Custom tasks are switched off.", 503);
   const overBudget = await budgetResponse(limiter, request, issues);
@@ -58,16 +62,18 @@ export async function handleCustomTask(request: Request, { claude, limiter, issu
   const prompt = buildGeneratorPrompt(describeRequest(parsed.data));
   // A reply that fails the checks gets one more try; the second failure returns the problems.
   let problems: string[] = [];
+  const call = measureCall(limiter.metrics, "customTask");
   for (let attempt = 1; attempt <= 2; attempt++) {
     let reply: string;
     try {
       reply = await claude.generateCustomTask(prompt, {
         signal: request.signal,
-        onUsage: (model, usage) => recordSpend(limiter, request, model, usage),
+        onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
       });
     } catch (error) {
       const failure = asClaudeError(error);
       await handleClaudeFailure({ limiter, issues }, "customTask", request, failure);
+      await call.finish(failure.code);
       return json({ kind: "error", code: failure.code, message: failure.message } satisfies CustomTaskResponse);
     }
     const checked = checkGeneratedTask(parseJsonReply(reply));
@@ -80,11 +86,15 @@ export async function handleCustomTask(request: Request, { claude, limiter, issu
         return badRequest("service_unavailable", "Could not store the task.", 503);
       }
       await countCustomTask(limiter, "generated");
+      await call.finish("ok");
       return json({ kind: "ok", id, task: publicPart(checked.task) } satisfies CustomTaskResponse);
     }
     problems = checked.problems;
+    // Why the generator's answer was refused: shows which instruction it keeps breaking.
+    for (const problem of problems) call.add(`customTask.rejected.${problem.split(":")[0]}`);
     console.warn(`Custom task attempt ${attempt} rejected: ${problems.join(", ")}`);
   }
+  await call.finish("rejected");
   // Our generator failed, not the person: the day's single attempt is given back.
   await giveBackToLimit(limiter, "customTask", request);
   return json({ kind: "invalid", problems } satisfies CustomTaskResponse);

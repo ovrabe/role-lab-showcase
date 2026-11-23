@@ -58,6 +58,9 @@ function localApi(): Plugin {
           "/api/custom-task": ["/server/customTaskHandler.ts", "handleCustomTask"],
           "/api/custom-task-status": ["/server/customTaskShare.ts", "handleCustomTaskStatus"],
           "/api/custom-task-share": ["/server/customTaskShare.ts", "handleCustomTaskShare"],
+          "/api/stats": ["/server/statsHandler.ts", "handleStats"],
+          "/api/why": ["/server/whyHandler.ts", "handleWhy"],
+          "/api/example": ["/server/exampleHandler.ts", "handleExample"],
         };
         const route = routes[req.url ?? ""];
         if (!route) return next();
@@ -161,6 +164,7 @@ export default defineConfig(({ mode }) => ({
             "server/customTaskHandler.test.ts",
             "server/customTaskSolve.test.ts",
             "server/customTaskShare.test.ts",
+            "server/metrics.test.ts",
             "server/injection.test.ts",
             "server/rateLimit.test.ts",
             "src/challenges/challengeKeys.test.ts",

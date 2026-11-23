@@ -1,3 +1,4 @@
+import { measureCall } from "./metrics.js";
 import { z } from "zod";
 import { TaskSession } from "../src/session/sessionSchema.js";
 import { buildWhyPrompt } from "../src/prompts/why.js";
@@ -39,15 +40,21 @@ export async function handleWhy(request: Request, deps: HandlerDeps): Promise<Re
   const limited = await limitResponse(limiter, "why", request);
   if (limited) return limited;
 
+  const call = measureCall(limiter.metrics, "why");
   let reply: string;
   try {
-    reply = await claude.evaluateChallenge(prompt, { signal: request.signal, onUsage: (model, usage) => recordSpend(limiter, request, model, usage) });
+    reply = await claude.evaluateChallenge(prompt, {
+      signal: request.signal,
+      onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
+    });
   } catch (error) {
     const failure = asClaudeError(error);
     await handleClaudeFailure({ limiter, issues }, "why", request, failure);
+    await call.finish(failure.code);
     return json({ kind: "error", code: failure.code, message: failure.message } satisfies WhyResponse);
   }
   const why = validateWhyReply(parseJsonReply(reply), session);
+  await call.finish(why ? "ok" : "invalid_json");
   if (!why) return json({ kind: "error", code: "invalid_json", message: "Unreadable explanation." } satisfies WhyResponse);
   return json({ kind: "ok", why } satisfies WhyResponse);
 }

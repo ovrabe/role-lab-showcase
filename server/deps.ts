@@ -1,3 +1,4 @@
+import { memoryMetrics, upstashMetrics } from "./metrics.js";
 import { loadServerContent, type ServerContent } from "./content.js";
 import { anthropicClient, type ClaudeClient } from "./claudeClient.js";
 import { mockClaude } from "./mockClaude.js";
@@ -54,6 +55,7 @@ export function getServerDeps(): ServerDeps {
         counter: storeUrl && storeToken ? upstashCounter(storeUrl, storeToken) : memoryCounter(),
         // The API key is already a server-only secret; reusing it saves setting another one.
         secret: apiKey ?? "local-development",
+        metrics: storeUrl && storeToken ? upstashMetrics(storeUrl, storeToken) : memoryMetrics(),
       },
       feedback: storeUrl && storeToken ? upstashFeedbackStore(storeUrl, storeToken) : memoryFeedbackStore(),
       issues: issuesToken && issuesRepository ? githubIssueTracker(issuesToken, issuesRepository) : onVercel ? null : memoryIssueTracker(),

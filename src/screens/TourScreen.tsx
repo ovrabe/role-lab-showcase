@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Send } from "lucide-react";
+import { track } from "../ai/track";
 import { BriefPanel } from "../task/BriefPanel";
 import { ChatMessages } from "../assistant/ChatMessages";
 import { ResultScreen } from "../result/ResultScreen";
@@ -145,7 +146,15 @@ function TourWalkthrough({ tour, onChooseTask, onTryChallenge }: TourProps & { t
             <h2 className="text-base font-semibold">Tvůj výsledek</h2>
             <p className="whitespace-pre-wrap rounded-control border border-line bg-surface p-3">{tour.submission}</p>
           </section>
-          <NextButton onClick={() => setStage(3)}>Odevzdat a ohodnotit</NextButton>
+          <NextButton
+            onClick={() => {
+              setStage(3);
+              // How many people get through the whole tour (anonymous count, src/ai/track.ts).
+              track("tour_completed", "tour");
+            }}
+          >
+            Odevzdat a ohodnotit
+          </NextButton>
         </>
       )}
 

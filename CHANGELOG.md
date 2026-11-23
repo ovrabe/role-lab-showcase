@@ -2,6 +2,21 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.2.0 – 23. 11. 2026
+
+Anonymní měření pro zlepšování aplikace.
+
+### Přidáno
+
+- Anonymní denní součty na 90 dní: které obrazovky se otevírají, jak úkoly probíhají a dopadají, jak rychle a za kolik odpovídají modely a kolik nastalo chyb. Bez textů, jmen a IP adres.
+- Odhad počtu návštěvníků z otisku, který se každý den mění. Návštěvy nejde spojit mezi dny a do prohlížeče se kvůli tomu nic neukládá.
+- Vercel Web Analytics a Speed Insights: odkud lidé přicházejí a jak rychle se stránka načítá. Bez cookies, adresa jde bez odkazů na sdílené úkoly.
+- Stránka Jak hodnotíme popisuje, co se měří a proč.
+
+### Opraveno
+
+- Lokální vývojový server zná i statistiku, „Proč tohle skóre?“ a silný pokus.
+
 ## 2.1.0 – 21. 11. 2026
 
 Vlastní výzva pro testery a spolehlivější hodnocení.

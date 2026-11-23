@@ -1,3 +1,4 @@
+import { measureCall } from "./metrics.js";
 import { z } from "zod";
 import { buildChallengePrompt } from "../src/challenges/challengePrompt.js";
 import { maxAnswerChars, minAnswerChars, validateChallengeReply, type ChallengeResult } from "../src/challenges/challengeResult.js";
@@ -44,20 +45,35 @@ export async function handleChallenge(request: Request, { content, claude, limit
   // An unreadable reply (cut short, or broken JSON) gets one more try: it costs a fraction
   // of a crown and the person never sees the hiccup.
   const prompt = buildChallengePrompt(challenge, key, answer);
+  const call = measureCall(limiter.metrics, "challenge");
   let raw: unknown;
   for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
     try {
       raw = parseJsonReply(
-        await claude.evaluateChallenge(prompt, { signal: request.signal, onUsage: (model, usage) => recordSpend(limiter, request, model, usage) }),
+        await claude.evaluateChallenge(prompt, {
+          signal: request.signal,
+          onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
+        }),
       );
     } catch (error) {
       const failure = asClaudeError(error);
       await handleClaudeFailure({ limiter, issues }, "challenge", request, failure);
+      await call.finish(failure.code);
       return json({ kind: "error", code: failure.code, message: failure.message } satisfies ChallengeResponse);
     }
   }
-  if (raw === undefined) return json({ kind: "invalid", problems: ["invalid_json"] } satisfies ChallengeResponse);
+  if (raw === undefined) {
+    await call.finish("invalid_json");
+    return json({ kind: "invalid", problems: ["invalid_json"] } satisfies ChallengeResponse);
+  }
   const result = validateChallengeReply(raw, key, answer);
-  if (!result.ok) return json({ kind: "invalid", problems: result.problems } satisfies ChallengeResponse);
+  if (!result.ok) {
+    await call.finish("invalid_shape");
+    return json({ kind: "invalid", problems: result.problems } satisfies ChallengeResponse);
+  }
+  call.add(`challenge.${challenge.id}.count`);
+  call.add(`challenge.${challenge.id}.score_sum`, result.result.score);
+  call.add(`challenge.${challenge.id}.score.${result.result.score}`);
+  await call.finish("ok");
   return json({ kind: "ok", result: result.result } satisfies ChallengeResponse);
 }

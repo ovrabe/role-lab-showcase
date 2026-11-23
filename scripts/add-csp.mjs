@@ -18,7 +18,9 @@ if (scriptHashes.length === 0) throw new Error("No inline script found in dist-w
 
 const policy = [
   "default-src 'self'",
-  `script-src ${scriptHashes.join(" ")}`,
+  // 'self' only for Vercel Web Analytics and Speed Insights, which load their scripts from
+  // our own domain (/_vercel/..., src/ai/vercelInsights.ts). Nothing else is served there.
+  `script-src 'self' ${scriptHashes.join(" ")}`,
   // React sets some styles inline; fonts come from Google Fonts (the one allowed outside host).
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src https://fonts.gstatic.com",

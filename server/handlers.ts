@@ -1,3 +1,5 @@
+import { measureCall } from "./metrics.js";
+import { outcomeMetrics } from "./outcomeMetrics.js";
 import { z } from "zod";
 import { TranscriptItem, TaskSession } from "../src/session/sessionSchema.js";
 import type { RoleConfig } from "../src/roles/roleSchema.js";
@@ -143,17 +145,20 @@ export async function handleChat(request: Request, deps: HandlerDeps): Promise<R
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: ChatStreamEvent) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+      const call = measureCall(limiter.metrics, "chat");
       try {
         const result = await claude.chat(fitted.turns, {
           signal: request.signal,
           onDelta: (text) => send({ type: "delta", text }),
-          onUsage: (model, usage) => recordSpend(limiter, request, model, usage),
+          onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
         });
         send({ type: "done", truncated: result.truncated });
+        await call.finish(result.truncated ? "truncated" : "ok");
       } catch (error) {
         const failure = asClaudeError(error);
         await handleClaudeFailure({ limiter, issues }, "chat", request, failure);
         send({ type: "error", code: failure.code, message: failure.message });
+        await call.finish(failure.code);
       } finally {
         controller.close();
       }
@@ -195,29 +200,40 @@ export async function handleEvaluate(request: Request, deps: HandlerDeps): Promi
   // A reply that is not readable JSON (about 1 in 90 in calibration) gets one more try; the
   // person should not lose one of the day's two evaluations to a glitch of the model.
   const prompt = buildEvaluatorPrompt(role, key, session);
+  const call = measureCall(limiter.metrics, "evaluate");
   let raw: unknown;
   for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
     let reply: string;
     try {
       reply = await claude.evaluate(prompt, {
         signal: request.signal,
-        onUsage: (model, usage) => recordSpend(limiter, request, model, usage),
+        onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
       });
     } catch (error) {
       const failure = asClaudeError(error);
       await handleClaudeFailure({ limiter, issues }, "evaluate", request, failure);
+      await call.finish(failure.code);
       return json({ kind: "error", code: failure.code, message: failure.message } satisfies EvaluateResponse);
     }
     raw = parseJsonReply(reply);
-    if (raw === undefined) console.warn(`Evaluation attempt ${attempt}: reply is not readable JSON.`);
+    if (raw === undefined) {
+      console.warn(`Evaluation attempt ${attempt}: reply is not readable JSON.`);
+      call.add("evaluate.unreadable_reply");
+    }
   }
   if (raw === undefined) {
     // Our model failed twice, not the person: the attempt is given back.
     await giveBackToLimit(limiter, "evaluate", request);
+    await call.finish("invalid_json");
     return json({ kind: "invalid", problems: ["invalid_json"] } satisfies EvaluateResponse);
   }
   const result = validateEvaluation(raw, role, key.traps, session.transcript, session.submission, session.reflection);
-  if (!result.ok) return json({ kind: "invalid", problems: result.problems } satisfies EvaluateResponse);
+  if (!result.ok) {
+    await call.finish("invalid_shape");
+    return json({ kind: "invalid", problems: result.problems } satisfies EvaluateResponse);
+  }
+  for (const [name, amount] of Object.entries(outcomeMetrics(role, session, result.evaluation))) call.add(name, amount);
+  await call.finish("ok");
 
   if (isCustomTask(role)) await countCustomTask(limiter, "evaluated");
 

@@ -6,8 +6,13 @@ import { applyThemeChoice, loadThemeChoice } from "./components/ThemeToggle";
 
 // Before the first render, so a saved theme does not flash in the other one first.
 applyThemeChoice(loadThemeChoice());
+import { trackScriptErrors } from "./ai/track";
+import { startVercelInsights } from "./ai/vercelInsights";
 import "./index.css";
 import "./phoneLayout.css";
+
+trackScriptErrors();
+void startVercelInsights();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

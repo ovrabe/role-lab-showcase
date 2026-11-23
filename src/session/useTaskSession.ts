@@ -122,6 +122,9 @@ export function useTaskSession(role: RoleConfig) {
     },
 
     addUserMessage(text: string, materialIds: string[]) {
+      // How far people get in a task (anonymous counts, src/ai/track.ts).
+      if (!session.transcript.some((item) => item.kind === "user")) track("task_step", role.id, { step: "first_message" });
+      if (materialIds.length > 0) track("task_step", role.id, { step: "data_attached" });
       setSession((current) => withUserMessage(current, role, text, materialIds));
     },
 
@@ -163,6 +166,12 @@ export function useTaskSession(role: RoleConfig) {
 
     // null removes the review: the AI evaluation applies again as it was.
     saveReview(review: ReviewerReview | null) {
+      // A score changed by hand: which area and which way, to see where people disagree with the evaluator.
+      const before = session.review?.scores ?? Object.fromEntries((session.evaluation?.output.dimensions ?? []).map((dimension) => [dimension.id, dimension.score]));
+      for (const [dimension, score] of Object.entries(review?.scores ?? {})) {
+        const previous = before[dimension as keyof typeof before];
+        if (previous !== undefined && score !== previous) track("review_change", role.id, { dimension, direction: score > previous ? "up" : "down" });
+      }
       setSession((current) => {
         const { review: _previous, ...rest } = current;
         return review ? { ...rest, review } : rest;
@@ -176,6 +185,7 @@ export function useTaskSession(role: RoleConfig) {
 
     restart() {
       deleteSession(role.id);
+      track("task_step", role.id, { step: "restarted" });
       track("task_started", role.id);
       setSession(createSession(role.id));
     },

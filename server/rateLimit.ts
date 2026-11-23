@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import type { MetricsStore } from "./metrics.js";
 import { upstashTransaction } from "./upstash.js";
 
 /**
@@ -42,6 +43,9 @@ export type RateLimiter = {
   secret: string;
   limits?: typeof dailyLimits;
   now?: () => Date;
+  // Anonymous daily metrics for the admin page (server/metrics.ts). Kept here because every
+  // handler already has the limiter; without it nothing is measured.
+  metrics?: MetricsStore | null;
 };
 
 const keyLifetimeSeconds = 2 * 24 * 60 * 60;

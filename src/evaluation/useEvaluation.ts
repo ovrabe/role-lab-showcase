@@ -4,7 +4,7 @@ import type { TaskSession } from "../session/sessionSchema";
 import type { TaskSessionControls } from "../session/useTaskSession";
 import type { AiBackend } from "../ai/aiBackend";
 import { attemptFromEvaluation } from "../progress/progress";
-import { recordAttempt } from "../progress/progressStorage";
+import { loadProgress, recordAttempt } from "../progress/progressStorage";
 import { isCustomTask } from "../customTask/customTaskRole";
 import { track } from "../ai/track";
 
@@ -50,7 +50,14 @@ export function useEvaluation(role: RoleConfig, controls: TaskSessionControls, b
       controls.saveEvaluation(outcome.evaluation);
       // Only the person's own evaluations count; samples and calibration never pass here.
       // A generated task is not calibrated, so it moves no skill level and unlocks nothing.
-      if (!isCustomTask(role)) recordAttempt(attemptFromEvaluation(role, outcome.evaluation));
+      if (!isCustomTask(role)) {
+        const attempt = attemptFromEvaluation(role, outcome.evaluation);
+        const earlier = loadProgress().attempts.filter((item) => item.roleId === role.id);
+        recordAttempt(attempt);
+        // Do people improve by trying again? Only the attempt number and the change of level are sent.
+        const previous = earlier.at(-1);
+        track("attempt", role.id, { attempt: earlier.length + 1, levelChange: previous ? attempt.level - previous.level : 0 });
+      }
       track("task_evaluated", role.id);
       setRun({ status: "idle" });
     } else if (outcome.kind === "missing_key") {

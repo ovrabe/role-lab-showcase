@@ -1,3 +1,4 @@
+import { track } from "./ai/track";
 import { useEffect, useState } from "react";
 import { PreviewPill } from "./components/PreviewPill";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -31,6 +32,8 @@ export default function App() {
 
   useEffect(() => {
     saveLastRoleId(screen.name === "task" ? screen.roleId : null);
+    // Which screens people open (web only, anonymous): the name of the screen, never its content.
+    track("screen_view", screen.name);
   }, [screen]);
 
   return (

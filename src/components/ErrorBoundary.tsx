@@ -1,3 +1,4 @@
+import { track } from "../ai/track";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 
 type ErrorBoundaryState = { hasError: boolean };
@@ -13,6 +14,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBound
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Rendering failed:", error, info.componentStack);
+    track("client_error", "render");
   }
 
   render() {
