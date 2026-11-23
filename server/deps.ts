@@ -1,3 +1,4 @@
+import { memoryAdminLog, upstashAdminLog, type AdminLog } from "./adminHandler.js";
 import { memoryMetrics, upstashMetrics } from "./metrics.js";
 import { loadServerContent, type ServerContent } from "./content.js";
 import { anthropicClient, type ClaudeClient } from "./claudeClient.js";
@@ -27,10 +28,16 @@ export type ServerDeps =
       issues: IssueTracker | null;
       // Generated custom tasks (docs/SPEC.md, section 14), kept 30 days.
       customTasks: CustomTaskStore;
+      // The admin page (server/adminHandler.ts): its secret token and its action log.
+      adminToken: string | undefined;
+      adminLog: AdminLog;
     }
   | { misconfigured: string };
 
 let cached: ServerDeps | undefined;
+
+// Local development only (never used on Vercel): the token for trying ?admin on localhost.
+export const localAdminToken = "local-admin-token-for-development-only";
 
 export function getServerDeps(): ServerDeps {
   if (cached) return cached;
@@ -60,6 +67,9 @@ export function getServerDeps(): ServerDeps {
       feedback: storeUrl && storeToken ? upstashFeedbackStore(storeUrl, storeToken) : memoryFeedbackStore(),
       issues: issuesToken && issuesRepository ? githubIssueTracker(issuesToken, issuesRepository) : onVercel ? null : memoryIssueTracker(),
       customTasks: storeUrl && storeToken ? upstashCustomTaskStore(storeUrl, storeToken) : memoryCustomTaskStore(),
+      // On Vercel only the real token from the settings; locally a fixed one, so ?admin can be tried.
+      adminToken: process.env.ADMIN_TOKEN?.trim() || (onVercel ? undefined : localAdminToken),
+      adminLog: storeUrl && storeToken ? upstashAdminLog(storeUrl, storeToken) : memoryAdminLog(),
     };
   }
   return cached;

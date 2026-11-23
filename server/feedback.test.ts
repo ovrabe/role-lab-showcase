@@ -85,7 +85,7 @@ describe("POST /api/feedback", () => {
 
   it("reports a store failure instead of pretending the note was saved", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    const failing: FeedbackStore = { save: async () => Promise.reject(new Error("down")) };
+    const failing: FeedbackStore = { save: async () => Promise.reject(new Error("down")), recent: async () => [] };
     const { deps } = setup(failing as ReturnType<typeof memoryFeedbackStore>);
     expect((await handleFeedback(send({ message: "ok" }), deps)).status).toBe(503);
   });

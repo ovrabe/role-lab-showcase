@@ -4,6 +4,7 @@ import { MethodologyScreen } from "./screens/MethodologyScreen";
 import { AboutScreen } from "./screens/AboutScreen";
 import { MakingOfScreen } from "./screens/MakingOfScreen";
 import { CustomTaskScreen } from "./screens/CustomTaskScreen";
+import { AdminScreen } from "./screens/AdminScreen";
 import { ReleaseNotesScreen } from "./screens/ReleaseNotesScreen";
 import { ChallengeScreen } from "./screens/ChallengeScreen";
 import { ChallengeMapScreen } from "./screens/ChallengeMapScreen";
@@ -34,6 +35,7 @@ export type Screen =
   | { name: "about" }
   | { name: "makingOf" }
   | { name: "customTask" }
+  | { name: "admin" }
   | { name: "profile" }
   | { name: "releaseNotes" }
   | { name: "challenge"; challengeId: string }
@@ -71,6 +73,8 @@ export function initialScreen(): Screen {
   if (isWebBuild && params.has("jak-vznikl")) return { name: "makingOf" };
   // ?vlastni-vyzva opens the custom task (docs/SPEC.md, section 14); ?vlastni-vyzva=<id> a shared one.
   if (isWebBuild && params.has("vlastni-vyzva")) return { name: "customTask" };
+  // ?admin opens the author's admin page (docs/PRODUCTION.md, part 11); it needs the secret token.
+  if (isWebBuild && params.has("admin")) return { name: "admin" };
   const lastRoleId = loadLastRoleId();
   // A generated custom task is known only in this browser (src/customTask/savedCustomTask.ts).
   return lastRoleId && (activeRoles.some((role) => role.id === lastRoleId) || (isWebBuild && savedCustomRole(lastRoleId)))
@@ -154,6 +158,7 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
       {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={aiStatus} backend={backend} />}
       {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}
       {isWebBuild && screen.name === "testing" && <TesterScenarioScreen />}
+      {isWebBuild && screen.name === "admin" && <AdminScreen />}
       {screen.name === "tour" && (
         <TourScreen
           onChooseTask={() => setScreen({ name: "home" })}

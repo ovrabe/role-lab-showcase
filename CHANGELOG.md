@@ -2,6 +2,20 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.3.0 – 23. 11. 2026
+
+Admin pro autora.
+
+### Přidáno
+
+- Admin na adrese `?admin`, chráněný tajným tokenem. Ukazuje návštěvnost, průchod úkoly a jejich výsledky, nalezené záludnosti, opakované pokusy, ruční úpravy skóre, rychlost, spolehlivost a cenu modelů, zpětnou vazbu a žádosti o sdílení vlastních výzev.
+- Sdílení vlastních výzev jde schválit a generování vypnout přímo v adminu. Každá akce se zapíše do logu.
+
+### Bezpečnost
+
+- Po 10 chybných pokusech o přihlášení z jedné adresy za den admin odmítá i správný token a autor dostane upozornění.
+- Návštěvy adminu se nezapočítávají do statistik.
+
 ## 2.2.0 – 23. 11. 2026
 
 Anonymní měření pro zlepšování aplikace.

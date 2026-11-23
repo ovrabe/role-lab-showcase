@@ -225,3 +225,19 @@ Schváleno 22. 11. 2026. Autor chce vidět návštěvnost, průběh a výsledky 
 - **Ochrana tokenu:** porovnání v konstantním čase, nejvýš 10 chybných pokusů z adresy za den, upozornění v GitHub Issues.
 - **Kde je token:** v prohlížeči jen po dobu otevřené karty (sessionStorage).
 - **Co admin umí:** ukazuje součty, schvaluje sdílení vlastních výzev a vypíná generování. Každou akci zapisuje do logu.
+
+### Kontrola bezpečnosti adminu (23. 11. 2026)
+
+| Útok | Ochrana | Ověřeno |
+|---|---|---|
+| Hádání tokenu | Token z 48 náhodných bajtů (2³⁸⁴ možností), nejvýš 10 chybných pokusů z adresy za den, pak odmítnutí i správného tokenu. První chyba dne založí issue. | test, ručně |
+| Odhad tokenu z doby odpovědi | Porovnání otisků stejné délky v konstantním čase (`timingSafeEqual`) | kód |
+| Požadavek z cizí stránky (CSRF) | Kontrola původu (`readJson`), token v hlavičce `Authorization`, kterou cizí stránka bez svolení serveru poslat nemůže | test, ručně (403) |
+| Krádež tokenu skriptem (XSS) | CSP pouští jen skripty se známým otiskem a z vlastní domény; admin vypisuje texty jen jako text (žádné vkládání HTML); token v `sessionStorage`, jen pro otevřenou kartu | kód |
+| Admin v rámu cizí stránky | `frame-ancestors 'none'`, `X-Frame-Options: DENY` | vercel.json |
+| Nenastavený nebo slabý token | Bez tokenu nebo s tokenem kratším než 32 znaků endpoint neexistuje (404). Lokální vývojový token se na Vercelu nikdy nepoužije. | test |
+| Výpadek Upstash | Kontrola pokusů selže zavřeně (503), admin se neotevře | kód |
+| Přetížení dotazy | Tělo nejvýš 2 kB (413), období nejvýš 90 dní (400), jen POST (405) | ručně |
+| Únik osobních údajů | Admin vrací jen součty a vlastní frontu zpětné vazby (kontakt testera jen přihlášenému autorovi); log akcí bez adres | test |
+
+**Zbylé riziko:** kdo získá token (třeba z odemčeného počítače), vidí zpětnou vazbu včetně kontaktů a může schvalovat sdílení. Proto token jen ve správci hesel. Při podezření vygeneruj nový a ve Vercelu ho přepiš (starý tím přestane platit po dalším nasazení).

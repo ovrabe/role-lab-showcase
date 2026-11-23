@@ -27,7 +27,11 @@ export type FeedbackEntry =
   // The tester scenario (?testovani): every question with its answer, grouped by step.
   | { kind: "tester"; answers: TesterAnswer[]; contact?: string; at: string };
 export type TesterAnswer = { step: string; question: string; answer: string };
-export type FeedbackStore = { save(entry: FeedbackEntry): Promise<void> };
+export type FeedbackStore = {
+  save(entry: FeedbackEntry): Promise<void>;
+  // The newest entries first, for the admin page (server/adminHandler.ts).
+  recent(limit: number): Promise<FeedbackEntry[]>;
+};
 
 // The newest notes are kept; older ones fall off, so spam cannot fill the database.
 const maxStoredNotes = 500;
@@ -72,6 +76,9 @@ export function memoryFeedbackStore(): FeedbackStore & { entries: FeedbackEntry[
     async save(entry) {
       entries.unshift(entry);
     },
+    async recent(limit) {
+      return entries.slice(0, limit);
+    },
   };
 }
 
@@ -82,6 +89,16 @@ export function upstashFeedbackStore(url: string, token: string): FeedbackStore 
         ["LPUSH", "feedback", JSON.stringify(entry)],
         ["LTRIM", "feedback", "0", String(maxStoredNotes - 1)],
       ]);
+    },
+    async recent(limit) {
+      const [values] = await upstashTransaction(url, token, [["LRANGE", "feedback", "0", String(limit - 1)]]);
+      return ((values ?? []) as string[]).flatMap((value) => {
+        try {
+          return [JSON.parse(value) as FeedbackEntry];
+        } catch {
+          return [];
+        }
+      });
     },
   };
 }

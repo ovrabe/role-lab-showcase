@@ -61,6 +61,7 @@ function localApi(): Plugin {
           "/api/stats": ["/server/statsHandler.ts", "handleStats"],
           "/api/why": ["/server/whyHandler.ts", "handleWhy"],
           "/api/example": ["/server/exampleHandler.ts", "handleExample"],
+          "/api/admin": ["/server/adminHandler.ts", "handleAdmin"],
         };
         const route = routes[req.url ?? ""];
         if (!route) return next();
@@ -165,6 +166,7 @@ export default defineConfig(({ mode }) => ({
             "server/customTaskSolve.test.ts",
             "server/customTaskShare.test.ts",
             "server/metrics.test.ts",
+            "server/adminHandler.test.ts",
             "server/injection.test.ts",
             "server/rateLimit.test.ts",
             "src/challenges/challengeKeys.test.ts",

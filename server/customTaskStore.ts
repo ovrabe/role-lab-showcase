@@ -23,6 +23,10 @@ export type CustomTaskStore = {
   requestShare(id: string, requestedAt: string): Promise<StoredCustomTask | null>;
   // The author's switch (npm run custom-task -- off): no new tasks, existing ones still work.
   isGenerationOff(): Promise<boolean>;
+  setGenerationOff(off: boolean): Promise<void>;
+  // For the admin page: requests waiting for a decision, and the decision itself.
+  listPending(): Promise<StoredCustomTask[]>;
+  decideShare(id: string, status: "approved" | "rejected", decidedAt: string): Promise<StoredCustomTask | null>;
 };
 
 export const customTaskLifetimeSeconds = 30 * 24 * 60 * 60;
@@ -34,9 +38,22 @@ export const generationOffKey = "custom-task:off";
 /** In this process's memory: for local development and tests only. */
 export function memoryCustomTaskStore(options: { generationOff?: boolean } = {}): CustomTaskStore {
   const records = new Map<string, StoredCustomTask>();
+  let generationOff = options.generationOff ?? false;
   return {
     async isGenerationOff() {
-      return options.generationOff ?? false;
+      return generationOff;
+    },
+    async setGenerationOff(off) {
+      generationOff = off;
+    },
+    async listPending() {
+      return [...records.values()].filter((record) => record.share?.status === "pending").map((record) => structuredClone(record));
+    },
+    async decideShare(id, status, decidedAt) {
+      const record = records.get(id);
+      if (!record) return null;
+      record.share = { requestedAt: record.share?.requestedAt ?? decidedAt, status, decidedAt };
+      return structuredClone(record);
     },
     async save(record) {
       records.set(record.id, structuredClone(record));
@@ -59,6 +76,30 @@ export function upstashCustomTaskStore(url: string, token: string): CustomTaskSt
     async isGenerationOff() {
       const [value] = await upstashTransaction(url, token, [["GET", generationOffKey]]);
       return value !== null && value !== undefined;
+    },
+    async setGenerationOff(off) {
+      await upstashTransaction(url, token, [off ? ["SET", generationOffKey, new Date().toISOString()] : ["DEL", generationOffKey]]);
+    },
+    async listPending() {
+      const [ids] = await upstashTransaction(url, token, [["SMEMBERS", pendingShareKey]]);
+      const list = (ids ?? []) as string[];
+      if (list.length === 0) return [];
+      const values = await upstashTransaction(url, token, list.map((id) => ["GET", keyOf(id)]));
+      // A task that expired after 30 days leaves its id behind; it is dropped from the list here.
+      const gone = list.filter((_, index) => typeof values[index] !== "string");
+      if (gone.length > 0) await upstashTransaction(url, token, [["SREM", pendingShareKey, ...gone]]);
+      return values.filter((value): value is string => typeof value === "string").map((value) => JSON.parse(value) as StoredCustomTask);
+    },
+    async decideShare(id, status, decidedAt) {
+      const record = await this.load(id);
+      if (!record) return null;
+      record.share = { requestedAt: record.share?.requestedAt ?? decidedAt, status, decidedAt };
+      // KEEPTTL: the decision does not extend the 30 days. XX: never recreate an expired task.
+      const [written] = await upstashTransaction(url, token, [
+        ["SET", keyOf(id), JSON.stringify(record), "KEEPTTL", "XX"],
+        ["SREM", pendingShareKey, id],
+      ]);
+      return written === "OK" ? record : null;
     },
     async save(record) {
       await upstashTransaction(url, token, [["SET", keyOf(record.id), JSON.stringify(record), "EX", String(customTaskLifetimeSeconds)]]);

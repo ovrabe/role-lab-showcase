@@ -33,7 +33,8 @@ export default function App() {
   useEffect(() => {
     saveLastRoleId(screen.name === "task" ? screen.roleId : null);
     // Which screens people open (web only, anonymous): the name of the screen, never its content.
-    track("screen_view", screen.name);
+    // The author's own admin visits would only distort the numbers.
+    if (screen.name !== "admin") track("screen_view", screen.name);
   }, [screen]);
 
   return (
