@@ -2,6 +2,12 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.3.1 – 23. 11. 2026
+
+### Bezpečnost
+
+- Vývojový přístup do adminu funguje jen ve vývojovém serveru na počítači autora. Kdekoli jinde se admin bez nastaveného tajného tokenu vůbec neotevře.
+
 ## 2.3.0 – 23. 11. 2026
 
 Admin pro autora.

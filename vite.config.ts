@@ -42,6 +42,9 @@ function localApi(): Plugin {
       // The key may sit in .env.local (ignored by git). Vite reads that file only for the page
       // and only VITE_ variables, so it is copied here into this Node process for the handlers.
       // It never reaches the browser: the page is built without it.
+      // Marks this process as the development server: only here the fixed development admin
+      // token works (server/deps.ts). Vite runs configureServer only for `vite`, not for builds.
+      process.env.ROLE_LAB_DEV_SERVER = "1";
       const fileKey = loadEnv("web", process.cwd(), "ANTHROPIC_").ANTHROPIC_API_KEY;
       if (fileKey && !process.env.ANTHROPIC_API_KEY) process.env.ANTHROPIC_API_KEY = fileKey;
       server.config.logger.info(

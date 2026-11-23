@@ -36,7 +36,8 @@ export type ServerDeps =
 
 let cached: ServerDeps | undefined;
 
-// Local development only (never used on Vercel): the token for trying ?admin on localhost.
+// The token for trying ?admin in the Vite development server only. It is public (this file is in
+// the public copy), so it must never open an admin anywhere else: see adminToken below.
 export const localAdminToken = "local-admin-token-for-development-only";
 
 export function getServerDeps(): ServerDeps {
@@ -67,8 +68,9 @@ export function getServerDeps(): ServerDeps {
       feedback: storeUrl && storeToken ? upstashFeedbackStore(storeUrl, storeToken) : memoryFeedbackStore(),
       issues: issuesToken && issuesRepository ? githubIssueTracker(issuesToken, issuesRepository) : onVercel ? null : memoryIssueTracker(),
       customTasks: storeUrl && storeToken ? upstashCustomTaskStore(storeUrl, storeToken) : memoryCustomTaskStore(),
-      // On Vercel only the real token from the settings; locally a fixed one, so ?admin can be tried.
-      adminToken: process.env.ADMIN_TOKEN?.trim() || (onVercel ? undefined : localAdminToken),
+      // The real token from the settings. The fixed development token only inside `npm run dev`
+      // (vite.config.ts sets ROLE_LAB_DEV_SERVER), never in a deployed build wherever it runs.
+      adminToken: process.env.ADMIN_TOKEN?.trim() || (process.env.ROLE_LAB_DEV_SERVER === "1" && !onVercel ? localAdminToken : undefined),
       adminLog: storeUrl && storeToken ? upstashAdminLog(storeUrl, storeToken) : memoryAdminLog(),
     };
   }
