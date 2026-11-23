@@ -86,6 +86,6 @@ export async function handleCustomTaskShare(request: Request, { limiter, customT
   }
   await countCustomTask(limiter, "shared");
   // Only that a request waits; the task's title comes from what a person typed, so it stays out.
-  await notify(limiter, "share", ":inbox_tray: Čeká žádost o sdílení vlastní výzvy.", request);
+  await notify(limiter, "share", ":inbox_tray: Čeká žádost o sdílení vlastní výzvy.");
   return json({ kind: "ok", status: "pending" } satisfies CustomTaskStatusResponse);
 }

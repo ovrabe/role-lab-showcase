@@ -2,6 +2,22 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.5.1 – 23. 11. 2026
+
+Bezpečnostní opravy po auditu.
+
+### Bezpečnost
+
+- Denní rozpočet na volání Clauda se nedá přestřelit souběžnými požadavky: před každým voláním se z něj zarezervuje nejvyšší možná cena a po dokončení se nahradí skutečnou.
+- Přerušené volání se do útraty započte.
+- Záznam postupu k hodnocení nemůže obsahovat dlouhé texty mimo zprávy a příliš dlouhý záznam server odmítne, místo aby ho poslal hodnotiteli.
+- Jedna IP adresa smí využít nejvýš třetinu denního limitu, takže nemůže zablokovat hodnocení ostatním.
+
+### Změněno
+
+- Denní limit pro všechny dohromady: 15 hodnocení (dříve 5) a 300 zpráv asistentovi (dříve 150).
+- Na Slack chodí odkaz do adminu místo tlačítka a vždy vede na veřejnou adresu.
+
 ## 2.5.0 – 23. 11. 2026
 
 Upozornění do Slacku.

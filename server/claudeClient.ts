@@ -58,6 +58,9 @@ export function toClaudeError(error: unknown, partialText = ""): ClaudeError {
   return { code: "upstream_error", message: "Unexpected error while calling Claude.", text: partialText };
 }
 
+/** Output allowance of each call; the daily budget holds this much before a call (spendBudget.ts). */
+export const maxOutputTokens = { chat: 16000, evaluate: 32000, generator: 16000, challenge: 8000 };
+
 /** The real client. The key comes only from the server's environment (ANTHROPIC_API_KEY). */
 export function anthropicClient(apiKey: string): ClaudeClient {
   // Vercel ends a function after 300 s (vercel.json). Giving up a little earlier returns a
@@ -72,7 +75,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
         const stream = client.beta.messages.stream(
           {
             model: assistantModel,
-            max_tokens: 16000,
+            max_tokens: maxOutputTokens.chat,
             betas: [fallbackBeta],
             fallbacks: "default",
             // Chat answers: thorough enough for calculations, without long pauses.
@@ -111,7 +114,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
         const stream = client.beta.messages.stream(
           {
             model: evaluatorModel,
-            max_tokens: 32000,
+            max_tokens: maxOutputTokens.evaluate,
             betas: [fallbackBeta],
             fallbacks: "default",
             // "medium" since 1.8.0: one calibration round on all 13 tasks (17. 11. 2026) kept the
@@ -136,7 +139,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
       try {
         // Streamed for the same reason as the evaluator: a long answer must not hit an HTTP timeout.
         const stream = client.messages.stream(
-          { model: generatorModel, max_tokens: 16000, system: prompt.system, messages: [{ role: "user", content: prompt.user }] },
+          { model: generatorModel, max_tokens: maxOutputTokens.generator, system: prompt.system, messages: [{ role: "user", content: prompt.user }] },
           { signal },
         );
         const message = await stream.finalMessage();
@@ -155,7 +158,7 @@ export function anthropicClient(apiKey: string): ClaudeClient {
           // The model thinks before it answers and the thinking counts toward max_tokens
           // (about 1,000 tokens in calibration). 2,000 cut the longer replies short; the
           // price is per token used, so a generous ceiling costs nothing extra.
-          { model: challengeModel, max_tokens: 8000, messages: [{ role: "user", content: prompt }] },
+          { model: challengeModel, max_tokens: maxOutputTokens.challenge, messages: [{ role: "user", content: prompt }] },
           { signal },
         );
         await onUsage?.(challengeModel, message.usage);

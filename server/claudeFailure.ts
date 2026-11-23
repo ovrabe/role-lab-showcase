@@ -29,7 +29,7 @@ export async function handleClaudeFailure(
   console.error(`Claude call failed (${action}): ${error.code} – ${error.message}`);
   // The person's own mistakes (too long, refused) are not an outage; these are.
   if (ourOutages.has(error.code) || error.code === "overloaded") {
-    await notify(limiter, "model_error", `:warning: Volání modelu selhává (${action}: ${error.code}). Podrobnosti v adminu, záložka Modely a útrata.`, request);
+    await notify(limiter, "model_error", `:warning: Volání modelu selhává (${action}: ${error.code}). Podrobnosti v adminu, záložka Modely a útrata.`);
   }
 
   if (ourOutages.has(error.code) && !error.text) {

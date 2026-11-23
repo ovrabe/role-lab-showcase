@@ -58,25 +58,89 @@ function budgetKeys(limiter: RateLimiter, request: Request) {
 }
 
 /**
- * The refusal to send when today's money is spent, or null when the call may go ahead.
+ * The most a call can cost, in micro-dollars: the prompt (about 2 characters a token, on the
+ * safe side for Czech; priced as a cache write) plus the whole output allowance.
+ */
+export function worstCaseMicroUsd(model: string, promptChars: number, maxOutputTokens: number): number {
+  const price = prices[model] ?? prices["claude-opus-5-5"];
+  return Math.ceil((promptChars / 2) * price.input * cacheWriteFactor + maxOutputTokens * price.output);
+}
+
+/** Money held for one request until its calls report what they really cost. */
+export type BudgetReservation = {
+  /** Adds what a finished call cost (the onUsage of the Claude client). */
+  record(model: string, usage: Usage): Promise<void>;
+  /**
+   * Replaces the held money with what was recorded. When the person cut the connection and no
+   * cost was reported, Anthropic may still have billed the call, so `ifCutOff` (by default
+   * the whole worst case) stays counted.
+   */
+  settle(ifCutOff?: number): Promise<void>;
+};
+
+/**
+ * Holds a call's worst-case cost on today's budget before the call, or returns the refusal.
+ * Holding before calling (one atomic increment per ceiling) means requests sent at the same
+ * moment cannot all slip under the ceiling: each sees the money the others hold.
+ * Without holds (until 2.5.0), 150 chats sent at once all saw an untouched budget.
  * The first refusal of the day for each ceiling files a backlog issue, so the author learns
  * whether it is interest (raise the ceiling) or one source hammering the server.
  */
-export async function budgetResponse(limiter: RateLimiter, request: Request, issues: IssueTracker | null = null): Promise<Response | null> {
-  if (!limiter.counter.add) return null;
+export async function reserveBudget(
+  limiter: RateLimiter,
+  request: Request,
+  issues: IssueTracker | null | undefined,
+  worstCase: number,
+): Promise<Response | BudgetReservation> {
+  const add = limiter.counter.add?.bind(limiter.counter);
+  if (!add) return { record: async () => {}, settle: async () => {} };
+  const keys = budgetKeys(limiter, request);
+  const held: string[] = [];
   try {
-    for (const { key, max, code } of budgetKeys(limiter, request)) {
-      if ((await limiter.counter.add(key, 0)) >= max) {
+    for (const { key, max, code } of keys) {
+      held.push(key);
+      // A call may start while today's spending (with what others hold) is under the ceiling,
+      // as before holds existed: an honest person near the ceiling still gets their evaluation.
+      // Parallel requests see each other's holds, so the day overshoots by one call at most.
+      if ((await add(key, worstCase)) - worstCase >= max) {
+        for (const heldKey of held) await add(heldKey, -worstCase);
         await alertOnce(limiter, issues, code);
         await addMetrics(limiter.metrics, { [`budget.refused.${code}`]: 1 });
         return badRequest(code, "Daily budget reached.", 429);
       }
     }
-    return null;
   } catch (error) {
     // Same rule as the call counts: no counter, no protection, no call.
     console.error("Budget counter failed:", error);
     return badRequest("service_unavailable", "Budget counter unavailable.", 503);
+  }
+  let recorded = false;
+  let settled = false;
+  return {
+    async record(model, usage) {
+      recorded = true;
+      await recordSpend(limiter, request, model, usage);
+    },
+    async settle(ifCutOff = worstCase) {
+      if (settled) return;
+      settled = true;
+      const keep = !recorded && request.signal.aborted ? Math.min(ifCutOff, worstCase) : 0;
+      try {
+        for (const { key } of keys) await add(key, keep - worstCase);
+      } catch (error) {
+        // The held money stays counted: safe for the credit, at worst a stricter day.
+        console.error("Releasing the budget hold failed:", error);
+      }
+    },
+  };
+}
+
+/** Runs the work and always gives back what the budget still holds for it, whatever happens. */
+export async function settleAfter(budget: BudgetReservation, work: Promise<Response>): Promise<Response> {
+  try {
+    return await work;
+  } finally {
+    await budget.settle();
   }
 }
 
@@ -90,14 +154,14 @@ export async function recordSpend(limiter: RateLimiter, request: Request, model:
     const spent = await limiter.counter.add(`spend:${day}:total`, 0);
     // Once a day, when the day's spending first passes 70 % of the ceiling.
     if (spent >= budgetWarningShare * dailyBudgetUsd.total * 1_000_000 && (await limiter.counter.add(`alert:${day}:budget_warning`, 1)) === 1) {
-      await notify(limiter, "budget", `:money_with_wings: Dnešní útrata je ${(spent / 1_000_000).toFixed(2).replace(".", ",")} $ z ${dailyBudgetUsd.total} $ (přes 70 % stropu).`, request);
+      await notify(limiter, "budget", `:money_with_wings: Dnešní útrata je ${(spent / 1_000_000).toFixed(2).replace(".", ",")} $ z ${dailyBudgetUsd.total} $ (přes 70 % stropu).`);
     }
   } catch (error) {
     console.error("Recording the spend failed:", error);
   }
 }
 
-async function alertOnce(limiter: RateLimiter, issues: IssueTracker | null, code: "limit_person" | "limit_daily"): Promise<void> {
+async function alertOnce(limiter: RateLimiter, issues: IssueTracker | null | undefined, code: "limit_person" | "limit_daily"): Promise<void> {
   if (!issues || !limiter.counter.add) return;
   try {
     const day = pragueDay(limiter);

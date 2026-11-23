@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { budgetResponse, costMicroUsd, dailyBudgetUsd, recordSpend } from "./spendBudget";
+import { costMicroUsd, dailyBudgetUsd, recordSpend, reserveBudget, worstCaseMicroUsd } from "./spendBudget";
+import type { IssueTracker } from "./issues";
 import { memoryCounter, type RateLimiter } from "./rateLimit";
 import { handleChat } from "./handlers";
 import { loadServerContent } from "./content";
@@ -23,6 +24,14 @@ describe("what a call costs", () => {
     expect(costMicroUsd("claude-new-model", { input_tokens: 1_000, output_tokens: 0 })).toBe(4_000);
   });
 });
+
+// A tiny hold, given back at once: "may a call go ahead right now?"
+async function budgetResponse(shared: RateLimiter, request: Request, issues: IssueTracker | null = null): Promise<Response | null> {
+  const reservation = await reserveBudget(shared, request, issues, 1);
+  if (reservation instanceof Response) return reservation;
+  await reservation.settle();
+  return null;
+}
 
 describe("the daily budget", () => {
   const dollars = (amount: number) => ({ input_tokens: 0, output_tokens: Math.round((amount * 1_000_000) / 20) });
@@ -95,5 +104,82 @@ describe("the daily budget", () => {
     expect(issues.issues[0].title).toContain("jedna adresa");
     expect(issues.issues[0].body).toContain("Celkem dnes utraceno: 1.50 $");
     expect(issues.issues[0].labels).toEqual(["provoz"]);
+  });
+
+  it("holds the worst case before the call, so requests at the same moment cannot all slip under the ceiling", async () => {
+    const shared = limiter();
+    // Each hold is $0.40 and one address has $1.50: calls start while less than $1.50 is spent
+    // or held (0, 0.40, 0.80, 1.20), so four of ten parallel calls get through, not all ten.
+    const holds = await Promise.all(Array.from({ length: 10 }, () => reserveBudget(shared, from("8.8.8.8"), null, 400_000)));
+    expect(holds.filter((hold) => !(hold instanceof Response))).toHaveLength(4);
+    expect(holds.filter((hold) => hold instanceof Response && hold.status === 429)).toHaveLength(6);
+  });
+
+  it("replaces the hold with the real cost when the call reports it", async () => {
+    const shared = limiter();
+    const hold = await reserveBudget(shared, from("9.9.9.9"), null, 1_500_000);
+    if (hold instanceof Response) throw new Error("refused");
+    // While held, nothing more fits for this address.
+    expect(await budgetResponse(shared, from("9.9.9.9"))).not.toBeNull();
+    await hold.record("claude-haiku-5-5", { input_tokens: 1000, output_tokens: 1000 });
+    await hold.settle();
+    expect(await budgetResponse(shared, from("9.9.9.9"))).toBeNull();
+    expect(await shared.counter.add!(`spend:2026-11-17:total`, 0)).toBe(costMicroUsd("claude-haiku-5-5", { input_tokens: 1000, output_tokens: 1000 }));
+  });
+
+  it("keeps the hold when the person cut the connection and no cost was reported", async () => {
+    const shared = limiter();
+    const controller = new AbortController();
+    const request = new Request("http://localhost/api/evaluate", { headers: { "x-real-ip": "10.0.0.1" }, signal: controller.signal });
+    const hold = await reserveBudget(shared, request, null, 500_000);
+    if (hold instanceof Response) throw new Error("refused");
+    controller.abort();
+    await hold.settle();
+    expect(await shared.counter.add!(`spend:2026-11-17:total`, 0)).toBe(500_000);
+  });
+
+  it("gives the hold back when the call failed on Anthropic's side without a cut connection", async () => {
+    const shared = limiter();
+    const hold = await reserveBudget(shared, from("10.0.0.2"), null, 500_000);
+    if (hold instanceof Response) throw new Error("refused");
+    await hold.settle();
+    await hold.settle();
+    expect(await shared.counter.add!(`spend:2026-11-17:total`, 0)).toBe(0);
+  });
+
+  it("still lets an honest person near the ceiling start an expensive call", async () => {
+    const shared = limiter();
+    await recordSpend(shared, from("12.0.0.1"), "claude-haiku-5-5", { input_tokens: 0, output_tokens: 2_800_000 });
+    // $1.40 spent of $1.50: an evaluation holding $0.80 may still start.
+    expect(await reserveBudget(shared, from("12.0.0.1"), null, 800_000)).not.toBeInstanceOf(Response);
+  });
+
+  it("prices the worst case from the prompt length and the whole output allowance", () => {
+    // 20 000 characters ≈ 10 000 tokens of Opus input as a cache write, plus 32 000 output tokens.
+    expect(worstCaseMicroUsd("claude-opus-5-5", 20_000, 32_000)).toBe(10_000 * 4 * 1.25 + 32_000 * 20);
+  });
+
+  it("counts a chat cut off mid-answer as its prompt plus what was already written, not the whole allowance", async () => {
+    const content = loadServerContent();
+    const role = content.roles.activeRoles.find((task) => task.id === "qa-release")!;
+    const controller = new AbortController();
+    const claude = {
+      async chat(_turns: unknown, options: { onDelta: (text: string) => void }) {
+        options.onDelta("x".repeat(1000));
+        controller.abort();
+        throw { code: "cancelled", message: "Aborted." };
+      },
+    } as unknown as ClaudeClient;
+    const shared = limiter();
+    const request = new Request("http://localhost/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: "http://localhost", "x-real-ip": "11.0.0.1" },
+      body: JSON.stringify({ roleId: role.id, transcript: [{ turn: 1, kind: "user", content: "Ahoj", ts: "2026-11-17T10:00:00.000Z" }] }),
+      signal: controller.signal,
+    });
+    await (await handleChat(request, { content, claude, limiter: shared })).text();
+    const kept = await shared.counter.add!(`spend:2026-11-17:total`, 0);
+    expect(kept).toBeGreaterThan(worstCaseMicroUsd("claude-sonnet-5-5", 0, 500));
+    expect(kept).toBeLessThan(worstCaseMicroUsd("claude-sonnet-5-5", 0, 16_000));
   });
 });

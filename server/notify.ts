@@ -38,16 +38,19 @@ export function memoryNotifier(): Notifier & { messages: SlackMessage[] } {
   };
 }
 
-export const adminUrl = (request?: Request) => `${request ? new URL(request.url).origin : "https://role-lab-gamma.vercel.app"}/?admin`;
+// Always the public address: Vercel's cron calls a deployment's own address
+// (role-xxxx.vercel.app), which would otherwise end up in the message.
+export const adminUrl = "https://role-lab-gamma.vercel.app/?admin";
 
-/** A message with a line of text and a button to the admin, in Slack's block format. */
-export function slackMessage(text: string, link: string, buttonLabel = "Otevřít admin"): SlackMessage {
+/**
+ * A message with the text and a link to the admin, in Slack's block format. A plain link, not a
+ * button: Slack reports a button click to the app and shows a warning when nobody answers, and
+ * answering would need another server function just for that.
+ */
+export function slackMessage(text: string, link: string, linkLabel = "Otevřít admin"): SlackMessage {
   return {
     text,
-    blocks: [
-      { type: "section", text: { type: "mrkdwn", text } },
-      { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: buttonLabel }, url: link }] },
-    ],
+    blocks: [{ type: "section", text: { type: "mrkdwn", text: `${text}\n\n<${link}|${linkLabel} →>` } }],
   };
 }
 
@@ -60,13 +63,13 @@ const pragueHour = (date: Date) =>
  * Sends one notification of a kind, unless the same kind was already sent this hour.
  * Never fails the request that caused it: a notification is a convenience.
  */
-export async function notify(limiter: RateLimiter, kind: NotifyKind, text: string, request?: Request): Promise<void> {
+export async function notify(limiter: RateLimiter, kind: NotifyKind, text: string): Promise<void> {
   const notifier = limiter.notifier;
   if (!notifier) return;
   try {
     const now = (limiter.now ?? (() => new Date()))();
     if (limiter.counter.add && (await limiter.counter.add(`notify:${kind}:${pragueHour(now)}`, 1)) > 1) return;
-    await notifier.post(slackMessage(text, adminUrl(request)));
+    await notifier.post(slackMessage(text, adminUrl));
   } catch (error) {
     console.error("Slack notification failed:", error instanceof Error ? error.message : error);
   }

@@ -70,7 +70,7 @@ export async function handleStats(
     : pageEventMetrics(pageEvent!.data!, id);
   await addMetrics(limiter.metrics, metrics, now);
   if (pageEvent?.success && pageEvent.data.event === "client_error") {
-    await notify(limiter, "page_error", ":bug: Na stránce nastala chyba. Počty jsou v adminu, Modely a útrata › Bezpečnost a chyby stránky.", request);
+    await notify(limiter, "page_error", ":bug: Na stránce nastala chyba. Počty jsou v adminu, Modely a útrata › Bezpečnost a chyby stránky.");
   }
   try {
     await limiter.metrics?.addUnique(metricsDay(now), "visitors", dailyVisitorMark(request, limiter.secret, metricsDay(now)));

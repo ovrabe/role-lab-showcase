@@ -6,7 +6,8 @@ import { checkGeneratedTask, publicPart, type PublicGeneratedTask } from "../src
 import { asClaudeError, parseJsonReply, type HandlerDeps } from "./handlers.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
-import { budgetResponse, recordSpend } from "./spendBudget.js";
+import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
+import { generatorModel, maxOutputTokens } from "./claudeClient.js";
 import { giveBackToLimit } from "./rateLimit.js";
 import type { CustomTaskStore } from "./customTaskStore.js";
 import { hasBlockingData } from "../src/customTask/sensitiveData.js";
@@ -41,7 +42,8 @@ export function describeRequest(input: z.infer<typeof CustomTaskRequest>): strin
     .trim();
 }
 
-export async function handleCustomTask(request: Request, { claude, limiter, issues, customTasks }: CustomTaskDeps): Promise<Response> {
+export async function handleCustomTask(request: Request, deps: CustomTaskDeps): Promise<Response> {
+  const { claude, limiter, issues, customTasks } = deps;
   const body = await readJson(request, 20_000);
   if (body instanceof Response) return body;
   const parsed = CustomTaskRequest.safeParse(body);
@@ -54,21 +56,35 @@ export async function handleCustomTask(request: Request, { claude, limiter, issu
   }
 
   if (await customTasks.isGenerationOff()) return badRequest("custom_tasks_off", "Custom tasks are switched off.", 503);
-  const overBudget = await budgetResponse(limiter, request, issues);
-  if (overBudget) return overBudget;
+  const prompt = buildGeneratorPrompt(describeRequest(parsed.data));
+  const promptChars = prompt.system.length + prompt.user.length;
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(generatorModel, promptChars, maxOutputTokens.generator));
+  if (budget instanceof Response) return budget;
+  return settleAfter(budget, generateWithinBudget(request, deps, parsed.data, prompt, budget));
+}
+
+/** The generation itself, once its worst-case cost is held on the budget (handleCustomTask). */
+async function generateWithinBudget(
+  request: Request,
+  { claude, limiter, issues, customTasks }: CustomTaskDeps,
+  input: z.infer<typeof CustomTaskRequest>,
+  prompt: ReturnType<typeof buildGeneratorPrompt>,
+  budget: BudgetReservation,
+): Promise<Response> {
+  // Checked in handleCustomTask already; repeated so this function cannot be called without it.
+  const generate = claude.generateCustomTask?.bind(claude);
+  if (!generate) return badRequest("unavailable", "Custom tasks are not available.", 503);
   const limited = await limitResponse(limiter, "customTask", request);
   if (limited) return limited;
-
-  const prompt = buildGeneratorPrompt(describeRequest(parsed.data));
   // A reply that fails the checks gets one more try; the second failure returns the problems.
   let problems: string[] = [];
   const call = measureCall(limiter.metrics, "customTask");
   for (let attempt = 1; attempt <= 2; attempt++) {
     let reply: string;
     try {
-      reply = await claude.generateCustomTask(prompt, {
+      reply = await generate(prompt, {
         signal: request.signal,
-        onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
+        onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
       });
     } catch (error) {
       const failure = asClaudeError(error);
@@ -80,7 +96,7 @@ export async function handleCustomTask(request: Request, { claude, limiter, issu
     if (checked.ok) {
       const id = randomBytes(9).toString("base64url");
       try {
-        await customTasks.save({ id, createdAt: new Date().toISOString(), input: parsed.data, task: checked.task });
+        await customTasks.save({ id, createdAt: new Date().toISOString(), input, task: checked.task });
       } catch (error) {
         console.error("Custom task store failed:", error);
         return badRequest("service_unavailable", "Could not store the task.", 503);

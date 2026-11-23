@@ -19,7 +19,10 @@ export const dailyLimits = {
   // Its status is read on every visit of the link; asking to share it opens a GitHub issue.
   perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15, example: 30, stats: 300, why: 15, customTask: 1, customTaskStatus: 60, customTaskShare: 3 },
   // For everyone together: a ceiling on what one day can cost (and on feedback spam).
-  total: { chat: 150, evaluate: 5, feedback: 100, challenge: 300, example: 1000, stats: 20000, why: 300, customTask: 5, customTaskStatus: 3000, customTaskShare: 30 },
+  // Chat and evaluation were 150 and 5 until the dollar budget (spendBudget.ts) held the worst
+  // case before each call; money is capped there now, so these only share the day out: 15
+  // evaluations let a group test on one day, and one address still gets at most a third.
+  total: { chat: 300, evaluate: 15, feedback: 100, challenge: 300, example: 1000, stats: 20000, why: 300, customTask: 5, customTaskStatus: 3000, customTaskShare: 30 },
 };
 
 export type LimitedAction = keyof typeof dailyLimits.perPerson;
@@ -121,6 +124,15 @@ function pragueDay(date: Date): string {
 // Vercel sets x-real-ip and x-forwarded-for itself; locally there is none ("unknown").
 // Only short keyed hashes are stored, so the counters cannot be turned back into either value.
 const sharedNetworkPeople = 4;
+// And never more than a third of the day's total: otherwise one address could use up a small
+// total and nobody else could evaluate until midnight. A script now needs at
+// least three addresses for that.
+const maxIpShareOfTotal = 1 / 3;
+
+/** How many calls one IP address may make today: a few people's worth, within its share of the total. */
+export function ipCeiling(perPerson: number, total: number): number {
+  return Math.max(perPerson, Math.min(perPerson * sharedNetworkPeople, Math.ceil(total * maxIpShareOfTotal)));
+}
 const browserIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const hashed = (value: string, secret: string) => createHmac("sha256", secret).update(value).digest("hex").slice(0, 16);
@@ -140,7 +152,7 @@ function limitKeys(limiter: RateLimiter, action: LimitedAction, request: Request
   const keys: { key: string; max: number; code: LimitCode }[] = browser
     ? [
         { key: `rl:${day}:${action}:browser:${hashed(browser, limiter.secret)}`, max: limits.perPerson[action], code: "limit_person" },
-        { key: `rl:${day}:${action}:person:${ip}`, max: limits.perPerson[action] * sharedNetworkPeople, code: "limit_person" },
+        { key: `rl:${day}:${action}:person:${ip}`, max: ipCeiling(limits.perPerson[action], limits.total[action]), code: "limit_person" },
       ]
     : [{ key: `rl:${day}:${action}:person:${ip}`, max: limits.perPerson[action], code: "limit_person" }];
   keys.push({ key: `rl:${day}:${action}:total`, max: limits.total[action], code: "limit_daily" });

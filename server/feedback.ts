@@ -124,7 +124,7 @@ export async function handleFeedback(
   }
   // Only the kind: the text and any contact stay in the admin, never in Slack.
   const kindName = { note: "vzkaz", evaluation: "hodnocení výsledku", tester: "odpovědi testera" }[entry.kind];
-  await notify(limiter, "feedback", `:speech_balloon: Nová zpětná vazba: ${kindName}.`, request);
+  await notify(limiter, "feedback", `:speech_balloon: Nová zpětná vazba: ${kindName}.`);
   // The backlog copy is a convenience: the note is already saved, so a GitHub outage is only logged.
   const issue = issueFromFeedback(entry);
   if (issues && issue) {

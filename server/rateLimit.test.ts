@@ -176,6 +176,25 @@ describe("limits per browser on a shared network", () => {
     expect(await takeFromLimit(shared, "chat", call("8.8.8.8", browser(6)))).toBeNull();
   });
 
+  it("keeps one IP address within a third of the day's total, so it cannot block everyone", async () => {
+    const { takeFromLimit, dailyLimits, ipCeiling } = await import("./rateLimit");
+    // The real limits: 2 evaluations a person, 15 a day for everyone, so 5 for one address.
+    const shared: RateLimiter = { counter: memoryCounter(), secret: "s", now: () => new Date("2026-11-11T10:00:00Z") };
+    const evaluate = (ip: string, index: number) => takeFromLimit(shared, "evaluate", new Request("http://localhost/api/evaluate", { headers: { "x-real-ip": ip, "x-role-lab-browser": browser(index) } }));
+    // A script inventing a new browser for every call…
+    for (let index = 1; index <= 5; index++) expect(await evaluate("9.9.9.9", index)).toBeNull();
+    // …stops at the address's third of the day…
+    expect(await evaluate("9.9.9.9", 6)).toBe("limit_person");
+    // …and people elsewhere can still evaluate.
+    expect(await evaluate("8.8.8.8", 7)).toBeNull();
+    // Every action keeps at least one person's worth and at most a third of the total.
+    for (const action of Object.keys(dailyLimits.perPerson) as (keyof typeof dailyLimits.perPerson)[]) {
+      const ceiling = ipCeiling(dailyLimits.perPerson[action], dailyLimits.total[action]);
+      expect(ceiling).toBeGreaterThanOrEqual(dailyLimits.perPerson[action]);
+      expect(ceiling).toBeLessThanOrEqual(Math.max(dailyLimits.perPerson[action], Math.ceil(dailyLimits.total[action] / 3)));
+    }
+  });
+
   it("ignores a malformed number and counts by the IP address", async () => {
     const { takeFromLimit } = await import("./rateLimit");
     const shared = limiter();

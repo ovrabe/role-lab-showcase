@@ -5,7 +5,8 @@ import { buildWhyPrompt } from "../src/prompts/why.js";
 import { validateWhyReply, type StoredWhy } from "../src/evaluation/whyAnswer.js";
 import { asClaudeError, isTimestamp, parseJsonReply, resolveTask, transcriptProblem, type HandlerDeps } from "./handlers.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
-import { budgetResponse, recordSpend } from "./spendBudget.js";
+import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
+import { challengeModel, maxOutputTokens } from "./claudeClient.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
 
 /**
@@ -19,7 +20,7 @@ const WhyRequest = z.object({ roleId: z.string().max(60), session: TaskSession, 
 export type WhyResponse = { kind: "ok"; why: StoredWhy } | { kind: "error"; code: string; message: string };
 
 export async function handleWhy(request: Request, deps: HandlerDeps): Promise<Response> {
-  const { claude, limiter, issues } = deps;
+  const { limiter, issues } = deps;
   const body = await readJson(request, 4_000_000);
   if (body instanceof Response) return body;
   const parsed = WhyRequest.safeParse(body);
@@ -35,8 +36,20 @@ export async function handleWhy(request: Request, deps: HandlerDeps): Promise<Re
   const prompt = buildWhyPrompt(role, session, dimensionId);
   if (!prompt) return badRequest("invalid_request", "No evaluated area to explain.");
 
-  const overBudget = await budgetResponse(limiter, request, issues);
-  if (overBudget) return overBudget;
+  // The quick model, the same call as challenges.
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(challengeModel, prompt.length, maxOutputTokens.challenge));
+  if (budget instanceof Response) return budget;
+  return settleAfter(budget, explainScore(request, deps, session, prompt, budget));
+}
+
+/** The explanation itself, once its worst-case cost is held on the budget (handleWhy). */
+async function explainScore(
+  request: Request,
+  { claude, limiter, issues }: HandlerDeps,
+  session: z.infer<typeof TaskSession>,
+  prompt: string,
+  budget: BudgetReservation,
+): Promise<Response> {
   const limited = await limitResponse(limiter, "why", request);
   if (limited) return limited;
 
@@ -45,7 +58,7 @@ export async function handleWhy(request: Request, deps: HandlerDeps): Promise<Re
   try {
     reply = await claude.evaluateChallenge(prompt, {
       signal: request.signal,
-      onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
+      onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
     });
   } catch (error) {
     const failure = asClaudeError(error);

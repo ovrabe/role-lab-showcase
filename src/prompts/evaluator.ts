@@ -3,6 +3,7 @@ import type { TaskSession } from "../session/sessionSchema.js";
 import type { EvaluatorKey } from "../evaluation/evaluatorKeys.js";
 import type { TranscriptItem } from "../session/sessionSchema.js";
 import { maxPromptBytes } from "../assistant/promptBudget.js";
+import { maxEventChars } from "../assistant/limits.js";
 
 // Instructions and output schema taken verbatim from docs/PROMPTS.md, section 2. Keep them in sync.
 const evaluatorInstructions = `Jsi pečlivý a férový hodnotitel praktických dovedností práce s AI. Hodnotíš, jak člověk pracoval s AI asistentem na pracovním úkolu a jak kvalitní je jeho výsledek. Tvoje hodnocení uvidí ten člověk i jeho vedoucí a může ovlivnit jeho další rozvoj. Buď proto přesný a opírej se jen o důkazy.
@@ -129,7 +130,7 @@ function fitTranscript(items: TranscriptItem[], room: number): string {
   const render = (assistantCap: number, userCap: number) =>
     items
       .map((item) => {
-        const cap = item.kind === "assistant" ? assistantCap : item.kind === "user" ? userCap : Infinity;
+        const cap = item.kind === "assistant" ? assistantCap : item.kind === "user" ? userCap : maxEventChars;
         // The time too: the web server checks it, but a page's stored record can be edited by hand.
         return `[${item.turn}] ${item.kind} (${neutralizeTags(item.ts)}): ${neutralizeTags(shorten(item.content, cap))}`;
       })

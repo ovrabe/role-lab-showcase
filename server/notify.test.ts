@@ -27,13 +27,16 @@ const post = (path: string, body: unknown, headers: Record<string, string> = {})
 describe("Slack notifications", () => {
   vi.spyOn(console, "error").mockImplementation(() => {});
 
-  it("sends one message of a kind an hour, with a button to the admin", async () => {
+  it("sends one message of a kind an hour, with a plain link to the admin", async () => {
     const { limiter, notifier, setTime } = setup();
-    await notify(limiter, "share", "A", post("/api/x", {}));
+    await notify(limiter, "share", "A");
     await notify(limiter, "share", "B");
     await notify(limiter, "feedback", "C");
     expect(notifier.messages.map((message) => message.text)).toEqual(["A", "C"]);
-    expect(JSON.stringify(notifier.messages[0].blocks)).toContain("https://role-lab.test/?admin");
+    // The public address even when the request came to a deployment's own address.
+    expect(JSON.stringify(notifier.messages[0].blocks)).toContain("<https://role-lab-gamma.vercel.app/?admin|Otevřít admin →>");
+    // No button: Slack would show a warning, because nobody answers its click report.
+    expect(JSON.stringify(notifier.messages[0].blocks)).not.toContain("button");
     setTime("2026-11-23T11:00:00Z");
     await notify(limiter, "share", "D");
     expect(notifier.messages).toHaveLength(3);

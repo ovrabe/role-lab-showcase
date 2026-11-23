@@ -41,6 +41,6 @@ export async function handleMorning(request: Request, deps: AdminDeps & { cronSe
     `Včera: ${numbers.visitors} návštěvníků · ${numbers.funnel.started} začatých úkolů · ${numbers.funnel.evaluated} ohodnocených · útrata ${usd(numbers.spendUsd)}`,
     attention.length > 0 ? `Co řešit: ${attention.length} (${attention.filter((item) => item.level === "warning").length} upozornění)` : "Co řešit: nic",
   ];
-  await notifier.post(slackMessage(lines.join("\n\n"), adminUrl(request), "Otevřít admin"));
+  await notifier.post(slackMessage(lines.join("\n\n"), adminUrl, "Otevřít admin"));
   return json({ posted: true });
 }

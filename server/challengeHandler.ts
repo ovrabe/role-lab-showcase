@@ -5,7 +5,9 @@ import { maxAnswerChars, minAnswerChars, validateChallengeReply, type ChallengeR
 import { asClaudeError, parseJsonReply, type HandlerDeps } from "./handlers.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
-import { budgetResponse, recordSpend } from "./spendBudget.js";
+import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
+import { challengeModel, maxOutputTokens } from "./claudeClient.js";
+import type { ChallengeConfig, ChallengeKey } from "../src/challenges/challengeSchema.js";
 
 /**
  * POST /api/challenge (docs/PRODUCTION.md, part 10, phase 2): one short challenge answer in,
@@ -26,7 +28,8 @@ export type ChallengeResponse =
   | { kind: "error"; code: string; message: string }
   | { kind: "missing_key" };
 
-export async function handleChallenge(request: Request, { content, claude, limiter, issues }: HandlerDeps): Promise<Response> {
+export async function handleChallenge(request: Request, deps: HandlerDeps): Promise<Response> {
+  const { content, limiter, issues } = deps;
   const body = await readJson(request);
   if (body instanceof Response) return body;
   const parsed = ChallengeRequest.safeParse(body);
@@ -36,15 +39,27 @@ export async function handleChallenge(request: Request, { content, claude, limit
 
   const key = content.getChallengeKey(challenge.id);
   if (!key) return json({ kind: "missing_key" } satisfies ChallengeResponse);
-  const overBudget = await budgetResponse(limiter, request, issues);
-  if (overBudget) return overBudget;
+  const prompt = buildChallengePrompt(challenge, key, parsed.data.answer);
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(challengeModel, prompt.length, maxOutputTokens.challenge));
+  if (budget instanceof Response) return budget;
+  return settleAfter(budget, scoreChallenge(request, deps, challenge, key, parsed.data.answer, prompt, budget));
+}
+
+/** The scoring itself, once its worst-case cost is held on the budget (handleChallenge). */
+async function scoreChallenge(
+  request: Request,
+  { claude, limiter, issues }: HandlerDeps,
+  challenge: ChallengeConfig,
+  key: ChallengeKey,
+  answer: string,
+  prompt: string,
+  budget: BudgetReservation,
+): Promise<Response> {
   const limited = await limitResponse(limiter, "challenge", request);
   if (limited) return limited;
 
-  const { answer } = parsed.data;
   // An unreadable reply (cut short, or broken JSON) gets one more try: it costs a fraction
   // of a crown and the person never sees the hiccup.
-  const prompt = buildChallengePrompt(challenge, key, answer);
   const call = measureCall(limiter.metrics, "challenge");
   let raw: unknown;
   for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
@@ -52,7 +67,7 @@ export async function handleChallenge(request: Request, { content, claude, limit
       raw = parseJsonReply(
         await claude.evaluateChallenge(prompt, {
           signal: request.signal,
-          onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
+          onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
         }),
       );
     } catch (error) {

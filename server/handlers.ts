@@ -6,15 +6,16 @@ import type { RoleConfig } from "../src/roles/roleSchema.js";
 import { buildAssistantTurns } from "../src/prompts/assistant.js";
 import { buildEvaluatorPrompt } from "../src/prompts/evaluator.js";
 import { fitTurnsToBudget } from "../src/assistant/promptBudget.js";
-import { maxMessageChars, maxUserMessages } from "../src/assistant/limits.js";
+import { maxEventChars, maxMessageChars, maxUserMessages } from "../src/assistant/limits.js";
+import { maxPromptBytes } from "../src/assistant/promptBudget.js";
 import { validateEvaluation } from "../src/evaluation/validateEvaluation.js";
 import type { StoredEvaluation } from "../src/evaluation/evaluationSchema.js";
 import type { ServerContent } from "./content.js";
-import type { ClaudeClient, ClaudeError } from "./claudeClient.js";
+import { assistantModel, evaluatorModel, maxOutputTokens, type ClaudeClient, type ClaudeError } from "./claudeClient.js";
 import type { RateLimiter } from "./rateLimit.js";
 import { badRequest, json, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
-import { budgetResponse, recordSpend } from "./spendBudget.js";
+import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
 import { giveBackToLimit } from "./rateLimit.js";
 import type { IssueTracker } from "./issues.js";
 import type { CustomTaskStore } from "./customTaskStore.js";
@@ -83,6 +84,9 @@ export function transcriptProblem(role: RoleConfig, transcript: TranscriptItem[]
   // Only the person's messages: the assistant's answers can be longer (16 000 tokens), and
   // refusing a long answer already in the record would block the rest of the attempt.
   if (transcript.some((item) => item.kind === "user" && item.content.length > maxMessageChars)) return "A message is too long.";
+  // The app writes events itself, each with its name and a short note. Without this check an event
+  // could carry megabytes of text past every cap straight into the evaluator's prompt.
+  if (transcript.some((item) => item.kind === "event" && (!item.event || item.content.length > maxEventChars))) return "Invalid event in the conversation.";
   const materialIds = new Set(role.materials.map((material) => material.id));
   if (transcript.some((item) => item.event === "data_attached" && !materialIds.has(item.materialId ?? ""))) {
     return "Unknown material.";
@@ -135,10 +139,11 @@ export async function handleChat(request: Request, deps: HandlerDeps): Promise<R
   const fitted = fitTurnsToBudget(buildAssistantTurns(role, parsed.data.transcript, task.getMaterialText));
   if (!fitted) return badRequest("too_large", "Conversation does not fit the prompt budget.", 413);
   if (fitted.turns[fitted.turns.length - 1].role !== "user") return badRequest("invalid_request", "Last turn must be the person's.");
-  const overBudget = await budgetResponse(limiter, request, issues);
-  if (overBudget) return overBudget;
+  const promptChars = JSON.stringify(fitted.turns).length;
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(assistantModel, promptChars, maxOutputTokens.chat));
+  if (budget instanceof Response) return budget;
   const limited = await limitResponse(limiter, "chat", request);
-  if (limited) return limited;
+  if (limited) return (await budget.settle(), limited);
 
   // Stream the answer as newline-delimited JSON; errors after the first byte become an event.
   const encoder = new TextEncoder();
@@ -146,11 +151,12 @@ export async function handleChat(request: Request, deps: HandlerDeps): Promise<R
     async start(controller) {
       const send = (event: ChatStreamEvent) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
       const call = measureCall(limiter.metrics, "chat");
+      let answerChars = 0;
       try {
         const result = await claude.chat(fitted.turns, {
           signal: request.signal,
-          onDelta: (text) => send({ type: "delta", text }),
-          onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
+          onDelta: (text) => ((answerChars += text.length), send({ type: "delta", text })),
+          onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
         });
         send({ type: "done", truncated: result.truncated });
         await call.finish(result.truncated ? "truncated" : "ok");
@@ -160,6 +166,8 @@ export async function handleChat(request: Request, deps: HandlerDeps): Promise<R
         send({ type: "error", code: failure.code, message: failure.message });
         await call.finish(failure.code);
       } finally {
+        // Cut off mid-answer: the prompt and what was already written were billed.
+        await budget.settle(worstCaseMicroUsd(assistantModel, promptChars, Math.ceil(answerChars / 2)));
         controller.close();
       }
     },
@@ -170,7 +178,7 @@ export async function handleChat(request: Request, deps: HandlerDeps): Promise<R
 }
 
 export async function handleEvaluate(request: Request, deps: HandlerDeps): Promise<Response> {
-  const { claude, limiter, issues } = deps;
+  const { limiter, issues } = deps;
   // A whole attempt can be long (25 messages, long answers). The prompt is cut to its budget
   // anyway (src/prompts/evaluator.ts), so the body may be bigger than a chat call; Vercel takes 4.5 MB.
   const body = await readJson(request, 4_000_000);
@@ -192,14 +200,30 @@ export async function handleEvaluate(request: Request, deps: HandlerDeps): Promi
 
   const key = task.getKey();
   if (!key) return json({ kind: "missing_key" } satisfies EvaluateResponse);
-  const overBudget = await budgetResponse(limiter, request, issues);
-  if (overBudget) return overBudget;
+  const prompt = buildEvaluatorPrompt(role, key, session);
+  // The evaluator shortens the record to fit; a prompt still over the budget means a record far
+  // beyond any real attempt, and sending it would only cost money.
+  if (Buffer.byteLength(prompt) > maxPromptBytes) return badRequest("prompt_too_large", "The record is too long to evaluate.", 413);
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(evaluatorModel, prompt.length, maxOutputTokens.evaluate));
+  if (budget instanceof Response) return budget;
+  return settleAfter(budget, evaluateWithinBudget(request, deps, role, key, session, prompt, budget));
+}
+
+/** The evaluation itself, once its worst-case cost is held on the budget (handleEvaluate). */
+async function evaluateWithinBudget(
+  request: Request,
+  { claude, limiter, issues }: HandlerDeps,
+  role: RoleConfig,
+  key: EvaluatorKey,
+  session: z.infer<typeof TaskSession>,
+  prompt: string,
+  budget: BudgetReservation,
+): Promise<Response> {
   const limited = await limitResponse(limiter, "evaluate", request);
   if (limited) return limited;
 
   // A reply that is not readable JSON (about 1 in 90 in calibration) gets one more try; the
   // person should not lose one of the day's two evaluations to a glitch of the model.
-  const prompt = buildEvaluatorPrompt(role, key, session);
   const call = measureCall(limiter.metrics, "evaluate");
   let raw: unknown;
   for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
@@ -207,7 +231,7 @@ export async function handleEvaluate(request: Request, deps: HandlerDeps): Promi
     try {
       reply = await claude.evaluate(prompt, {
         signal: request.signal,
-        onUsage: (model, usage) => (call.usage(model, usage), recordSpend(limiter, request, model, usage)),
+        onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
       });
     } catch (error) {
       const failure = asClaudeError(error);

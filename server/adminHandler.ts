@@ -156,7 +156,7 @@ export async function handleAdmin(request: Request, deps: AdminDeps): Promise<Re
     if (!tokenMatches(given, adminToken)) {
       const failures = (await limiter.counter.add?.(failKey, 1)) ?? 1;
       if ((await limiter.counter.add?.(`alert:${pragueDay(now)}:admin_login`, 1)) === 1) await alertFailedLogin(deps, failures);
-      await notify(limiter, "admin_login", `:lock: Neúspěšné přihlášení do adminu (${failures}. pokus z jedné adresy dnes).`, request);
+      await notify(limiter, "admin_login", `:lock: Neúspěšné přihlášení do adminu (${failures}. pokus z jedné adresy dnes).`);
       return badRequest("unauthorized", "Wrong token.", 401);
     }
   } catch (error) {
