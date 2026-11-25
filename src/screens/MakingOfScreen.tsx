@@ -3,12 +3,15 @@ import { appVersion } from "../buildFlags";
 import { ArchitectureDiagram } from "../components/makingOf/ArchitectureDiagram";
 import { DeliveryPipeline } from "../components/makingOf/DeliveryPipeline";
 import { DevelopmentChart } from "../components/makingOf/DevelopmentChart";
-import { benefits, decisions, figures, sourceCodeUrl, statusDate, threats } from "../components/makingOf/makingOfContent";
+import { benefits, customTaskFacts, decisions, figures, sourceCodeUrl, statusDate, threats } from "../components/makingOf/makingOfContent";
+import { InfoTabs } from "../components/InfoTabs";
 import { panelClass } from "../components/makingOf/makingOfStyles";
 
-// How Role Lab was built: a factual record for people who look at the project as a reference.
-// Order: why and how fast (for anyone), how it works (for technical readers), how decisions
+// "O projektu" (web version): what Role Lab is and how it was built, a factual record for people
+// who look at the project as a reference. Order: what it is, numbers and the development chart
+// (for anyone), how it works and what it protects against (for technical readers), how decisions
 // were made. Neutral on purpose: no personal bio, no comparison without a source, no money.
+// How the evaluation works is the other tab, "Jak hodnotíme" (MethodologyScreen).
 
 // The real function from src/evaluation/verifyQuote.ts, comments left out. Keep in sync.
 const quoteCheckCode = `export function quoteAppearsIn(quote: string, source: string): boolean {
@@ -31,32 +34,24 @@ const outcomeClass = {
   stopped: "bg-paper text-ink-muted ring-1 ring-line",
 };
 
-type MakingOfScreenProps = { onOpenTour: () => void };
+type MakingOfScreenProps = { onOpenTour: () => void; onOpenMethodology: () => void };
 
-/** How the project was built. Web version only, like the About page. */
-export function MakingOfScreen({ onOpenTour }: MakingOfScreenProps) {
+/** What the project is and how it was built. Web version only. */
+export function MakingOfScreen({ onOpenTour, onOpenMethodology }: MakingOfScreenProps) {
   return (
     <article className="max-w-2xl mx-auto">
-      <h1 className="mb-1">Jak vznikl Role Lab</h1>
+      <InfoTabs current="about" onSelect={(page) => page === "methodology" && onOpenMethodology()} />
+      <h1 className="mb-1">O projektu</h1>
       <p className="mb-6 text-sm text-ink-muted tabular-nums">
         Stav k {statusDate} · verze {appVersion}
       </p>
       <p className="mb-8">
-        Role Lab vznikl jako ověření AI-first přístupu: jak rychle a v jaké kvalitě jde postavit nový produkt, když AI
-        (Claude Code) píše kód, testy a revize a člověk určuje směr, kontroluje kvalitu a rozhoduje o riziku a nákladech. Funkční produkt vznikl za víkend.
+        Role Lab je trénink práce s AI. Na realistickém pracovním úkolu si vyzkoušíš, jak s AI asistentem pracuješ, a
+        dostaneš hodnocení výsledku i postupu. Situace i data jsou vymyšlené. Nejde o nástroj pro výběr uchazečů ani pro
+        hodnocení zaměstnanců.
       </p>
 
-      <h2 className="mb-3">Co řeší</h2>
-      <p className="mb-3">
-        Firmy učí lidi pracovat s AI, ale výsledek obvykle měří testem znalostí nebo dotazníkem. Ty neukážou, jestli
-        člověk zadá AI práci srozumitelně, ověří její výstup a pozná chybu v datech. Role Lab to měří na práci samotné.
-      </p>
-      <ul className="mb-8 list-disc space-y-2 pl-5">
-        {benefits.map((benefit) => (
-          <li key={benefit}>{benefit}</li>
-        ))}
-      </ul>
-
+      {/* Numbers and the chart first: the quickest answer to "what is this and how was it made". */}
       <h2 className="mb-3">V číslech</h2>
       <ul className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {figures.map((figure) => (
@@ -67,7 +62,11 @@ export function MakingOfScreen({ onOpenTour }: MakingOfScreenProps) {
         ))}
       </ul>
 
-      <h2 className="mb-3">Průběh vývoje</h2>
+      <h2 className="mb-3">Jak vznikl</h2>
+      <p className="mb-4">
+        Role Lab vznikl jako ověření AI-first přístupu: jak rychle a v jaké kvalitě jde postavit nový produkt, když AI
+        (Claude Code) píše kód, testy a revize a člověk určuje směr, kontroluje kvalitu a rozhoduje o riziku a nákladech. Funkční produkt vznikl za víkend.
+      </p>
       <DevelopmentChart />
       <p className="mb-8 text-sm text-ink-muted">
         Aktivní práce je odhad z historie změn: mezery mezi změnami do 60 minut se počítají jako práce, delší jako
@@ -89,6 +88,17 @@ export function MakingOfScreen({ onOpenTour }: MakingOfScreenProps) {
         <code>{quoteCheckCode}</code>
       </pre>
 
+      <h2 className="mb-3">Co řeší</h2>
+      <p className="mb-3">
+        Firmy učí lidi pracovat s AI, ale výsledek obvykle měří testem znalostí nebo dotazníkem. Ty neukážou, jestli
+        člověk zadá AI práci srozumitelně, ověří její výstup a pozná chybu v datech. Role Lab to měří na práci samotné.
+      </p>
+      <ul className="mb-8 list-disc space-y-2 pl-5">
+        {benefits.map((benefit) => (
+          <li key={benefit}>{benefit}</li>
+        ))}
+      </ul>
+
       <h2 className="mb-3">Hrozby a ochrana</h2>
       <dl className={`${panelClass} mb-8 divide-y-[0.5px] divide-ink-muted/30 px-4 py-1`}>
         {threats.map((item) => (
@@ -98,6 +108,13 @@ export function MakingOfScreen({ onOpenTour }: MakingOfScreenProps) {
           </div>
         ))}
       </dl>
+
+      <h2 className="mb-3">Vlastní výzva (beta)</h2>
+      <ul className="mb-8 list-disc space-y-2 pl-5">
+        {customTaskFacts.map((fact) => (
+          <li key={fact}>{fact}</li>
+        ))}
+      </ul>
 
       <h2 className="mb-3">Cesta změny do produkce</h2>
       <DeliveryPipeline />

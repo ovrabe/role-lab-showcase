@@ -5,8 +5,9 @@ import { ProgressTeaser } from "../progress/ProgressTeaser";
 import { DailyChallengeCard } from "../challenges/DailyChallengeCard";
 import { CustomTaskCard } from "../customTask/CustomTaskCard";
 import type { ChallengeConfig } from "../challenges/challengeSchema";
-import { useState } from "react";
-import { CircleHelp, MessageSquare } from "lucide-react";
+import { useCallback, useState } from "react";
+import { MessageSquare } from "lucide-react";
+import { useGuideOpener } from "../home/guideButton";
 import { FeedbackDialog } from "../components/FeedbackDialog";
 import { isWebBuild } from "../buildFlags";
 import { RoleList } from "../home/RoleList";
@@ -48,9 +49,11 @@ export function HomeScreen({
   const roleCards = roleGroups(activeRoles);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(() => !hasSeenGuide(guideKey));
+  // The "?" in the header opens it again.
+  useGuideOpener(useCallback(() => setIsGuideOpen(true), []));
   return (
     <section className="mx-auto max-w-4xl">
-      <HomeHero onOpenTour={onOpenTour} onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} onOpenGuide={() => setIsGuideOpen(true)} />
+      <HomeHero onOpenTour={onOpenTour} onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} />
       {isGuideOpen && <FirstVisitGuide steps={guideSteps} storageKey={guideKey} onClose={() => setIsGuideOpen(false)} />}
 
       {errors.length > 0 && <ConfigErrors errors={errors} />}
@@ -110,12 +113,10 @@ function HomeHero({
   onOpenTour,
   onOpenMethodology,
   onOpenAbout,
-  onOpenGuide,
 }: {
   onOpenTour: () => void;
   onOpenMethodology: () => void;
   onOpenAbout?: () => void;
-  onOpenGuide: () => void;
 }) {
   return (
     <div className="relative overflow-hidden rounded-card mb-6 bg-linear-to-br from-[#241d5c] via-[#3a2a8a] to-[#5a37b8]">
@@ -160,16 +161,10 @@ function HomeHero({
           <button type="button" data-guide="tour" onClick={onOpenTour} className="rounded-full bg-white text-[#241d5c] px-4 py-2 font-semibold hover:bg-white/90">
             Prohlídka na 2 minuty
           </button>
-          <button type="button" onClick={onOpenMethodology} className={heroButtonClass}>
-            Jak hodnotíme
-          </button>
-          {onOpenAbout && (
-            <button type="button" onClick={onOpenAbout} className={heroButtonClass}>
-              O projektu
-            </button>
-          )}
-          <button type="button" onClick={onOpenGuide} aria-label="Jak začít" title="Jak začít" className={`${heroButtonClass} px-2.5`}>
-            <CircleHelp aria-hidden="true" size={20} />
+          {/* One way into the pages about the project: on the web "O projektu" (its tabs lead on to
+              "Jak hodnotíme"); the claude.ai pages have only "Jak hodnotíme". */}
+          <button type="button" onClick={onOpenAbout ?? onOpenMethodology} className={heroButtonClass}>
+            {onOpenAbout ? "O projektu" : "Jak hodnotíme"}
           </button>
         </div>
       </div>

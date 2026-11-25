@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { CircleHelp } from "lucide-react";
+import { useCallback, useState } from "react";
 import { FirstVisitGuide, hasSeenGuide, type GuideStep } from "../home/FirstVisitGuide";
 
 // The first-visit guide on a task (src/home/FirstVisitGuide.tsx): where the brief and the data
-// are, where to work with AI, where the result goes. Shown on the first task only; the "?"
-// beside "Začít znovu" repeats it. On a computer the steps point at the tabs, the assistant
+// are, where to work with AI, where the result goes. Shown on the first task only; the "?" in
+// the header repeats it (src/home/guideButton.tsx). On a computer the steps point at the tabs, the assistant
 // panel and the submission card; on a phone at the tabs in the bottom bar (TaskLayouts.tsx).
 // The second step says to check the AI's work, but not that the data hide traps: whether the
 // person checks on their own is what the evaluation measures.
@@ -34,19 +33,9 @@ export const taskGuideSteps = steps;
 
 export function useTaskGuide() {
   const [isOpen, setIsOpen] = useState(() => !hasSeenGuide(storageKey));
+  const open = useCallback(() => setIsOpen(true), []);
   return {
-    button: (
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        aria-label="Jak na úkol"
-        title="Jak na úkol"
-        className="inline-flex items-center gap-1 text-ink-muted hover:text-ink"
-      >
-        <CircleHelp aria-hidden="true" size={18} />
-        <span className="text-sm">Jak na úkol</span>
-      </button>
-    ),
+    open,
     guide: isOpen ? <FirstVisitGuide steps={steps} storageKey={storageKey} onClose={() => setIsOpen(false)} /> : null,
   };
 }

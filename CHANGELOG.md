@@ -2,6 +2,21 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.8.0 – 25. 11. 2026
+
+Jedno místo pro nápovědu a jedna sekce o projektu.
+
+### Změněno
+
+- Nápověda je otazník v horní liště. Na úvodní stránce otevře průvodce úvodem, v rozpracovaném úkolu průvodce úkolem. Nahradil ikonu v úvodním panelu a tlačítko „Jak na úkol“.
+- O projektu a Jak hodnotíme jsou jedna sekce se dvěma záložkami. Úvodní stránka má místo dvou tlačítek jedno, „O projektu“.
+- Záložka O projektu začíná čísly a grafem vývoje, pak následuje schéma, hrozby a ochrana, vlastní výzva, cesta do produkce a rozhodnutí. Bývalá stránka Jak vznikl je její součástí a odkaz `?jak-vznikl` vede sem.
+- Kalibrace hodnotitele a férovost jsou na záložce Jak hodnotíme. Bezpečnost se už neopakuje na dvou místech.
+
+### Opraveno
+
+- Tabulka hrozeb uvádí, že stránka z cizích webů nenačítá nic, ani písmo, a zmiňuje ochranu proti robotům.
+
 ## 2.7.0 – 25. 11. 2026
 
 Průvodce při první návštěvě a ochrana proti robotům.

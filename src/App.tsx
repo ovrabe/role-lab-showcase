@@ -4,6 +4,7 @@ import { PreviewPill } from "./components/PreviewPill";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AvatarMedal, useAvatar } from "./profile/AvatarMedal";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { GuideButton } from "./home/guideButton";
 import { Footer } from "./components/Footer";
 import { useAiAvailability } from "./runtime/useAiAvailability";
 import { loadSession, saveLastRoleId } from "./session/sessionStorage";
@@ -75,6 +76,8 @@ export default function App() {
           </button>
           <div className="justify-self-end flex items-center gap-4 sm:gap-6">
             {status === "preview" && <PreviewPill />}
+            {/* Help where people look for it: the guide of this screen (home page, unfinished task). */}
+            <GuideButton />
             {/* The theme switch only on the home page: it is a one-off setting, the default
                 follows the system, and inside the task every row of the screen counts. */}
             {screen.name === "home" && <ThemeToggle />}

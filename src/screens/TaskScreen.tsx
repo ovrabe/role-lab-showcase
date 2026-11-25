@@ -24,6 +24,7 @@ import { track } from "../ai/track";
 import { customTaskIdOf, isCustomTask } from "../customTask/customTaskRole";
 import { SharePanel } from "../customTask/SharePanel";
 import { useTaskGuide } from "../task/TaskGuide";
+import { useGuideOpener } from "../home/guideButton";
 
 type TaskScreenProps = {
   role: RoleConfig;
@@ -60,6 +61,8 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
   const controls = useTaskSession(role);
   const evaluation = useEvaluation(role, controls, backend);
   const guide = useTaskGuide();
+  // The "?" in the header, while the task is still open (after submitting, the steps no longer apply).
+  useGuideOpener(controls.session.submittedAt ? null : guide.open);
   // Materials attached but not sent yet. Kept in memory only: after a reload they are simply attached again.
   const [pendingAttachmentIds, setPendingAttachmentIds] = useState<string[]>([]);
 
@@ -170,7 +173,6 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
           <SoftTimer startedAt={controls.session.startedAt} limitMinutes={role.timeLimitMinutes} />
         )}
         <RestartButton onConfirm={restart} />
-        {!controls.session.submittedAt && guide.button}
       </div>
       {!controls.session.submittedAt && guide.guide}
 

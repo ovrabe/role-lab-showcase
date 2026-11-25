@@ -1,7 +1,6 @@
 import { sweepPositionFor } from "./components/RoleBadge";
 import { HomeScreen } from "./screens/HomeScreen";
 import { MethodologyScreen } from "./screens/MethodologyScreen";
-import { AboutScreen } from "./screens/AboutScreen";
 import { MakingOfScreen } from "./screens/MakingOfScreen";
 import { CustomTaskScreen } from "./screens/CustomTaskScreen";
 import { AdminScreen } from "./screens/AdminScreen";
@@ -32,6 +31,7 @@ import { isCustomTask } from "./customTask/customTaskRole";
 export type Screen =
   | { name: "home" }
   | { name: "methodology" }
+  // Old name of the "O projektu" page, still possible in browser history: shows makingOf.
   | { name: "about" }
   | { name: "makingOf" }
   | { name: "customTask" }
@@ -111,7 +111,7 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
           onSelectRole={(roleId) => setScreen({ name: "role", roleId })}
           onOpenMethodology={() => setScreen({ name: "methodology" })}
           onOpenTour={() => setScreen({ name: "tour" })}
-          onOpenAbout={isWebBuild ? () => setScreen({ name: "about" }) : undefined}
+          onOpenAbout={isWebBuild ? () => setScreen({ name: "makingOf" }) : undefined}
           onOpenProfile={() => setScreen({ name: "profile" })}
           challenges={challenges}
           dailyChallenge={todaysChallenge}
@@ -126,6 +126,7 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
           roles={groups.map((group) => group.role)}
           onOpenCalibration={() => setScreen({ name: "calibration" })}
           onOpenSamples={() => setScreen({ name: "samples" })}
+          onOpenAbout={isWebBuild ? () => setScreen({ name: "makingOf" }) : undefined}
         />
       )}
       {screen.name === "profile" && <ProfileScreen roles={activeRoles} onSelectRole={(roleId) => setScreen({ name: "task", roleId })} />}
@@ -150,10 +151,9 @@ export function ScreenContent({ screen, setScreen, aiStatus, backend }: ScreenCo
       {screen.name === "challengeMap" && (
         <ChallengeMapScreen challenges={challenges} dailyChallengeId={todaysChallenge?.id ?? null} onSelect={openChallenge} />
       )}
-      {isWebBuild && screen.name === "about" && (
-        <AboutScreen onOpenMethodology={() => setScreen({ name: "methodology" })} onOpenMakingOf={() => setScreen({ name: "makingOf" })} />
+      {isWebBuild && (screen.name === "makingOf" || screen.name === "about") && (
+        <MakingOfScreen onOpenTour={() => setScreen({ name: "tour" })} onOpenMethodology={() => setScreen({ name: "methodology" })} />
       )}
-      {isWebBuild && screen.name === "makingOf" && <MakingOfScreen onOpenTour={() => setScreen({ name: "tour" })} />}
       {isWebBuild && screen.name === "customTask" && <CustomTaskScreen onStart={(taskId) => setScreen({ name: "task", roleId: taskId })} />}
       {!isParticipantBuild && screen.name === "calibration" && <CalibrationScreen roles={activeRoles} aiStatus={aiStatus} backend={backend} />}
       {!isParticipantBuild && screen.name === "samples" && <SamplesScreen roles={activeRoles} />}

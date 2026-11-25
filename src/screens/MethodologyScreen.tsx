@@ -3,21 +3,26 @@ import { isParticipantBuild, isWebBuild } from "../buildFlags";
 import type { RoleConfig } from "../roles/roleSchema";
 import { RoleRubric } from "../methodology/RoleRubric";
 import { AiIcon } from "../components/AiIcon";
-import { Ban, BarChart3, Calculator, Database, FileSearch, HardDrive, Scale, ShieldAlert, UserCheck, Wallet, type LucideIcon } from "lucide-react";
+import { Ban, BarChart3, Calculator, Database, EyeOff, FileSearch, HardDrive, Quote, Scale, ShieldAlert, Sigma, UserCheck, Wallet, type LucideIcon } from "lucide-react";
+import { InfoTabs } from "../components/InfoTabs";
+import { CalibrationSection } from "../methodology/CalibrationSection";
 
 type MethodologyScreenProps = {
   roles: RoleConfig[];
   onOpenCalibration: () => void;
   onOpenSamples: () => void;
+  // Web version: the tab to "O projektu" (src/components/InfoTabs.tsx).
+  onOpenAbout?: () => void;
 };
 
 // The rubric, thresholds and cap come from the selected role's config; the rest is the same for every role.
-export function MethodologyScreen({ roles, onOpenCalibration, onOpenSamples }: MethodologyScreenProps) {
+export function MethodologyScreen({ roles, onOpenCalibration, onOpenSamples, onOpenAbout }: MethodologyScreenProps) {
   const [roleId, setRoleId] = useState(roles[0]?.id ?? "");
   const role = roles.find((candidate) => candidate.id === roleId);
 
   return (
     <article className="max-w-2xl mx-auto">
+      {onOpenAbout && <InfoTabs current="methodology" onSelect={(page) => page === "about" && onOpenAbout()} />}
       <h1 className="mb-6">Jak hodnotíme</h1>
 
       <p className="card flex gap-4 mb-8">
@@ -48,6 +53,11 @@ export function MethodologyScreen({ roles, onOpenCalibration, onOpenSamples }: M
         </label>
       )}
       {role && <RoleRubric role={role} />}
+
+      <h2 className="mb-3">Férovost</h2>
+      <IconList items={fairness} />
+
+      <CalibrationSection />
 
       <h2 className="mb-3">Co dělá asistent</h2>
       <IconList
@@ -92,6 +102,13 @@ export function MethodologyScreen({ roles, onOpenCalibration, onOpenSamples }: M
     </article>
   );
 }
+
+const fairness = [
+  { icon: Quote, text: "Každé skóre je doložené citací ze záznamu. Aplikace ověří, že citace v záznamu opravdu je." },
+  { icon: Sigma, text: "Celkovou úroveň počítá kód podle pevných pravidel, ne model." },
+  { icon: UserCheck, text: "Hodnocení je návrh. Člověk ho může upravit a konečné slovo má on." },
+  { icon: EyeOff, text: "Hodnotitel nezná jméno řešitele a píše genderově neutrálně." },
+];
 
 // The web version calls Claude through the project's own server (docs/PRODUCTION.md); the
 // claude.ai pages call it through the viewer's account. Anthropic's API terms checked
