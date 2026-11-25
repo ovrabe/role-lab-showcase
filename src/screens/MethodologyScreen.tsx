@@ -3,7 +3,7 @@ import { isParticipantBuild, isWebBuild } from "../buildFlags";
 import type { RoleConfig } from "../roles/roleSchema";
 import { RoleRubric } from "../methodology/RoleRubric";
 import { AiIcon } from "../components/AiIcon";
-import { Ban, BarChart3, Calculator, Database, FileSearch, HardDrive, ShieldAlert, Wallet, type LucideIcon } from "lucide-react";
+import { Ban, BarChart3, Calculator, Database, FileSearch, HardDrive, Scale, ShieldAlert, UserCheck, Wallet, type LucideIcon } from "lucide-react";
 
 type MethodologyScreenProps = {
   roles: RoleConfig[];
@@ -107,11 +107,22 @@ const webDataFacts = [
   },
   {
     icon: BarChart3,
-    text: "Aby šla aplikace zlepšovat, počítají se 90 dní anonymní denní součty: které obrazovky se otevírají, jak úkoly probíhají a dopadají (úroveň, skóre, nalezené záludnosti), jak rychle a za kolik odpovídají modely a kolik nastalo chyb. Počet návštěvníků se odhaduje z otisku, který se každý den mění, takže návštěvy nejde spojit mezi dny. Návštěvnost a rychlost načítání měří také Vercel Web Analytics, bez cookies. Texty, jména ani IP adresy se nikde neukládají.",
+    text: "Aby šla aplikace zlepšovat, počítají se 90 dní anonymní denní součty: které obrazovky se otevírají, jak úkoly probíhají a dopadají (úroveň, skóre, nalezené záludnosti), jak rychle a za kolik odpovídají modely a kolik nastalo chyb. Počet návštěvníků se odhaduje z otisku, který se každý den mění, takže návštěvy nejde spojit mezi dny. Návštěvnost a rychlost načítání měří také Vercel Web Analytics, bez cookies. Texty, jména ani IP adresy v těchto součtech nejsou.",
   },
   {
     icon: ShieldAlert,
     text: "Konverzaci zpracovává Claude od společnosti Anthropic. Anthropic data z API nepoužívá k tréninku modelů a do 30 dnů je maže. Déle je může uchovat jen při podezření na porušení pravidel nebo když to vyžaduje zákon. Nevkládej proto skutečná firemní ani osobní data. Úkol je postavený na vymyšlených podkladech.",
+  },
+  // The information GDPR (Art. 13) asks for, in two items: who, what, where, how long; then
+  // legal bases and rights. The contact is the feedback form on purpose (the author's decision,
+  // 24. 11. 2026); the legal basis "you asked for it" for the task and conversation too (25. 11.).
+  {
+    icon: UserCheck,
+    text: "Osobní údaje zpracovává autor aplikace Ondřej Vrabeľ. Kromě otisku pro denní limit se uloží jen to, co pošleš: zpětná vazba s nepovinným e-mailem na 90 dní a vlastní výzva na 30 dní. E-mail vidí jen autor. Text zpětné vazby a žádost o sdílení výzvy jdou i do jeho soukromého seznamu námětů na GitHubu, kde zůstanou, dokud je nesmaže. Databáze Upstash a serverové funkce na Vercelu běží ve Frankfurtu. Dál data zpracovávají Anthropic (konverzace s AI), GitHub (seznam námětů) a Vercel (provoz webu a měření návštěvnosti), a to i v USA.",
+  },
+  {
+    icon: Scale,
+    text: "Konverzace s AI a vlastní výzva se zpracovávají, protože o ně žádáš: bez toho by nešlo vyřešit úkol ani vytvořit výzvu. Limity a anonymní součty se zpracovávají na základě oprávněného zájmu na bezpečném provozu a proti tomu můžeš vznést námitku. Zpětná vazba se zpracovává na základě tvého souhlasu, když ji pošleš, a souhlas můžeš kdykoli odvolat. Chceš vědět, co o tobě aplikace má, opravit to nebo smazat? Napiš přes „Poslat zpětnou vazbu“ dole na stránce. Stížnost můžeš podat Úřadu pro ochranu osobních údajů.",
   },
 ];
 

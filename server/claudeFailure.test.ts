@@ -86,4 +86,15 @@ describe("recognising that the API is unusable for everyone", () => {
     expect(handling.offerRetry).toBe(false);
     expect(handling.message).toContain("dočasně nedostupná");
   });
+
+  it("tells the page only that AI is unavailable, the reason only the author", async () => {
+    const { toClaudeError } = await import("./claudeClient");
+    const failure = toClaudeError(new Anthropic.BadRequestError(400, { error: { message: "Your credit balance is too low" } }, "Your credit balance is too low", new Headers()));
+    expect(failure).toMatchObject({ code: "ai_unavailable", message: "AI is unavailable.", reason: "Anthropic credit balance too low." });
+    const issues = memoryIssueTracker();
+    const shared = limiter();
+    await takeFromLimit(shared, "chat", request());
+    await handleClaudeFailure({ limiter: shared, issues }, "chat", request(), failure, now);
+    expect(issues.issues[0].body).toContain("Anthropic credit balance too low.");
+  });
 });

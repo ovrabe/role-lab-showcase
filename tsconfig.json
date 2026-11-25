@@ -12,6 +12,8 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "noEmit": true,
+    // vite.config.ts imports scripts/selfHostedFont.ts with its extension, as Vite's native config loader requires.
+    "allowImportingTsExtensions": true,
     "types": ["vite/client"]
   },
   "include": ["src", "docs/claude-runtime", "vite.config.ts", "scripts/calibrate", "scripts/pilot"]

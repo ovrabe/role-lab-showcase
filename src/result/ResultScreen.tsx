@@ -92,7 +92,7 @@ export function ResultScreen({ role, session, onReviewChange, why }: ResultScree
         <GrowthSection role={role} evaluation={evaluation} />
         <PromptTips role={role} evaluation={evaluation} />
         {/* Only beside the person's own result: a sample already is a made-up attempt. */}
-        {onReviewChange && canShowStrongExample && !isCustomTask(role) && <StrongExampleSection role={role} />}
+        {onReviewChange && canShowStrongExample && !isCustomTask(role) && <StrongExampleSection role={role} evaluation={evaluation} />}
         <ReviewNotes evaluation={evaluation} />
         {/* Web version only (it needs the project's server), and only for the person's own attempt. */}
         {isWebBuild && onReviewChange && <EvaluationFeedback role={role} evaluation={evaluation} />}

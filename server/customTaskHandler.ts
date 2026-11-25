@@ -3,11 +3,11 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { buildGeneratorPrompt } from "../src/customTask/generatorPrompt.js";
 import { checkGeneratedTask, publicPart, type PublicGeneratedTask } from "../src/customTask/generatedTask.js";
-import { asClaudeError, parseJsonReply, type HandlerDeps } from "./handlers.js";
-import { badRequest, json, limitResponse, readJson } from "./http.js";
+import { asClaudeError, mayTryAgain, parseJsonReply, type HandlerDeps } from "./handlers.js";
+import { badRequest, json, limitReachedResponse, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
-import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
-import { generatorModel, maxOutputTokens } from "./claudeClient.js";
+import { cutOffEstimator, reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
+import { callDeadline, generatorModel, maxOutputTokens, type CallDeadline } from "./claudeClient.js";
 import { giveBackToLimit } from "./rateLimit.js";
 import type { CustomTaskStore } from "./customTaskStore.js";
 import { hasBlockingData } from "../src/customTask/sensitiveData.js";
@@ -30,7 +30,7 @@ const CustomTaskRequest = z.object({
 
 export type CustomTaskResponse =
   | { kind: "ok"; id: string; task: PublicGeneratedTask }
-  | { kind: "invalid"; problems: string[] }
+  | { kind: "invalid"; problems: string[]; attemptReturned: boolean }
   | { kind: "error"; code: string; message: string };
 
 export type CustomTaskDeps = HandlerDeps & { customTasks: CustomTaskStore };
@@ -58,9 +58,12 @@ export async function handleCustomTask(request: Request, deps: CustomTaskDeps): 
   if (await customTasks.isGenerationOff()) return badRequest("custom_tasks_off", "Custom tasks are switched off.", 503);
   const prompt = buildGeneratorPrompt(describeRequest(parsed.data));
   const promptChars = prompt.system.length + prompt.user.length;
-  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(generatorModel, promptChars, maxOutputTokens.generator));
+  const deadline = callDeadline(request);
+  const full = await limitReachedResponse(limiter, "customTask", request);
+  if (full) return full;
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(generatorModel, promptChars, maxOutputTokens.generator), deadline.signal, cutOffEstimator(generatorModel, promptChars, maxOutputTokens.generator));
   if (budget instanceof Response) return budget;
-  return settleAfter(budget, generateWithinBudget(request, deps, parsed.data, prompt, budget));
+  return settleAfter(budget, generateWithinBudget(request, deps, parsed.data, prompt, budget, deadline));
 }
 
 /** The generation itself, once its worst-case cost is held on the budget (handleCustomTask). */
@@ -70,6 +73,7 @@ async function generateWithinBudget(
   input: z.infer<typeof CustomTaskRequest>,
   prompt: ReturnType<typeof buildGeneratorPrompt>,
   budget: BudgetReservation,
+  deadline: CallDeadline,
 ): Promise<Response> {
   // Checked in handleCustomTask already; repeated so this function cannot be called without it.
   const generate = claude.generateCustomTask?.bind(claude);
@@ -79,15 +83,15 @@ async function generateWithinBudget(
   // A reply that fails the checks gets one more try; the second failure returns the problems.
   let problems: string[] = [];
   const call = measureCall(limiter.metrics, "customTask");
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  for (let attempt = 1; attempt <= 2 && (attempt === 1 || (await mayTryAgain(deadline, budget))); attempt++) {
     let reply: string;
     try {
       reply = await generate(prompt, {
-        signal: request.signal,
+        signal: deadline.signal,
         onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
       });
     } catch (error) {
-      const failure = asClaudeError(error);
+      const failure = asClaudeError(error, deadline);
       await handleClaudeFailure({ limiter, issues }, "customTask", request, failure);
       await call.finish(failure.code);
       return json({ kind: "error", code: failure.code, message: failure.message } satisfies CustomTaskResponse);
@@ -112,6 +116,6 @@ async function generateWithinBudget(
   }
   await call.finish("rejected");
   // Our generator failed, not the person: the day's single attempt is given back.
-  await giveBackToLimit(limiter, "customTask", request);
-  return json({ kind: "invalid", problems } satisfies CustomTaskResponse);
+  const attemptReturned = await giveBackToLimit(limiter, "customTask", request, { afterPaidCalls: true });
+  return json({ kind: "invalid", problems, attemptReturned } satisfies CustomTaskResponse);
 }

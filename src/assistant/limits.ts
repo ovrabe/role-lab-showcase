@@ -11,3 +11,8 @@ export const maxMessageChars = 20_000;
 // (… znaků)"): a material title at most. The evaluator gets no more of an event than this,
 // and the web server refuses longer ones, which only a forged record can contain.
 export const maxEventChars = 300;
+
+// The longest answer of the assistant the record may hold: it writes at most 16 000 tokens
+// (server/claudeClient.ts), well under this. Only a forged record goes over; the web server
+// refuses it before any work on it.
+export const maxAssistantChars = 100_000;

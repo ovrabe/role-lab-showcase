@@ -2,6 +2,39 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.6.0 – 25. 11. 2026
+
+Bezpečnost, soukromí a spolehlivost po auditu a třech kolech ověření.
+
+### Bezpečnost
+
+- Hodnotitel má pravidlo neplnit pokyny ze záznamu a ochrana zachytí i falešné značky s mezerou, širokými závorkami a neviditelnými znaky a podvržené kroky záznamu.
+- Vzorová odpověď, která ukazuje záludnosti, se vydá jen po hodnocení stejného úkolu.
+- Přihlášení do adminu: kontroluje se nejdřív token a počítají se jen špatné pokusy.
+- Kontroly textu od uživatele běží v lineárním čase, takže je dlouhý vstup nemůže zahltit.
+- Hlavička COOP a stránka se nedozví důvod nedostupnosti AI.
+
+### Soukromí
+
+- E-mail testera zůstává jen v adminu, do seznamu námětů na GitHubu nejde.
+- Zpětná vazba se po 90 dnech sama smaže.
+- Písmo webu se načítá z vlastní domény, ne z Googlu.
+- Metodika má oddíl o osobních údajích: co se ukládá, kde, jak dlouho, na jakém základě a jaká máš práva.
+- Serverové funkce běží ve Frankfurtu.
+
+### Změněno
+
+- Denní rozpočet 5 $ na adresu a 8 $ celkem, limity 600 zpráv a 24 hodnocení denně: čtyři kolegové na jedné síti zvládnou celý den.
+- Když rozpočet drží běžící volání, stránka napíše „zkus to za minutu“ místo „zítra“.
+- Hlášky po nepovedeném hodnocení a vypršení času říkají pravdivě, jestli se pokus započítal.
+- Při schvalování vlastní výzvy je vidět celý vygenerovaný úkol a sdílený odkaz se před přepsáním vlastní výzvy zeptá.
+
+### Opraveno
+
+- „Proč tohle skóre?“ si dlouhý záznam zkrátí místo odmítnutí.
+- Zvýraznění citací: jen celá slova, bez rozdělení znaků a i s neviditelnými znaky.
+- Vracení pokusu přes půlnoc, žádost o sdílení vypršelé výzvy a velké tabulky v Safari.
+
 ## 2.5.1 – 23. 11. 2026
 
 Bezpečnostní opravy po auditu.

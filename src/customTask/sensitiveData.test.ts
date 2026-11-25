@@ -35,3 +35,12 @@ describe("findSensitiveData", () => {
     expect(hasBlockingData(describeSummary(summary, new Set()))).toBe(false);
   });
 });
+
+describe("the sensitive data check stays fast", () => {
+  it("handles a long text without any @ quickly", () => {
+    const started = performance.now();
+    findSensitiveData("a".repeat(60_000));
+    expect(performance.now() - started).toBeLessThan(200);
+    expect(hasBlockingData("napiš na jana.novak@firma.cz")).toBe(true);
+  });
+});

@@ -67,13 +67,14 @@ export function shareIssue(record: StoredCustomTask): Issue {
 export async function handleCustomTaskShare(request: Request, { limiter, customTasks, issues = null }: CustomTaskDeps): Promise<Response> {
   const id = await readId(request);
   if (id instanceof Response) return id;
-  const record = await customTasks.load(id);
-  if (!record) return json({ kind: "missing" } satisfies CustomTaskStatusResponse);
-  // Already asked or decided: no new issue, no use of the limit.
-  if (record.share) return json({ kind: "ok", status: statusOf(record) } satisfies CustomTaskStatusResponse);
-
+  // The limit first: every lookup costs a database command, and unknown ids must not be
+  // tried endlessly (until 2.5.1 they were looked up before any limit).
   const limited = await limitResponse(limiter, "customTaskShare", request);
   if (limited) return limited;
+  const record = await customTasks.load(id);
+  if (!record) return json({ kind: "missing" } satisfies CustomTaskStatusResponse);
+  // Already asked or decided: no new issue.
+  if (record.share) return json({ kind: "ok", status: statusOf(record) } satisfies CustomTaskStatusResponse);
   const updated = await customTasks.requestShare(id, new Date().toISOString());
   if (!updated) return json({ kind: "missing" } satisfies CustomTaskStatusResponse);
   // The request is already on the author's list (scripts/custom-task.mjs); the issue is a notice.

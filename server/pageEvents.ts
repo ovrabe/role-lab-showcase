@@ -1,3 +1,4 @@
+import { clientAddress } from "./rateLimit.js";
 import { createHmac } from "node:crypto";
 import { z } from "zod";
 import { dimensionIds } from "../src/roles/roleSchema.js";
@@ -62,7 +63,7 @@ export function pageEventMetrics(event: PageEvent, taskKey: string): MetricEntri
  * so visits cannot be linked across days. Only a HyperLogLog estimate keeps it (metrics.ts).
  */
 export function dailyVisitorMark(request: Request, secret: string, day: string): string {
-  const ip = request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = clientAddress(request);
   const agent = request.headers.get("user-agent") ?? "";
   const dailyKey = createHmac("sha256", secret).update(`visitors:${day}`).digest();
   return createHmac("sha256", dailyKey).update(`${ip}|${agent}`).digest("hex").slice(0, 16);

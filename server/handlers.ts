@@ -6,16 +6,16 @@ import type { RoleConfig } from "../src/roles/roleSchema.js";
 import { buildAssistantTurns } from "../src/prompts/assistant.js";
 import { buildEvaluatorPrompt } from "../src/prompts/evaluator.js";
 import { fitTurnsToBudget } from "../src/assistant/promptBudget.js";
-import { maxEventChars, maxMessageChars, maxUserMessages } from "../src/assistant/limits.js";
+import { maxAssistantChars, maxEventChars, maxMessageChars, maxUserMessages } from "../src/assistant/limits.js";
 import { maxPromptBytes } from "../src/assistant/promptBudget.js";
 import { validateEvaluation } from "../src/evaluation/validateEvaluation.js";
 import type { StoredEvaluation } from "../src/evaluation/evaluationSchema.js";
 import type { ServerContent } from "./content.js";
-import { assistantModel, evaluatorModel, maxOutputTokens, type ClaudeClient, type ClaudeError } from "./claudeClient.js";
+import { assistantModel, callDeadline, evaluatorModel, maxOutputTokens, minTimeForRetryMs, type CallDeadline, type ClaudeClient, type ClaudeError } from "./claudeClient.js";
 import type { RateLimiter } from "./rateLimit.js";
-import { badRequest, json, limitResponse, readJson } from "./http.js";
+import { badRequest, json, limitReachedResponse, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
-import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
+import { cutOffEstimator, reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
 import { giveBackToLimit } from "./rateLimit.js";
 import type { IssueTracker } from "./issues.js";
 import type { CustomTaskStore } from "./customTaskStore.js";
@@ -25,6 +25,7 @@ import { composeCustomTask, customEvaluatorKey, customMaterialTexts, customTaskI
 import { publicPart } from "../src/customTask/generatedTask.js";
 import { isCustomTask } from "../src/customTask/customTaskRole.js";
 import { countCustomTask } from "./statsHandler.js";
+import { exampleTokenFor } from "./exampleHandler.js";
 
 /**
  * The two endpoints of the web build (docs/SPEC.md, section 13). Web-standard
@@ -42,7 +43,7 @@ import { countCustomTask } from "./statsHandler.js";
 // is short events that pile up in honest use (every save of the submission, every download),
 // so the item cap is generous: 300 could be reached by switching tabs on a phone.
 const maxTranscriptItems = 2_000;
-const maxSubmissionChars = 10_000;
+export const maxSubmissionChars = 10_000;
 const maxReflectionChars = 5_000;
 
 const Transcript = z.array(TranscriptItem).max(maxTranscriptItems);
@@ -68,7 +69,8 @@ export type ChatStreamEvent =
 /** The evaluate response; mirrors EvaluatorOutcome in the page. */
 export type EvaluateResponse =
   | { kind: "ok"; evaluation: StoredEvaluation }
-  | { kind: "invalid"; problems: string[] }
+  // attemptReturned: whether the day's attempt came back (the page says so truthfully).
+  | { kind: "invalid"; problems: string[]; attemptReturned: boolean }
   | { kind: "error"; code: string; message: string }
   | { kind: "missing_key" };
 
@@ -84,6 +86,7 @@ export function transcriptProblem(role: RoleConfig, transcript: TranscriptItem[]
   // Only the person's messages: the assistant's answers can be longer (16 000 tokens), and
   // refusing a long answer already in the record would block the rest of the attempt.
   if (transcript.some((item) => item.kind === "user" && item.content.length > maxMessageChars)) return "A message is too long.";
+  if (transcript.some((item) => item.kind === "assistant" && item.content.length > maxAssistantChars)) return "An answer in the conversation is too long.";
   // The app writes events itself, each with its name and a short note. Without this check an event
   // could carry megabytes of text past every cap straight into the evaluator's prompt.
   if (transcript.some((item) => item.kind === "event" && (!item.event || item.content.length > maxEventChars))) return "Invalid event in the conversation.";
@@ -116,10 +119,21 @@ export async function resolveTask({ content, customTasks }: HandlerDeps, roleId:
   };
 }
 
-export function asClaudeError(error: unknown): ClaudeError {
+/**
+ * Whether a second try of a call may start: enough time left before the deadline, and the
+ * budget holds its worst case too (every call a request makes is covered by a hold).
+ */
+export async function mayTryAgain(deadline: CallDeadline, budget: BudgetReservation): Promise<boolean> {
+  return deadline.timeLeftMs() >= minTimeForRetryMs && (await budget.holdAnother());
+}
+
+export function asClaudeError(error: unknown, deadline?: CallDeadline): ClaudeError {
+  // Its own code: the call ran and was billed, so the attempt is not given back as after an
+  // outage, and Slack gets no "model failing" alarm. The page offers to try again.
+  if (deadline?.timedOut()) return { code: "timeout", message: "The call took too long." };
   if (typeof error === "object" && error !== null && "code" in error) {
-    const { code, message, text } = error as Partial<ClaudeError>;
-    return { code: String(code), message: String(message ?? ""), ...(text ? { text } : {}) };
+    const { code, message, text, reason } = error as Partial<ClaudeError>;
+    return { code: String(code), message: String(message ?? ""), ...(text ? { text } : {}), ...(reason ? { reason } : {}) };
   }
   return { code: "upstream_error", message: "Unexpected error." };
 }
@@ -140,7 +154,13 @@ export async function handleChat(request: Request, deps: HandlerDeps): Promise<R
   if (!fitted) return badRequest("too_large", "Conversation does not fit the prompt budget.", 413);
   if (fitted.turns[fitted.turns.length - 1].role !== "user") return badRequest("invalid_request", "Last turn must be the person's.");
   const promptChars = JSON.stringify(fitted.turns).length;
-  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(assistantModel, promptChars, maxOutputTokens.chat));
+  const deadline = callDeadline(request);
+  // The page can stop reading the answer (a closed tab) before the request itself is aborted.
+  const pageGone = new AbortController();
+  const callSignal = AbortSignal.any([deadline.signal, pageGone.signal]);
+  const full = await limitReachedResponse(limiter, "chat", request);
+  if (full) return full;
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(assistantModel, promptChars, maxOutputTokens.chat), callSignal);
   if (budget instanceof Response) return budget;
   const limited = await limitResponse(limiter, "chat", request);
   if (limited) return (await budget.settle(), limited);
@@ -149,27 +169,39 @@ export async function handleChat(request: Request, deps: HandlerDeps): Promise<R
   const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (event: ChatStreamEvent) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+      // Writing to a stream the page no longer reads throws; that ends the call as cancelled,
+      // not as a failing model (which used to post a false alarm to Slack).
+      const send = (event: ChatStreamEvent) => {
+        if (pageGone.signal.aborted) return;
+        try {
+          controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"));
+        } catch {
+          pageGone.abort();
+        }
+      };
       const call = measureCall(limiter.metrics, "chat");
       let answerChars = 0;
       try {
         const result = await claude.chat(fitted.turns, {
-          signal: request.signal,
+          signal: callSignal,
           onDelta: (text) => ((answerChars += text.length), send({ type: "delta", text })),
           onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
         });
         send({ type: "done", truncated: result.truncated });
         await call.finish(result.truncated ? "truncated" : "ok");
       } catch (error) {
-        const failure = asClaudeError(error);
+        const failure = pageGone.signal.aborted ? { code: "cancelled", message: "The page stopped reading." } : asClaudeError(error, deadline);
         await handleClaudeFailure({ limiter, issues }, "chat", request, failure);
         send({ type: "error", code: failure.code, message: failure.message });
         await call.finish(failure.code);
       } finally {
         // Cut off mid-answer: the prompt and what was already written were billed.
         await budget.settle(worstCaseMicroUsd(assistantModel, promptChars, Math.ceil(answerChars / 2)));
-        controller.close();
+        if (!pageGone.signal.aborted) controller.close();
       }
+    },
+    cancel() {
+      pageGone.abort();
     },
   });
   return new Response(stream, {
@@ -204,9 +236,12 @@ export async function handleEvaluate(request: Request, deps: HandlerDeps): Promi
   // The evaluator shortens the record to fit; a prompt still over the budget means a record far
   // beyond any real attempt, and sending it would only cost money.
   if (Buffer.byteLength(prompt) > maxPromptBytes) return badRequest("prompt_too_large", "The record is too long to evaluate.", 413);
-  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(evaluatorModel, prompt.length, maxOutputTokens.evaluate));
+  const deadline = callDeadline(request);
+  const full = await limitReachedResponse(limiter, "evaluate", request);
+  if (full) return full;
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(evaluatorModel, prompt.length, maxOutputTokens.evaluate), deadline.signal, cutOffEstimator(evaluatorModel, prompt.length, maxOutputTokens.evaluate));
   if (budget instanceof Response) return budget;
-  return settleAfter(budget, evaluateWithinBudget(request, deps, role, key, session, prompt, budget));
+  return settleAfter(budget, evaluateWithinBudget(request, deps, role, key, session, prompt, budget, deadline));
 }
 
 /** The evaluation itself, once its worst-case cost is held on the budget (handleEvaluate). */
@@ -218,6 +253,7 @@ async function evaluateWithinBudget(
   session: z.infer<typeof TaskSession>,
   prompt: string,
   budget: BudgetReservation,
+  deadline: CallDeadline,
 ): Promise<Response> {
   const limited = await limitResponse(limiter, "evaluate", request);
   if (limited) return limited;
@@ -226,15 +262,15 @@ async function evaluateWithinBudget(
   // person should not lose one of the day's two evaluations to a glitch of the model.
   const call = measureCall(limiter.metrics, "evaluate");
   let raw: unknown;
-  for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
+  for (let attempt = 1; attempt <= 2 && raw === undefined && (attempt === 1 || (await mayTryAgain(deadline, budget))); attempt++) {
     let reply: string;
     try {
       reply = await claude.evaluate(prompt, {
-        signal: request.signal,
+        signal: deadline.signal,
         onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
       });
     } catch (error) {
-      const failure = asClaudeError(error);
+      const failure = asClaudeError(error, deadline);
       await handleClaudeFailure({ limiter, issues }, "evaluate", request, failure);
       await call.finish(failure.code);
       return json({ kind: "error", code: failure.code, message: failure.message } satisfies EvaluateResponse);
@@ -247,14 +283,16 @@ async function evaluateWithinBudget(
   }
   if (raw === undefined) {
     // Our model failed twice, not the person: the attempt is given back.
-    await giveBackToLimit(limiter, "evaluate", request);
+    const attemptReturned = await giveBackToLimit(limiter, "evaluate", request, { afterPaidCalls: true });
     await call.finish("invalid_json");
-    return json({ kind: "invalid", problems: ["invalid_json"] } satisfies EvaluateResponse);
+    return json({ kind: "invalid", problems: ["invalid_json"], attemptReturned } satisfies EvaluateResponse);
   }
   const result = validateEvaluation(raw, role, key.traps, session.transcript, session.submission, session.reflection);
   if (!result.ok) {
+    // The model's fault as much as unreadable JSON: the same once-a-day give-back.
+    const attemptReturned = await giveBackToLimit(limiter, "evaluate", request, { afterPaidCalls: true });
     await call.finish("invalid_shape");
-    return json({ kind: "invalid", problems: result.problems } satisfies EvaluateResponse);
+    return json({ kind: "invalid", problems: result.problems, attemptReturned } satisfies EvaluateResponse);
   }
   for (const [name, amount] of Object.entries(outcomeMetrics(role, session, result.evaluation))) call.add(name, amount);
   await call.finish("ok");
@@ -268,7 +306,8 @@ async function evaluateWithinBudget(
     whatIsWrong: trap.whatIsWrong,
     ...(typeof trap.naiveEffect === "string" ? { naiveEffect: trap.naiveEffect } : {}),
   }));
-  return json({ kind: "ok", evaluation: { ...result.evaluation, keyTraps } } satisfies EvaluateResponse);
+  const exampleToken = exampleTokenFor(role.id, limiter.secret);
+  return json({ kind: "ok", evaluation: { ...result.evaluation, keyTraps, exampleToken } } satisfies EvaluateResponse);
 }
 
 // The model is asked for JSON; tolerate a code fence or a sentence around it.

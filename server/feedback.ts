@@ -32,10 +32,16 @@ export type FeedbackStore = {
   save(entry: FeedbackEntry): Promise<void>;
   // The newest entries first, for the admin page (server/adminHandler.ts).
   recent(limit: number): Promise<FeedbackEntry[]>;
+  // Deletes notes older than 90 days. After every new note, and every morning from the cron
+  // (server/morningHandler.ts), so they go on time even when no new note comes.
+  prune(): Promise<void>;
 };
 
 // The newest notes are kept; older ones fall off, so spam cannot fill the database.
 const maxStoredNotes = 500;
+// Notes and the e-mail addresses in them are kept 90 days, as the forms promise, then deleted.
+export const feedbackLifetimeDays = 90;
+const isFresh = (entry: FeedbackEntry, now: Date) => now.getTime() - new Date(entry.at).getTime() < feedbackLifetimeDays * 24 * 60 * 60 * 1000;
 
 const Rating = z.enum(["yes", "rather_yes", "rather_no", "no"]);
 type Rating = z.infer<typeof Rating>;
@@ -72,35 +78,78 @@ const TesterRequest = z.object({
 
 export function memoryFeedbackStore(): FeedbackStore & { entries: FeedbackEntry[] } {
   const entries: FeedbackEntry[] = [];
+  const prune = async () => {
+    const now = new Date();
+    entries.splice(0, entries.length, ...entries.filter((item) => isFresh(item, now)));
+  };
   return {
     entries,
     async save(entry) {
       entries.unshift(entry);
+      await prune();
     },
     async recent(limit) {
-      return entries.slice(0, limit);
+      const now = new Date();
+      return entries.filter((item) => isFresh(item, now)).slice(0, limit);
     },
+    prune,
   };
 }
 
+function parseEntry(value: string): FeedbackEntry | null {
+  try {
+    return JSON.parse(value) as FeedbackEntry;
+  } catch {
+    return null;
+  }
+}
+
+// How many of the oldest notes one round of pruning looks at; a few rounds cover the list.
+const pruneWindow = 20;
+
 export function upstashFeedbackStore(url: string, token: string): FeedbackStore {
+  // Deletes from the old end only, value by value (LREM). New notes go to the other end, so a
+  // note arriving meanwhile cannot shift what gets deleted. Cutting by position (the first
+  // version) could delete a fresh note when two came at once (review of 24. 11. 2026).
+  async function prune() {
+    const now = new Date();
+    for (let round = 0; round * pruneWindow < maxStoredNotes; round++) {
+      const [values] = await upstashTransaction(url, token, [["LRANGE", "feedback", String(-pruneWindow), "-1"]]);
+      const oldestLast = ((values ?? []) as string[]).slice().reverse();
+      const expired: string[] = [];
+      for (const value of oldestLast) {
+        const entry = parseEntry(value);
+        // An unreadable entry is junk and goes too; the first fresh one ends the search.
+        if (entry && isFresh(entry, now)) break;
+        expired.push(value);
+      }
+      if (expired.length === 0) return;
+      await upstashTransaction(url, token, expired.map((value) => ["LREM", "feedback", "-1", value]));
+      if (expired.length < oldestLast.length) return;
+    }
+  }
   return {
     async save(entry) {
       await upstashTransaction(url, token, [
         ["LPUSH", "feedback", JSON.stringify(entry)],
         ["LTRIM", "feedback", "0", String(maxStoredNotes - 1)],
+        // With no new note for 90 days, the whole list goes.
+        ["EXPIRE", "feedback", String(feedbackLifetimeDays * 24 * 60 * 60)],
       ]);
+      // The note is stored: a failed cleanup must not report it as lost (the person would send
+      // it again). The morning cron prunes anyway.
+      try {
+        await prune();
+      } catch (error) {
+        console.error("Pruning old feedback failed:", error);
+      }
     },
     async recent(limit) {
       const [values] = await upstashTransaction(url, token, [["LRANGE", "feedback", "0", String(limit - 1)]]);
-      return ((values ?? []) as string[]).flatMap((value) => {
-        try {
-          return [JSON.parse(value) as FeedbackEntry];
-        } catch {
-          return [];
-        }
-      });
+      const now = new Date();
+      return ((values ?? []) as string[]).map(parseEntry).filter((item): item is FeedbackEntry => item !== null && isFresh(item, now));
     },
+    prune,
   };
 }
 

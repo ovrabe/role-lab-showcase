@@ -3,10 +3,11 @@ import { z } from "zod";
 import { TaskSession } from "../src/session/sessionSchema.js";
 import { buildWhyPrompt } from "../src/prompts/why.js";
 import { validateWhyReply, type StoredWhy } from "../src/evaluation/whyAnswer.js";
-import { asClaudeError, isTimestamp, parseJsonReply, resolveTask, transcriptProblem, type HandlerDeps } from "./handlers.js";
-import { badRequest, json, limitResponse, readJson } from "./http.js";
-import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
-import { challengeModel, maxOutputTokens } from "./claudeClient.js";
+import { asClaudeError, isTimestamp, maxSubmissionChars, parseJsonReply, resolveTask, transcriptProblem, type HandlerDeps } from "./handlers.js";
+import { maxPromptBytes } from "../src/assistant/promptBudget.js";
+import { badRequest, json, limitReachedResponse, limitResponse, readJson } from "./http.js";
+import { cutOffEstimator, reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
+import { callDeadline, challengeModel, maxOutputTokens, type CallDeadline } from "./claudeClient.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
 
 /**
@@ -33,13 +34,20 @@ export async function handleWhy(request: Request, deps: HandlerDeps): Promise<Re
   const problem = transcriptProblem(role, session.transcript);
   if (problem) return badRequest("invalid_request", problem);
   if (!isTimestamp(session.startedAt)) return badRequest("invalid_request", "Invalid time of the attempt.");
+  if (session.submission.length > maxSubmissionChars) return badRequest("too_large", "Submission too long.", 413);
   const prompt = buildWhyPrompt(role, session, dimensionId);
   if (!prompt) return badRequest("invalid_request", "No evaluated area to explain.");
+  // The same ceiling as the evaluator's prompt: a bigger one is no real attempt (until 2.5.1
+  // a 3 MB explanation prompt went through).
+  if (Buffer.byteLength(prompt) > maxPromptBytes) return badRequest("prompt_too_large", "The record is too long to explain.", 413);
 
   // The quick model, the same call as challenges.
-  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(challengeModel, prompt.length, maxOutputTokens.challenge));
+  const deadline = callDeadline(request);
+  const full = await limitReachedResponse(limiter, "why", request);
+  if (full) return full;
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(challengeModel, prompt.length, maxOutputTokens.challenge), deadline.signal, cutOffEstimator(challengeModel, prompt.length, maxOutputTokens.challenge));
   if (budget instanceof Response) return budget;
-  return settleAfter(budget, explainScore(request, deps, session, prompt, budget));
+  return settleAfter(budget, explainScore(request, deps, session, prompt, budget, deadline));
 }
 
 /** The explanation itself, once its worst-case cost is held on the budget (handleWhy). */
@@ -49,6 +57,7 @@ async function explainScore(
   session: z.infer<typeof TaskSession>,
   prompt: string,
   budget: BudgetReservation,
+  deadline: CallDeadline,
 ): Promise<Response> {
   const limited = await limitResponse(limiter, "why", request);
   if (limited) return limited;
@@ -57,11 +66,11 @@ async function explainScore(
   let reply: string;
   try {
     reply = await claude.evaluateChallenge(prompt, {
-      signal: request.signal,
+      signal: deadline.signal,
       onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
     });
   } catch (error) {
-    const failure = asClaudeError(error);
+    const failure = asClaudeError(error, deadline);
     await handleClaudeFailure({ limiter, issues }, "why", request, failure);
     await call.finish(failure.code);
     return json({ kind: "error", code: failure.code, message: failure.message } satisfies WhyResponse);

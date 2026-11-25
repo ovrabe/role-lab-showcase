@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { attentionItems } from "./attention";
 import type { AdminOverview } from "./adminApi";
+import { sampleGeneratedTask } from "../customTask/sampleGeneratedTask";
 
 const base: AdminOverview = {
   generatedAt: "2026-11-23T10:00:00.000Z",
@@ -24,7 +25,7 @@ describe("Co řešit", () => {
   });
 
   it("warns about spending, failing calls and page errors, warnings first", () => {
-    const items = texts(withMetrics({ "call.chat.ok": 9, "call.chat.error": 1, "client_error.script": 2 }, { budget: { perIpUsd: 1.5, totalUsd: 3, spentTodayUsd: 2.4 }, pendingShares: [{ id: "x", title: "t", roleTitle: "r", requestedAt: "", brief: { situation: "", task: "" }, trap: "" }] }));
+    const items = texts(withMetrics({ "call.chat.ok": 9, "call.chat.error": 1, "client_error.script": 2 }, { budget: { perIpUsd: 1.5, totalUsd: 3, spentTodayUsd: 2.4 }, pendingShares: [{ id: "x", title: "t", roleTitle: "r", requestedAt: "", brief: { situation: "", task: "" }, trap: "", task: sampleGeneratedTask }] }));
     expect(items[0]).toContain("80 % denního stropu");
     expect(items).toEqual(expect.arrayContaining([expect.stringContaining("Asistent: 10 %"), expect.stringContaining("chyba"), expect.stringContaining("Čeká 1 žádost")]));
     expect(items.at(-1)).toMatch(/^info/);

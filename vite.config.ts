@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { viteSingleFile } from "vite-plugin-singlefile";
+import { selfHostedFont } from "./scripts/selfHostedFont.ts";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { existsSync, readFileSync } from "node:fs";
 
@@ -138,7 +139,7 @@ export default defineConfig(({ mode }) => ({
     tailwindcss(),
     escapeReplacementCharacter(),
     ...(mode === "participant" ? [participantTitle()] : []),
-    ...(mode === "web" ? [localApi(), webLinkPreview()] : []),
+    ...(mode === "web" ? [localApi(), webLinkPreview(), selfHostedFont()] : []),
     viteSingleFile(),
   ],
   // The web build is a participant page too: no calibration, no samples.

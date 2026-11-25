@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { handleAdmin, memoryAdminLog, memorySummaryCache, type AdminDeps, type AdminOverview } from "./adminHandler";
+import { describe, expect, it, vi } from "vitest";
+import { handleAdmin, memoryAdminLog, memorySummaryCache, upstashAdminLog, type AdminDeps, type AdminOverview } from "./adminHandler";
 import { loadServerContent } from "./content";
 import { memoryCounter } from "./rateLimit";
 import { memoryMetrics, pragueDay } from "./metrics";
@@ -56,12 +56,34 @@ describe("/api/admin", () => {
     expect(issues.issues[0].body).not.toContain("10.1.1.1");
   });
 
+  it("counts attempts sent at the same moment, so 50 at once cannot all try a token", async () => {
+    const { deps } = await setup();
+    const statuses = await Promise.all(Array.from({ length: 50 }, (_, index) => call(deps, { action: "overview" }, `wrong-${index}`).then((response) => response.status)));
+    expect(statuses.filter((status) => status === 401)).toHaveLength(10);
+    expect(statuses.filter((status) => status === 429)).toHaveLength(40);
+  });
+
+  it("never locks the author out with their own parallel requests, even after 9 wrong tokens", async () => {
+    const { deps } = await setup();
+    for (let attempt = 0; attempt < 9; attempt++) expect((await call(deps, { action: "overview" }, `wrong-${attempt}`)).status).toBe(401);
+    const statuses = await Promise.all(Array.from({ length: 5 }, () => call(deps, { action: "overview" }).then((response) => response.status)));
+    expect(statuses).toEqual([200, 200, 200, 200, 200]);
+    expect((await call(deps, { action: "overview" })).status).toBe(200);
+  });
+
+  it("does not use up attempts with the right token", async () => {
+    const { deps } = await setup();
+    for (let round = 0; round < 15; round++) expect((await call(deps, { action: "overview" })).status).toBe(200);
+    for (let attempt = 0; attempt < 10; attempt++) expect((await call(deps, { action: "overview" }, `wrong-${attempt}`)).status).toBe(401);
+  });
+
   it("returns the overview: daily metrics, visitors, budget, tasks, feedback and pending shares", async () => {
     const { deps, metrics, customTasks, feedback } = await setup();
     const day = pragueDay(new Date());
     await metrics.add(day, { "screen.home": 4 });
     await metrics.addUnique(day, "visitors", "x");
-    await feedback.save({ kind: "note", message: "Super", at: "2026-11-23T10:00:00.000Z" });
+    // Now, not a fixed date: notes older than 90 days are dropped (server/feedback.ts).
+    await feedback.save({ kind: "note", message: "Super", at: new Date().toISOString() });
     await customTasks.save({ id: "AbCdEfGhIjKl", createdAt: "2026-11-23T09:00:00.000Z", input: { role: "x", situation: "y", deliverable: "", data: null }, task: sampleGeneratedTask });
     await customTasks.requestShare("AbCdEfGhIjKl", "2026-11-23T09:30:00.000Z");
     const response = await call(deps, { action: "overview", days: 7 });
@@ -118,7 +140,7 @@ describe("/api/admin", () => {
   it("answers a question about the data from totals only, within a daily limit", async () => {
     const { deps, metrics, feedback } = await setup();
     await metrics.add(pragueDay(new Date()), { "funnel.qa-release.started": 3 });
-    await feedback.save({ kind: "note", message: "Tajný vzkaz", contact: "jana@firma.cz", at: "2026-11-23T10:00:00.000Z" });
+    await feedback.save({ kind: "note", message: "Tajný vzkaz", contact: "jana@firma.cz", at: new Date().toISOString() });
     const sent: string[] = [];
     deps.claude = {
       async chat(turns, { onDelta }) {
@@ -159,5 +181,14 @@ describe("/api/admin", () => {
     expect((await call(deps, { action: "ask", days: 7, question: "Ještě?" })).status).toBe(429);
     // A cached summary still opens.
     expect((await call(deps, { action: "summary", days: 7 })).status).toBe(200);
+  });
+});
+
+describe("the admin log in Upstash", () => {
+  it("skips a damaged entry instead of breaking the whole overview", async () => {
+    const good = JSON.stringify({ at: "2026-11-24T10:00:00.000Z", action: "share_approved", taskId: "abc" });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify([{ result: [good, "{ nedokončené"] }]))));
+    expect(await upstashAdminLog("https://example.upstash.io", "t").recent(10)).toHaveLength(1);
+    vi.unstubAllGlobals();
   });
 });

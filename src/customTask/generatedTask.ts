@@ -1,3 +1,4 @@
+import { withoutInvisible } from "../text/invisibleCharacters.js";
 import { z } from "zod";
 
 // The generator's answer for "Vlastní výzva" (docs/PROMPTS.md, section 6) and the checks code
@@ -55,17 +56,32 @@ export const customCharLimit = 800;
  */
 export function withCharLimit(deliverable: string): string {
   const limit = `nejvýš ${customCharLimit} znaků`;
-  const stated = /(nejvýš|maximálně|max\.)\s+[\d\s\u00a0]+\s+znaků/i;
+  // The number starts with a digit: "\s+[\d\s]+\s+" let a long run of spaces split three ways.
+  const stated = /(nejvýš|maximálně|max\.)\s+\d[\d\s\u00a0]*?\s*znaků/i;
   // Keep a capital letter where the limit starts a sentence.
   if (stated.test(deliverable)) return deliverable.replace(stated, (found) => (found[0] === found[0].toUpperCase() ? limit[0].toUpperCase() + limit.slice(1) : limit));
-  return `${deliverable.trim().replace(/[.,;:]*$/, "")}, ${limit}.`;
+  // Trailing punctuation cut by a loop, not /[.,;:]*$/, which slows down on long runs of dots.
+  let text = deliverable.trim();
+  while (/[.,;:]$/.test(text)) text = text.slice(0, -1);
+  return `${text}, ${limit}.`;
 }
 
 export type CheckResult = { ok: true; task: GeneratedTask } | { ok: false; problems: string[] };
 
 /** Parses and checks a generator reply. Problems are short English codes for logs and tests. */
+// Every text of a generated task without invisible characters: the author approves what they
+// see, and a hidden instruction (tag characters, bidi marks) must not reach other people's
+// assistant and evaluator unseen.
+function withoutInvisibleDeep(value: unknown): unknown {
+  if (typeof value === "string") return withoutInvisible(value);
+  if (Array.isArray(value)) return value.map(withoutInvisibleDeep);
+  // Key names too: the facts' names go to the evaluator as they are.
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [withoutInvisible(key), withoutInvisibleDeep(item)]));
+  return value;
+}
+
 export function checkGeneratedTask(raw: unknown): CheckResult {
-  const parsed = GeneratedTask.safeParse(raw);
+  const parsed = GeneratedTask.safeParse(withoutInvisibleDeep(raw));
   if (!parsed.success) return { ok: false, problems: parsed.error.issues.slice(0, 5).map((issue) => `schema: ${issue.path.join(".")}`) };
   const task = { ...parsed.data, brief: { ...parsed.data.brief, deliverable: withCharLimit(parsed.data.brief.deliverable) } };
   const problems: string[] = [];

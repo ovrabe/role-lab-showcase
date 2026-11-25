@@ -52,8 +52,13 @@ if (/sk-ant-[A-Za-z0-9_-]{10,}/.test(page)) problems.push("Something like an Ant
 // Anything that looks like a GitHub token (the issues token is server-only, like the API key).
 if (/(github_pat_|ghp_|gho_|ghs_)[A-Za-z0-9_]{20,}/.test(page)) problems.push("Something like a GitHub token found in the page");
 
+// The other server-only settings: the Slack webhook, the Upstash database, private keys.
+if (/hooks\.slack\.com\/services\/[A-Za-z0-9/]+/.test(page)) problems.push("Something like a Slack webhook found in the page");
+if (/https:\/\/[a-z0-9-]+\.upstash\.io/.test(page)) problems.push("An Upstash database address found in the page");
+if (/-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(page)) problems.push("A private key found in the page");
+
 if (problems.length > 0) {
   console.error("Web bundle check failed:\n- " + problems.join("\n- "));
   process.exit(1);
 }
-console.log("Web bundle check passed: no evaluator keys, evaluator instructions, API keys or GitHub tokens in dist-web/index.html.");
+console.log("Web bundle check passed: no evaluator keys, evaluator instructions, API keys, tokens, webhooks or database addresses in dist-web/index.html.");

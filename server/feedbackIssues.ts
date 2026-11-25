@@ -37,6 +37,12 @@ function shortTitle(prefix: string, text: string): string {
 }
 
 // A tester report reads like the scenario: step by step, question in bold, answer below.
+// Only someone who left an address wants a reply; it is said plainly so it is not missed. The
+// address itself stays in the admin: the app promises it goes nowhere else, and GitHub would
+// keep it in the issue's edit history even after the issue is edited.
+const replyLine = (contact: string | undefined) =>
+  contact ? "Čeká na odpověď: e-mail je v adminu, záložka Zpětná vazba." : "Bez e-mailu, odpověď není potřeba.";
+
 function testerIssue(entry: Extract<FeedbackEntry, { kind: "tester" }>): Issue {
   const lines: string[] = [untrustedNote, ""];
   let step = "";
@@ -48,7 +54,7 @@ function testerIssue(entry: Extract<FeedbackEntry, { kind: "tester" }>): Issue {
     lines.push(`**${asLine(question)}**`, asQuote(answer), "");
   }
   lines.push("---", `Odesláno: ${pragueTime(entry.at)}`);
-  lines.push(entry.contact ? `E-mail pro odpověď: ${asLine(entry.contact)}` : "Bez e-mailu, odpověď není potřeba.");
+  lines.push(replyLine(entry.contact));
   // The tester's role and task, when given, tell the reports apart in the backlog list.
   const roleAnswer = entry.answers.find((item) => item.question === "Vybraná role a úkol")?.answer;
   return { title: shortTitle("Testování", roleAnswer ?? "zpráva testera"), body: lines.join("\n"), labels: ["testování"] };
@@ -59,8 +65,7 @@ export function issueFromFeedback(entry: FeedbackEntry): Issue | null {
   if (entry.kind === "note") {
     const lines = [untrustedNote, "", asQuote(entry.message), "", "---", `Odesláno: ${pragueTime(entry.at)}`];
     if (entry.page) lines.push(`Obrazovka: ${asLine(entry.page)}`);
-    // Only someone who left an address wants a reply; it is said plainly so it is not missed.
-    lines.push(entry.contact ? `E-mail pro odpověď: ${asLine(entry.contact)}` : "Bez e-mailu, odpověď není potřeba.");
+    lines.push(replyLine(entry.contact));
     return { title: shortTitle("Zpětná vazba", entry.message), body: lines.join("\n"), labels: ["zpětná vazba"] };
   }
 

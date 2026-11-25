@@ -14,6 +14,7 @@ const safetyNames: Record<string, string> = {
   "security.sensitive_data_blocked": "Zablokované osobní údaje ve vlastní výzvě",
   "budget.refused.limit_person": "Odmítnuto: rozpočet jedné adresy",
   "budget.refused.limit_daily": "Odmítnuto: denní rozpočet všech",
+  "budget.refused.busy": "Odmítnuto na chvíli: rozpočet drží běžící volání",
   "client_error.render": "Chyba stránky při vykreslení",
   "client_error.script": "Chyba skriptu na stránce",
 };

@@ -3,9 +3,11 @@
 // and Markdown marks (list dashes, asterisks, backticks) carry no meaning here.
 // The words must still match exactly and in order, so a paraphrase is caught.
 
-// Letters, digits and % are content; everything else becomes a single space.
+import { withoutInvisible } from "../text/invisibleCharacters.js";
+
+// Letters, digits and % are content; invisible characters vanish; everything else becomes a single space.
 export function normalizeForQuotes(text: string): string {
-  return text
+  return withoutInvisible(text)
     .toLowerCase()
     .replace(/[^\p{L}\p{N}%]+/gu, " ")
     .trim();

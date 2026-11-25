@@ -4,7 +4,9 @@
   // That the server itself uses no Vite-only code is checked by server/content.test.ts.
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client"],
+    // Only vite.config.ts needs it; the server functions check compiles this code to files.
+    "allowImportingTsExtensions": false
   },
   "include": ["server", "api", "docs/claude-runtime"]
 }

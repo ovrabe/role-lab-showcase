@@ -10,10 +10,10 @@ import { buildAdminSummaryPrompt, validateAdminSummary, type AdminSummary } from
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { badRequest, json, readJson } from "./http.js";
-import { dailyLimits, type RateLimiter } from "./rateLimit.js";
-import { dailyBudgetUsd } from "./spendBudget.js";
+import { clientAddress, dailyLimits, type RateLimiter } from "./rateLimit.js";
+import { dailyBudgetUsd, spentTodayMicroUsd } from "./spendBudget.js";
 import { pragueDay, type MetricEntries } from "./metrics.js";
-import { publicPart } from "../src/customTask/generatedTask.js";
+import { publicPart, type GeneratedTask } from "../src/customTask/generatedTask.js";
 import type { ServerContent } from "./content.js";
 import type { FeedbackEntry, FeedbackStore } from "./feedback.js";
 import type { CustomTaskStore } from "./customTaskStore.js";
@@ -124,7 +124,14 @@ export function upstashAdminLog(url: string, token: string): AdminLog {
     },
     async recent(limit) {
       const [values] = await upstashTransaction(url, token, [["LRANGE", "admin:log", "0", String(limit - 1)]]);
-      return ((values ?? []) as string[]).map((value) => JSON.parse(value));
+      // One damaged entry must not take the whole overview down with it.
+      return ((values ?? []) as string[]).flatMap((value) => {
+        try {
+          return [JSON.parse(value)];
+        } catch {
+          return [];
+        }
+      });
     },
   };
 }
@@ -136,7 +143,7 @@ function tokenMatches(given: string, expected: string): boolean {
 }
 
 const addressMark = (request: Request, secret: string) => {
-  const ip = request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = clientAddress(request);
   return createHmac("sha256", secret).update(ip).digest("hex").slice(0, 16);
 };
 
@@ -151,10 +158,17 @@ export async function handleAdmin(request: Request, deps: AdminDeps): Promise<Re
   const failKey = `admin:fail:${pragueDay(now)}:${addressMark(request, limiter.secret)}`;
   const given = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   try {
-    // Checked before the token, so a blocked address learns nothing more.
-    if (limiter.counter.add && (await limiter.counter.add(failKey, 0)) >= maxFailuresPerDay) return badRequest("too_many_attempts", "Too many attempts.", 429);
-    if (!tokenMatches(given, adminToken)) {
+    // The token is checked first; only wrong ones are counted, each in one atomic step. A
+    // blocked address gets the same refusal whatever it sends, so it learns nothing more.
+    // Counting every attempt (one version on main, never released) let the author's own
+    // parallel requests after 9 failures push the count over and lock them out for the day.
+    if (tokenMatches(given, adminToken)) {
+      if (((await limiter.counter.add?.(failKey, 0)) ?? 0) >= maxFailuresPerDay) return badRequest("too_many_attempts", "Too many attempts.", 429);
+    } else {
+      // Reading the count and adding after the check (until 2.5.1) let 50 wrong tokens sent at
+      // once all be tried; adding first means only the first ten are.
       const failures = (await limiter.counter.add?.(failKey, 1)) ?? 1;
+      if (failures > maxFailuresPerDay) return badRequest("too_many_attempts", "Too many attempts.", 429);
       if ((await limiter.counter.add?.(`alert:${pragueDay(now)}:admin_login`, 1)) === 1) await alertFailedLogin(deps, failures);
       await notify(limiter, "admin_login", `:lock: Neúspěšné přihlášení do adminu (${failures}. pokus z jedné adresy dnes).`);
       return badRequest("unauthorized", "Wrong token.", 401);
@@ -212,7 +226,9 @@ export type AdminOverview = {
   budget: { perIpUsd: number; totalUsd: number; spentTodayUsd: number };
   limits: typeof dailyLimits;
   tasks: { id: string; roleTitle: string; taskTitle: string; difficulty: number }[];
-  pendingShares: { id: string; title: string; roleTitle: string; requestedAt: string; brief: { situation: string; task: string }; trap: string }[];
+  // task: everything the generator wrote, also what only the assistant and the evaluator get,
+  // so the author approves what other people will really run (instructions could hide anywhere).
+  pendingShares: { id: string; title: string; roleTitle: string; requestedAt: string; brief: { situation: string; task: string }; trap: string; task: GeneratedTask }[];
   generationOff: boolean;
   feedback: FeedbackEntry[];
   log: { at: string; action: string; detail?: string }[];
@@ -222,7 +238,7 @@ export async function overview(deps: AdminDeps, log: AdminLog, dayCount: number,
   const { limiter, content } = deps;
   const perDay = await readDays(limiter, dayCount, 0, now);
   const previousDays = await readDays(limiter, dayCount, dayCount, now);
-  const spentToday = limiter.counter.add ? (await limiter.counter.add(`spend:${pragueDay(now)}:total`, 0)) / 1_000_000 : 0;
+  const spentToday = (await spentTodayMicroUsd(limiter)) / 1_000_000;
   const pending = await deps.customTasks.listPending();
   return {
     generatedAt: now.toISOString(),
@@ -242,6 +258,7 @@ export async function overview(deps: AdminDeps, log: AdminLog, dayCount: number,
         requestedAt: record.share?.requestedAt ?? "",
         brief: { situation: visible.brief.situation, task: visible.brief.task },
         trap: record.task.trap.whatIsWrong,
+        task: record.task,
       };
     }),
     generationOff: await deps.customTasks.isGenerationOff(),

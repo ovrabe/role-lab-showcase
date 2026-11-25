@@ -21,9 +21,9 @@ const policy = [
   // 'self' only for Vercel Web Analytics and Speed Insights, which load their scripts from
   // our own domain (/_vercel/..., src/ai/vercelInsights.ts). Nothing else is served there.
   `script-src 'self' ${scriptHashes.join(" ")}`,
-  // React sets some styles inline; fonts come from Google Fonts (the one allowed outside host).
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src https://fonts.gstatic.com",
+  // React sets some styles inline. The font comes from our own domain (scripts/selfHostedFont.ts).
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self'",
   "img-src 'self' data: blob:",
   // Only the project's own server functions (/api/...).
   "connect-src 'self'",

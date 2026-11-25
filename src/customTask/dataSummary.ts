@@ -50,7 +50,10 @@ export function summarizeRows(fileName: string, table: unknown[][]): DataSummary
     const numbers = filled.map(parseNumber);
     if (filled.length > 0 && numbers.every((value) => value !== null)) {
       const values = numbers as number[];
-      return { name, type: "číslo", empty, min: roughly(Math.min(...values)), max: roughly(Math.max(...values)) };
+      // reduce, not Math.min(...values): Safari refuses more than about 65 000 arguments.
+      const min = values.reduce((low, value) => Math.min(low, value), Infinity);
+      const max = values.reduce((high, value) => Math.max(high, value), -Infinity);
+      return { name, type: "číslo", empty, min: roughly(min), max: roughly(max) };
     }
     const months = filled.map(parseMonth);
     if (filled.length > 0 && months.every((value) => value !== null)) {

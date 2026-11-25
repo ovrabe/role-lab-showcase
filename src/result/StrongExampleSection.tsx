@@ -4,11 +4,22 @@ import { isParticipantBuild, isWebBuild } from "../buildFlags";
 import { loadPreviewSamples } from "../evaluation/previewFixture";
 import { apiHeaders } from "../ai/apiHeaders";
 import { strongExampleFrom, type StrongExample } from "./strongExample";
+import type { StoredEvaluation } from "../evaluation/evaluationSchema";
 
 /** Where the strong sample comes from: the page itself (claude.ai demo) or the project's server (web). */
-async function loadStrongExample(role: RoleConfig): Promise<StrongExample | null> {
+// "needsEvaluation": the server gives the sample only with the token from an evaluation of this
+// task. A result from 2.5.1 or earlier has none, and a token stops matching when the server's
+// key changes; both are fixed by evaluating the task again, so retrying now would not help.
+async function loadStrongExample(role: RoleConfig, evaluation: StoredEvaluation): Promise<StrongExample | null | "needsEvaluation"> {
   if (isWebBuild) {
-    const response = await fetch("/api/example", { method: "POST", headers: apiHeaders(), body: JSON.stringify({ roleId: role.id }) });
+    if (!evaluation.exampleToken) return "needsEvaluation";
+    const request = JSON.stringify({ roleId: role.id, token: evaluation.exampleToken });
+    const response = await fetch("/api/example", { method: "POST", headers: apiHeaders(), body: request });
+    // Only "not evaluated" means the token: another 403 (a foreign page) is an ordinary error.
+    if (response.status === 403) {
+      const code = ((await response.clone().json().catch(() => null)) as { error?: { code?: string } } | null)?.error?.code;
+      if (code === "not_evaluated") return "needsEvaluation";
+    }
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const body = (await response.json()) as { kind: "ok"; example: StrongExample } | { kind: "none" };
     return body.kind === "ok" ? body.example : null;
@@ -20,21 +31,21 @@ async function loadStrongExample(role: RoleConfig): Promise<StrongExample | null
 // The claude.ai page for participants has neither samples nor a server.
 export const canShowStrongExample = isWebBuild || !isParticipantBuild;
 
-type State = { kind: "closed" } | { kind: "loading" } | { kind: "shown"; example: StrongExample } | { kind: "none" } | { kind: "error" };
+type State = { kind: "closed" } | { kind: "loading" } | { kind: "shown"; example: StrongExample } | { kind: "none" } | { kind: "needsEvaluation" } | { kind: "error" };
 
 /**
  * "Jak to řešil silný pokus": a made-up strong attempt of the same task beside the person's
  * own result, with what the evaluator praised in it. Loaded on request, after the evaluation.
  */
-export function StrongExampleSection({ role }: { role: RoleConfig }) {
+export function StrongExampleSection({ role, evaluation }: { role: RoleConfig; evaluation: StoredEvaluation }) {
   const [state, setState] = useState<State>({ kind: "closed" });
   const areaName = (id: string) => role.rubric.find((dimension) => dimension.id === id)?.name ?? id;
 
   async function open() {
     setState({ kind: "loading" });
     try {
-      const example = await loadStrongExample(role);
-      setState(example ? { kind: "shown", example } : { kind: "none" });
+      const example = await loadStrongExample(role, evaluation);
+      setState(example === "needsEvaluation" ? { kind: "needsEvaluation" } : example ? { kind: "shown", example } : { kind: "none" });
     } catch {
       setState({ kind: "error" });
     }
@@ -57,6 +68,9 @@ export function StrongExampleSection({ role }: { role: RoleConfig }) {
           <p className="text-ink-muted">Načítám…</p>
         )}
         {state.kind === "none" && <p className="text-ink-muted">Pro tenhle úkol zatím silný pokus není.</p>}
+        {state.kind === "needsEvaluation" && (
+          <p className="text-ink-muted">U staršího výsledku se silný pokus ukázat nedá. Uvidíš ho u dalšího hodnocení tohohle úkolu.</p>
+        )}
         {state.kind === "error" && (
           <p className="text-ink-muted">
             Silný pokus se nepodařilo načíst.{" "}

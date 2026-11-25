@@ -1,3 +1,4 @@
+import type { GeneratedTask } from "../customTask/generatedTask";
 import type { DayMetrics } from "./aggregate";
 
 // The page's side of /api/admin (server/adminHandler.ts). The token lives only in this tab
@@ -35,7 +36,7 @@ export type AdminOverview = {
   budget: { perIpUsd: number; totalUsd: number; spentTodayUsd: number };
   limits: { perPerson: Record<string, number>; total: Record<string, number> };
   tasks: { id: string; roleTitle: string; taskTitle: string; difficulty: number }[];
-  pendingShares: { id: string; title: string; roleTitle: string; requestedAt: string; brief: { situation: string; task: string }; trap: string }[];
+  pendingShares: { id: string; title: string; roleTitle: string; requestedAt: string; brief: { situation: string; task: string }; trap: string; task: GeneratedTask }[];
   generationOff: boolean;
   feedback: FeedbackItem[];
   log: { at: string; action: string; detail?: string }[];

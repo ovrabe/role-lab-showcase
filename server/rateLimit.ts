@@ -20,9 +20,10 @@ export const dailyLimits = {
   perPerson: { chat: 50, evaluate: 2, feedback: 5, challenge: 15, example: 30, stats: 300, why: 15, customTask: 1, customTaskStatus: 60, customTaskShare: 3 },
   // For everyone together: a ceiling on what one day can cost (and on feedback spam).
   // Chat and evaluation were 150 and 5 until the dollar budget (spendBudget.ts) held the worst
-  // case before each call; money is capped there now, so these only share the day out: 15
-  // evaluations let a group test on one day, and one address still gets at most a third.
-  total: { chat: 300, evaluate: 15, feedback: 100, challenge: 300, example: 1000, stats: 20000, why: 300, customTask: 5, customTaskStatus: 3000, customTaskShare: 30 },
+  // case before each call; money is capped there now, so these only share the day out. Sized
+  // for four colleagues on one office network (the author's decision, 25. 11. 2026): a third
+  // of 600 and 24 is 200 messages and 8 evaluations, four people's full day.
+  total: { chat: 600, evaluate: 24, feedback: 100, challenge: 300, example: 1000, stats: 20000, why: 300, customTask: 5, customTaskStatus: 3000, customTaskShare: 30 },
 };
 
 export type LimitedAction = keyof typeof dailyLimits.perPerson;
@@ -94,7 +95,12 @@ export function upstashCounter(url: string, token: string): Counter {
       return value;
     },
     async decrement(key) {
-      await upstashTransaction(url, token, [["DECR", key]]);
+      // With its expiry too: a counter must never stay forever (a give-back after midnight used
+      // to create the next day's key without one).
+      await upstashTransaction(url, token, [
+        ["DECR", key],
+        ["EXPIRE", key, String(keyLifetimeSeconds)],
+      ]);
     },
     async add(key, amount) {
       const [value] = await upstashTransaction(url, token, [
@@ -136,17 +142,43 @@ export function ipCeiling(perPerson: number, total: number): number {
 const browserIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const hashed = (value: string, secret: string) => createHmac("sha256", secret).update(value).digest("hex").slice(0, 16);
-const ipOf = (request: Request) =>
-  request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+/**
+ * The caller's address as the limits see it. Vercel sets x-real-ip and x-forwarded-for itself;
+ * locally there is none ("unknown"). An IPv6 address counts by its /64 network: one home or
+ * server gets a whole /64, so counting single addresses would give one machine billions of
+ * "people". An IPv4 address written as IPv6 ("::ffff:1.2.3.4") counts as that IPv4 address.
+ */
+export function clientAddress(request: Request): string {
+  const raw = request.headers.get("x-real-ip")?.trim() || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  // Written forms Vercel does not send but a header might hold: "[2001:db8::1]", "%eth0" zone,
+  // "1.2.3.4:5678" with a port.
+  const address = raw.replace(/^\[|\](:\d+)?$/g, "").replace(/%.*$/, "").replace(/^(\d+\.\d+\.\d+\.\d+):\d+$/, "$1");
+  if (!address.includes(":")) return address;
+  const mapped = address.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+  if (mapped) return mapped[1];
+  const [head, tail = ""] = address.toLowerCase().split("::");
+  const front = head ? head.split(":") : [];
+  const back = tail ? tail.split(":") : [];
+  const missing = 8 - front.length - back.length;
+  // Not a real IPv6 address (too many groups): counted as it is, never a crash.
+  if (missing < 0 || (!address.includes("::") && front.length !== 8)) return address.toLowerCase();
+  const groups = address.includes("::") ? [...front, ...Array(missing).fill("0"), ...back] : front;
+  return `${groups.slice(0, 4).map((group) => group.replace(/^0+(?=.)/, "")).join(":")}::/64`;
+}
+const ipOf = clientAddress;
 function browserOf(request: Request): string | null {
   const id = request.headers.get("x-role-lab-browser")?.trim() ?? "";
   return browserIdPattern.test(id) ? id : null;
 }
 
+// The day a request's attempt was counted on, so giving it back after midnight returns it to
+// that day, not to the new one (which got a free call).
+const countedDay = new WeakMap<Request, string>();
+
 // The counters one call goes against, with their ceilings, in the order they are checked.
 function limitKeys(limiter: RateLimiter, action: LimitedAction, request: Request) {
   const limits = limiter.limits ?? dailyLimits;
-  const day = pragueDay((limiter.now ?? (() => new Date()))());
+  const day = countedDay.get(request) ?? pragueDay((limiter.now ?? (() => new Date()))());
   const ip = hashed(ipOf(request), limiter.secret);
   const browser = browserOf(request);
   const keys: { key: string; max: number; code: LimitCode }[] = browser
@@ -164,7 +196,21 @@ function limitKeys(limiter: RateLimiter, action: LimitedAction, request: Request
  * which limit was reached. The person's limit is checked first, so one person cannot use
  * up the shared daily allowance.
  */
+/**
+ * Whether today's limit for `action` is already used up, without counting anything: checked
+ * before the money is held, so a person who will be refused anyway never holds money (and many
+ * such requests cannot pass for a busy moment, or set off the stuck-holds alert, for free).
+ */
+export async function limitAlreadyReached(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<LimitCode | null> {
+  if (!limiter.counter.add) return null;
+  for (const { key, max, code } of limitKeys(limiter, action, request)) {
+    if ((await limiter.counter.add(key, 0)) >= max) return code;
+  }
+  return null;
+}
+
 export async function takeFromLimit(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<LimitCode | null> {
+  countedDay.set(request, pragueDay((limiter.now ?? (() => new Date()))()));
   for (const { key, max, code } of limitKeys(limiter, action, request)) {
     if ((await limiter.counter.increment(key)) > max) return code;
   }
@@ -172,11 +218,27 @@ export async function takeFromLimit(limiter: RateLimiter, action: LimitedAction,
 }
 
 /**
- * Returns a call taken by takeFromLimit, for a call that failed before Claude wrote anything
- * (credit used up, overloaded API): the person should not lose an attempt to our outage.
- * Called only after takeFromLimit let the call through, so both counters were raised.
+ * Returns a call taken by takeFromLimit: after an outage on our side (credit used up, overloaded
+ * API), always; after answers that were paid for but unusable, once a day per address
+ * (`afterPaidCalls`). Called only after takeFromLimit let the call through. True when it came back.
  */
-export async function giveBackToLimit(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<void> {
-  if (!limiter.counter.decrement) return;
+export async function giveBackToLimit(
+  limiter: RateLimiter,
+  action: LimitedAction,
+  request: Request,
+  { afterPaidCalls = false }: { afterPaidCalls?: boolean } = {},
+): Promise<boolean> {
+  if (!limiter.counter.decrement) return false;
+  // After calls that were paid for (the model answered, but unusably), once a day per person:
+  // a description or submission made to break the model on purpose would otherwise make the
+  // count limit endless. An outage costs nothing, so its attempts always come back.
+  // Counted per address, not per browser: the browser id comes from the page, and a script
+  // inventing a new one each time got every paid failure back (review of 24. 11. 2026).
+  if (afterPaidCalls) {
+    const keys = limitKeys(limiter, action, request);
+    const addressKey = keys.find(({ key }) => key.includes(":person:")) ?? keys[0];
+    if ((await limiter.counter.increment(`${addressKey.key}:given-back`)) > 1) return false;
+  }
   for (const { key } of limitKeys(limiter, action, request)) await limiter.counter.decrement(key);
+  return true;
 }

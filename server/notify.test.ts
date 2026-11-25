@@ -141,4 +141,21 @@ describe("the morning message", () => {
     expect(notifier.messages[0].text).toContain("Shrnutí se dnes nepodařilo napsat");
     expect(notifier.messages[0].text).toContain("Včera:");
   });
+
+  it("posts at most five morning messages a day, so a leaked secret cannot flood Slack", async () => {
+    const { limiter, notifier } = setup();
+    const results = [];
+    for (let round = 0; round < 7; round++) results.push(await (await morning(morningDeps(limiter), secret)).json());
+    expect(notifier.messages).toHaveLength(5);
+    expect(results.at(-1)).toMatchObject({ skipped: expect.any(String) });
+  });
+
+  it("deletes feedback older than 90 days every morning, even without Slack", async () => {
+    const { limiter } = setup(false);
+    const deps = morningDeps(limiter);
+    const store = deps.feedback as ReturnType<typeof memoryFeedbackStore>;
+    store.entries.push({ kind: "note", message: "stará", contact: "a@b.cz", at: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString() });
+    await morning(deps, secret);
+    expect(store.entries).toHaveLength(0);
+  });
 });

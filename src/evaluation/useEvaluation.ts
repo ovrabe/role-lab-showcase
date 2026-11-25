@@ -15,6 +15,10 @@ export type EvaluationRun =
   | { status: "cancelled" };
 
 const invalidReplyMessage = "Hodnotitel vrátil neúplnou odpověď. Pokus se nepočítá, zkus hodnocení spustit znovu.";
+// The server finished the evaluation, but this page cannot read the result (an older version).
+const unreadableResultMessage = "Hodnocení proběhlo, ale tahle verze stránky neumí výsledek přečíst. Načti stránku znovu a spusť hodnocení ještě jednou. Tenhle pokus se do denního limitu už započítal.";
+// The web server gives an attempt back after such a reply once a day (server/rateLimit.ts).
+const invalidCountedMessage = "Hodnotitel vrátil neúplnou odpověď. Tentokrát se pokus započítal do denního limitu, protože nepovedený pokus se vrací jen jednou denně. Jestli ti ještě nějaký zbývá, zkus hodnocení spustit znovu.";
 const blockedMessage =
   "Volání Clauda není pro tuhle stránku povolené, takže hodnocení nemůže proběhnout. Odevzdaný text zůstává uložený.";
 
@@ -63,7 +67,13 @@ export function useEvaluation(role: RoleConfig, controls: TaskSessionControls, b
     } else if (outcome.kind === "missing_key") {
       setRun({ status: "failed", message: "Pro tuhle roli chybí klíč hodnotitele. Dej vědět autorovi.", canRetry: false });
     } else if (outcome.kind === "invalid") {
-      setRun({ status: "failed", message: invalidReplyMessage, canRetry: true });
+      const message = outcome.problems.includes("unexpected_shape")
+        ? unreadableResultMessage
+        : outcome.attemptReturned === false
+          ? invalidCountedMessage
+          : invalidReplyMessage;
+      // Retrying on this old page would fail the same way and use up another attempt.
+      setRun({ status: "failed", message, canRetry: !outcome.problems.includes("unexpected_shape") });
     } else if (outcome.handling.kind === "silent") {
       setRun({ status: "cancelled" });
     } else if (outcome.handling.kind === "blocked") {

@@ -102,6 +102,23 @@ export function handleSampleError(error: unknown): SampleErrorHandling {
         keepPartial: false,
         offerRetry: false,
       };
+    // Web build: the server's deadline ended the call (server/claudeClient.ts, callDeadline). It ran
+    // and was paid for, so the attempt is not given back.
+    case "timeout":
+      return {
+        kind: "notice",
+        message: "Claude odpovídal příliš dlouho, a tak se volání ukončilo. Do denního limitu se ale započítalo. Zkus to prosím znovu, rozpracovaná práce zůstane uložená.",
+        keepPartial: true,
+        offerRetry: true,
+      };
+    // Web build: the day's money is not spent, but running calls hold it (server/spendBudget.ts).
+    case "budget_busy":
+      return {
+        kind: "notice",
+        message: "Role Lab teď zpracovává hodně požadavků najednou. Zkus to prosím za minutu, rozpracovaná práce zůstane uložená.",
+        keepPartial: false,
+        offerRetry: true,
+      };
     case "limit_daily":
       return {
         kind: "notice",

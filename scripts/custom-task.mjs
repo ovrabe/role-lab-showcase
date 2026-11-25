@@ -78,7 +78,15 @@ function show(record) {
   console.log(`Situace: ${task.brief.situation}\n\nÚkol: ${task.brief.task}\n\nOdevzdává se: ${task.brief.deliverable}\n`);
   console.log(`${task.table.title} (${task.table.period})\n${task.table.csv}\n`);
   console.log(`${task.notes.title}\n${task.notes.markdown}\n`);
+  // Everything the evaluator gets too: an instruction could hide in any of it.
   console.log(`Záludnost: ${task.trap.title}\n${task.trap.whatIsWrong}\n`);
+  console.log(`Dopad bez kontroly: ${task.trap.naiveEffect}`);
+  console.log(`Odhalená, když: ${task.trap.caughtIf}`);
+  console.log(`Napůl, když: ${task.trap.partialIf}`);
+  console.log(`Přehlédnutá, když: ${task.trap.missedIf}`);
+  console.log(`Buňka: řádek ${task.trap.cell.row}, ${task.trap.cell.column} = ${task.trap.cell.value}\n`);
+  console.log(`Znaky dobrého úsudku:\n${task.judgmentMarkers.map((marker) => `- ${marker}`).join("\n")}\n`);
+  console.log(`Fakta:\n${Object.entries(task.facts).map(([name, value]) => `- ${name}: ${value}`).join("\n")}\n`);
   console.log(`Stav sdílení: ${record.share?.status ?? "nikdo nežádal"}`);
 }
 

@@ -111,7 +111,7 @@ export function TesterScenarioScreen() {
         <label className="block">
           <span className="block font-medium mb-1">E-mail (nepovinné)</span>
           <span className="block text-sm text-ink-muted mb-2">
-            Chceš vědět, co se z tvých připomínek udělalo? Nech e-mail. Použije se jen k odpovědi autora a po odpovědi ho autor smaže.
+            Chceš vědět, co se z tvých připomínek udělalo? Nech e-mail. Použije se jen k odpovědi autora a za 90 dní se automaticky smaže.
           </span>
           <input
             type="email"

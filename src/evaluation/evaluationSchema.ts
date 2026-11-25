@@ -79,5 +79,8 @@ export const StoredEvaluation = z.object({
   keyTraps: z
     .array(z.object({ id: z.string(), title: z.string(), whatIsWrong: z.string(), naiveEffect: z.string().optional() }))
     .optional(),
+  // Web build only: the server's proof that this task was evaluated, which unlocks the strong
+  // sample (/api/example). The sample shows the traps, so it is not given out before.
+  exampleToken: z.string().max(64).optional(),
 });
 export type StoredEvaluation = z.infer<typeof StoredEvaluation>;

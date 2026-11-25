@@ -56,6 +56,13 @@ describe("custom task sharing", () => {
     expect((await post("/api/custom-task-status", { id: "../x" })).status).toBe(400);
   });
 
+  it("counts the limit before looking anything up, so unknown ids cannot be tried endlessly", async () => {
+    const { post } = await setup();
+    // 3 a person a day: guessing ids stops after three, with or without a hit.
+    for (let attempt = 0; attempt < 3; attempt++) expect((await post("/api/custom-task-share", { id: `ZZZZZZZZZZZ${attempt}` })).body).toEqual({ kind: "missing" });
+    expect((await post("/api/custom-task-share", { id: "ZZZZZZZZZZZ9" })).status).toBe(429);
+  });
+
   it("writes the issue only from what the person saw", () => {
     const issue = shareIssue({ id, createdAt: "", input: { role: "x", situation: "y", deliverable: "", data: "Sloupce: tajne" }, task: sampleGeneratedTask });
     expect(issue.title).toContain(sampleGeneratedTask.title);
@@ -63,3 +70,17 @@ describe("custom task sharing", () => {
     expect(issue.body).not.toContain(sampleGeneratedTask.judgmentMarkers[0]);
   });
 });
+
+describe("the Upstash custom task store", () => {
+  it("does not report a share request for a task that expired between reading and writing", async () => {
+    const { vi } = await import("vitest");
+    const { upstashCustomTaskStore } = await import("./customTaskStore");
+    const record = { id, createdAt: "2026-11-21T10:00:00.000Z", input: { role: "x", situation: "y", deliverable: "", data: null }, task: sampleGeneratedTask };
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: null }, { result: 1 }])));
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify([{ result: JSON.stringify(record) }])));
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await upstashCustomTaskStore("https://example.upstash.io", "t").requestShare(id, "2026-11-25T10:00:00.000Z")).toBeNull();
+    vi.unstubAllGlobals();
+  });
+});
+

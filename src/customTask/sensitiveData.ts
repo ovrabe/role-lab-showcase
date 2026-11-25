@@ -14,7 +14,9 @@ function looksLikeBirthNumber(digits: string): boolean {
 }
 
 const checks: { kind: string; pattern: RegExp; blocking: boolean; accept?: (match: string) => boolean }[] = [
-  { kind: "e-mail", pattern: /[\w.+-]+@[\w-]+(\.[\w-]+)+/g, blocking: true },
+  // The lookbehind starts a match only at the start of a name: without it, a long run of name
+  // characters with no "@" took time growing with the square of its length.
+  { kind: "e-mail", pattern: /(?<![\w.+-])[\w.+-]+@[\w-]+(\.[\w-]+)+/g, blocking: true },
   { kind: "IBAN", pattern: /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){3,7}\b/g, blocking: true },
   // 123456/7890 or 19-123456789/0800: a birth number or a Czech account number.
   { kind: "rodné číslo nebo číslo účtu", pattern: /\b(?:\d{1,6}-)?\d{6,10}\/\d{3,4}\b/g, blocking: true },

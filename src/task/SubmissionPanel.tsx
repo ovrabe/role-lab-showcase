@@ -10,7 +10,8 @@ export const submissionCharLimit = 2500;
  * Every task states one (src/task/charLimit.test.ts); without it the general limit applies.
  */
 export function charLimitFromDeliverable(deliverable: string): number {
-  const match = deliverable.match(/nejvýš\s+([\d\s]+?)\s+znaků/i);
+  // The number starts with a digit, so a long run of spaces cannot be split many ways.
+  const match = deliverable.match(/nejvýš\s+(\d[\d\s]*?)\s*znaků/i);
   const stated = match ? Number(match[1].replace(/\s/g, "")) : NaN;
   return Number.isFinite(stated) && stated > 0 ? Math.min(stated, submissionCharLimit) : submissionCharLimit;
 }

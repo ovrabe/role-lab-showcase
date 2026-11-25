@@ -1,5 +1,5 @@
 import { addMetrics } from "./metrics.js";
-import { takeFromLimit, type LimitedAction, type RateLimiter } from "./rateLimit.js";
+import { limitAlreadyReached, takeFromLimit, type LimitedAction, type RateLimiter } from "./rateLimit.js";
 
 /**
  * Request checks shared by every endpoint, so each one gets the same protection:
@@ -42,6 +42,20 @@ export async function readJson(request: Request, maxBodyBytes = 1_000_000): Prom
 
 // Counted only for requests that passed every check. A counter that cannot be reached
 // blocks the request: no limits means no protection against spending or spam.
+/** The refusal when today's limit is already used up, checked before holding money; null otherwise. */
+export async function limitReachedResponse(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<Response | null> {
+  let code;
+  try {
+    code = await limitAlreadyReached(limiter, action, request);
+  } catch (error) {
+    console.error("Rate limit counter failed:", error);
+    return badRequest("service_unavailable", "Limit counter unavailable.", 503);
+  }
+  if (!code) return null;
+  await addMetrics(limiter.metrics, { [`limit.${action}.${code}`]: 1 });
+  return badRequest(code, "Daily limit reached.", 429);
+}
+
 export async function limitResponse(limiter: RateLimiter, action: LimitedAction, request: Request): Promise<Response | null> {
   let code;
   try {

@@ -113,11 +113,13 @@ export function upstashCustomTaskStore(url: string, token: string): CustomTaskSt
       if (!record) return null;
       record.share = { status: "pending", requestedAt };
       // KEEPTTL: asking to share does not make the task live longer. XX: never recreate a deleted one.
-      await upstashTransaction(url, token, [
+      const [written] = await upstashTransaction(url, token, [
         ["SET", keyOf(id), JSON.stringify(record), "KEEPTTL", "XX"],
         ["SADD", pendingShareKey, id],
       ]);
-      return record;
+      // The task expired between reading and writing: nothing to share (the pending list cleans
+      // the id up itself, src listPending).
+      return written === "OK" ? record : null;
     },
   };
 }

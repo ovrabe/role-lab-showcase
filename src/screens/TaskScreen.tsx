@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { isWebBuild } from "../buildFlags";
 import { revealChatEnd } from "../assistant/revealChatEnd";
 import type { RoleConfig } from "../roles/roleSchema";
 import { BriefPanel } from "../task/BriefPanel";
@@ -194,7 +195,8 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
             }
           />
           {/* After solving is the best moment to decide whether colleagues should get the task too. */}
-          {isCustomTask(role) && controls.session.evaluation && (
+          {/* Web only: sharing needs the project's server, so the claude.ai pages leave the code out. */}
+          {isWebBuild && isCustomTask(role) && controls.session.evaluation && (
             <div className="mt-10 max-w-2xl">
               <SharePanel id={customTaskIdOf(role.id) ?? ""} />
             </div>

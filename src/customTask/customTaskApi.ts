@@ -9,9 +9,12 @@ export type CustomTaskOutcome = { kind: "ok"; id: string; task: PublicGeneratedT
 
 // Messages for the codes that are specific to generating; the rest uses the shared wording.
 const messages: Record<string, string> = {
-  limit_person: "Dnešní vlastní výzva už je vygenerovaná. Další půjde zítra.",
+  limit_person: "Dnešní pokus o vlastní výzvu už je využitý. Další půjde zítra.",
+  timeout: "Generování trvalo příliš dlouho, a tak se ukončilo. Pokus se do denního limitu započítal, další vlastní výzva půjde až zítra.",
   limit_daily: "Dnešní kapacita pro vlastní výzvy je vyčerpaná. Zkus to prosím zítra.",
+  budget_busy: "Role Lab teď zpracovává hodně požadavků najednou. Zkus to prosím za minutu.",
   invalid: "Úkol se nepodařilo vygenerovat tak, aby dával smysl. Pokus se nepočítá, zkus popis upřesnit a vygenerovat znovu.",
+  invalid_counted: "Úkol se nepodařilo vygenerovat tak, aby dával smysl. Nepovedený pokus se vrací jen jednou denně, takže další vlastní výzvu půjde vygenerovat až zítra.",
   invalid_request: "Popis je moc krátký nebo moc dlouhý. Situaci napiš aspoň ve dvou větách.",
   custom_tasks_off: "Generování vlastních výzev je teď vypnuté. Už vygenerované úkoly fungují dál.",
   sensitive_data: "V popisu je e-mail, rodné číslo nebo číslo účtu. Odstraň je a zkus to znovu.",
@@ -22,11 +25,12 @@ export async function requestCustomTask(input: CustomTaskInput, signal?: AbortSi
     const response = await fetch("/api/custom-task", { method: "POST", headers: apiHeaders(), body: JSON.stringify(input), signal });
     const body = (await response.json().catch(() => ({}))) as
       | { kind: "ok"; id: string; task: PublicGeneratedTask }
-      | { kind: "invalid"; problems: string[] }
+      | { kind: "invalid"; problems: string[]; attemptReturned?: boolean }
       | { kind: "error"; code: string; message: string }
       | { error?: { code?: string } };
     if ("kind" in body && body.kind === "ok") return body;
-    const code = "kind" in body ? (body.kind === "invalid" ? "invalid" : body.code) : (body.error?.code ?? "upstream_error");
+    const invalidCode = "kind" in body && body.kind === "invalid" && body.attemptReturned === false ? "invalid_counted" : "invalid";
+    const code = "kind" in body ? (body.kind === "invalid" ? invalidCode : body.code) : (body.error?.code ?? "upstream_error");
     return { kind: "error", message: messages[code] ?? handleSampleError({ code }).message ?? "Něco se pokazilo. Zkus to prosím znovu." };
   } catch {
     return { kind: "error", message: handleSampleError({ code: "upstream_error" }).message };

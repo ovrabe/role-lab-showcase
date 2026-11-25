@@ -99,7 +99,7 @@ async function mockJson(input: MockInput, options: MockOptions = {}) {
   }
   if (submission.includes("#spatny-tvar")) return { hodnoceni: "nevím" };
 
-  const firstUserLine = prompt.match(/^\[(\d+)\] user \([^)]*\): (.+)$/m);
+  const firstUserLine = prompt.match(/^\[(\d+)\] user \([^)\n]*\): (.+)$/m);
   const userEvidence = firstUserLine
     ? { turn: Number(firstUserLine[1]), quote: firstUserLine[2].split(" ").slice(0, 6).join(" ") }
     : { turn: "submission", quote: submission.split(/\s+/).slice(0, 5).join(" ") };

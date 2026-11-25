@@ -38,7 +38,8 @@ const challengeOutputSchema = `{
 
 // The answer is the person's own text, so a closing tag in it must not end the section
 // and smuggle in instructions (same protection as in the role evaluator).
-const challengeTags = /<(\/?)(dovednost|rubrika|situace|vystup_ai|ukol|klic|odpoved_na_vyzvu)\b/gi;
+// The same shape as promptTags in src/prompts/evaluator.ts (spaces, full-width bracket).
+const challengeTags = /[<＜﹤⟨〈˂]\s*(?:(\/)\s*)?(dovednost|rubrika|situace|vystup_ai|ukol|klic|odpoved_na_vyzvu)\b/gi;
 const neutralizeChallengeTags = (text: string) => neutralizeTags(text).replace(challengeTags, "‹$1$2");
 
 /** One prompt string: instructions, output schema, then the message from docs/PROMPTS.md, section 4. */

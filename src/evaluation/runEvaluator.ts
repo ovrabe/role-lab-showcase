@@ -10,7 +10,8 @@ import { validateEvaluation } from "./validateEvaluation";
 export type EvaluatorOutcome =
   | { kind: "ok"; evaluation: StoredEvaluation }
   // The reply came but could not be used (wrong shape, missing dimension).
-  | { kind: "invalid"; problems: string[] }
+  // attemptReturned (web): false when the day's attempt was not given back this time.
+  | { kind: "invalid"; problems: string[]; attemptReturned?: boolean }
   | { kind: "error"; handling: SampleErrorHandling }
   | { kind: "missing_key" };
 

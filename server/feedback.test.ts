@@ -85,7 +85,7 @@ describe("POST /api/feedback", () => {
 
   it("reports a store failure instead of pretending the note was saved", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
-    const failing: FeedbackStore = { save: async () => Promise.reject(new Error("down")), recent: async () => [] };
+    const failing: FeedbackStore = { save: async () => Promise.reject(new Error("down")), recent: async () => [], prune: async () => {} };
     const { deps } = setup(failing as ReturnType<typeof memoryFeedbackStore>);
     expect((await handleFeedback(send({ message: "ok" }), deps)).status).toBe(503);
   });
@@ -94,14 +94,52 @@ describe("POST /api/feedback", () => {
 describe("upstashFeedbackStore", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("adds the note to the list and keeps only the newest 500", async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: 1 }, { result: "OK" }])));
+  it("adds the note to the list, keeps only the newest 500 and lets the list expire after 90 days", async () => {
+    const fresh = { kind: "note" as const, message: "ok", at: new Date().toISOString() };
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: 1 }, { result: "OK" }, { result: 1 }])));
     vi.stubGlobal("fetch", fetchMock);
-    await upstashFeedbackStore("https://example.upstash.io", "t").save({ kind: "note", message: "ok", at: "2026-11-11T10:00:00.000Z" });
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify([{ result: 1 }, { result: "OK" }, { result: 1 }])));
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify([{ result: [JSON.stringify(fresh)] }])));
+    await upstashFeedbackStore("https://example.upstash.io", "t").save(fresh);
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(JSON.parse(String(init.body))).toEqual([
-      ["LPUSH", "feedback", JSON.stringify({ kind: "note", message: "ok", at: "2026-11-11T10:00:00.000Z" })],
+      ["LPUSH", "feedback", JSON.stringify(fresh)],
       ["LTRIM", "feedback", "0", "499"],
+      ["EXPIRE", "feedback", String(90 * 24 * 60 * 60)],
     ]);
+    // Then the old end is checked; nothing expired, so nothing is deleted.
+    const [, check] = fetchMock.mock.calls[1] as unknown as [string, RequestInit];
+    expect(JSON.parse(String(check.body))).toEqual([["LRANGE", "feedback", "-20", "-1"]]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("deletes notes older than 90 days by value from the old end, so a note arriving meanwhile is safe", async () => {
+    const day = 24 * 60 * 60 * 1000;
+    // Newest first, as LRANGE returns them: 0, 30, 89, 91 and 200 days old.
+    const entries = [0, 30, 89, 91, 200].map((age) => JSON.stringify({ kind: "note", message: `${age}`, contact: "a@b.cz", at: new Date(Date.now() - age * day).toISOString() }));
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: entries }])));
+    vi.stubGlobal("fetch", fetchMock);
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify([{ result: entries }])));
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify([{ result: 1 }, { result: 1 }])));
+    const store = upstashFeedbackStore("https://example.upstash.io", "t");
+    await store.prune();
+    const [, remove] = fetchMock.mock.calls[1] as unknown as [string, RequestInit];
+    // The 200 and 91 days old go, each by its own value; nothing is cut by position.
+    expect(JSON.parse(String(remove.body))).toEqual([
+      ["LREM", "feedback", "-1", entries[4]],
+      ["LREM", "feedback", "-1", entries[3]],
+    ]);
+    // And the admin never shows an old one, even before the next prune.
+    fetchMock.mockImplementation(async () => new Response(JSON.stringify([{ result: entries }])));
+    expect((await store.recent(50)).map((entry) => (entry as { message: string }).message)).toEqual(["0", "30", "89"]);
+  });
+
+  it("reports a stored note as saved even when the cleanup after it fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const fresh = { kind: "note" as const, message: "ok", at: new Date().toISOString() };
+    const fetchMock = vi.fn(async () => new Response("down", { status: 500 }));
+    fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify([{ result: 1 }, { result: "OK" }, { result: 1 }])));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(upstashFeedbackStore("https://example.upstash.io", "t").save(fresh)).resolves.toBeUndefined();
   });
 });

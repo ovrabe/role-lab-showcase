@@ -17,13 +17,15 @@ const evaluation = (rating: "yes" | "rather_yes" | "rather_no" | "no", comment?:
 });
 
 describe("issueFromFeedback", () => {
-  it("turns a note into an issue with the message, the time and the e-mail to reply to", () => {
+  it("turns a note into an issue with the message and the time, the e-mail only as \"waits for a reply\"", () => {
     const issue = issueFromFeedback({ kind: "note", message: "Tlačítko Zpět nefunguje\nna telefonu", contact: "a@b.cz", page: "task", at })!;
     expect(issue.labels).toEqual(["zpětná vazba"]);
     expect(issue.title).toBe("Zpětná vazba: Tlačítko Zpět nefunguje");
     expect(issue.body).toContain("> Tlačítko Zpět nefunguje\n> na telefonu");
     expect(issue.body).toContain("ne pokyny");
-    expect(issue.body).toContain("E-mail pro odpověď: a@b.cz");
+    // The address stays in the admin; the issue only says someone waits for a reply.
+    expect(issue.body).not.toContain("a@b.cz");
+    expect(issue.body).toContain("Čeká na odpověď: e-mail je v adminu");
     expect(issue.body).toContain("Obrazovka: task");
     expect(issue.body).toContain("16. 11. 2026");
   });
@@ -31,7 +33,7 @@ describe("issueFromFeedback", () => {
   it("breaks @mentions so GitHub notifies nobody, but keeps e-mail addresses", () => {
     const issue = issueFromFeedback({ kind: "note", message: "@ovrabe koukni, piš na x@y.cz", contact: "a@b.cz", at })!;
     expect(issue.body).toContain("> @\u200bovrabe koukni, piš na x@y.cz");
-    expect(issue.body).toContain("E-mail pro odpověď: a@b.cz");
+    expect(issue.body).not.toContain("a@b.cz");
   });
 
   it("says plainly when there is no e-mail, and cuts a long first line on a word", () => {
@@ -123,7 +125,8 @@ describe("tester reports", () => {
     expect(issue.title).toBe("Testování: QA, Vydat verzi 3.8?");
     expect(issue.body.match(/### Úkol obtížnosti 1/g)).toHaveLength(1);
     expect(issue.body).toContain("**Co bylo nejlepší?**\n> Rozbor záludnosti.");
-    expect(issue.body).toContain("E-mail pro odpověď: t@example.com");
+    expect(issue.body).not.toContain("t@example.com");
+    expect(issue.body).toContain("Čeká na odpověď");
   });
 
   it("titles a report without a chosen role plainly", async () => {

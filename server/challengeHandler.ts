@@ -2,11 +2,11 @@ import { measureCall } from "./metrics.js";
 import { z } from "zod";
 import { buildChallengePrompt } from "../src/challenges/challengePrompt.js";
 import { maxAnswerChars, minAnswerChars, validateChallengeReply, type ChallengeResult } from "../src/challenges/challengeResult.js";
-import { asClaudeError, parseJsonReply, type HandlerDeps } from "./handlers.js";
-import { badRequest, json, limitResponse, readJson } from "./http.js";
+import { asClaudeError, mayTryAgain, parseJsonReply, type HandlerDeps } from "./handlers.js";
+import { badRequest, json, limitReachedResponse, limitResponse, readJson } from "./http.js";
 import { handleClaudeFailure } from "./claudeFailure.js";
-import { reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
-import { challengeModel, maxOutputTokens } from "./claudeClient.js";
+import { cutOffEstimator, reserveBudget, settleAfter, worstCaseMicroUsd, type BudgetReservation } from "./spendBudget.js";
+import { callDeadline, challengeModel, maxOutputTokens, type CallDeadline } from "./claudeClient.js";
 import type { ChallengeConfig, ChallengeKey } from "../src/challenges/challengeSchema.js";
 
 /**
@@ -40,9 +40,12 @@ export async function handleChallenge(request: Request, deps: HandlerDeps): Prom
   const key = content.getChallengeKey(challenge.id);
   if (!key) return json({ kind: "missing_key" } satisfies ChallengeResponse);
   const prompt = buildChallengePrompt(challenge, key, parsed.data.answer);
-  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(challengeModel, prompt.length, maxOutputTokens.challenge));
+  const deadline = callDeadline(request);
+  const full = await limitReachedResponse(limiter, "challenge", request);
+  if (full) return full;
+  const budget = await reserveBudget(limiter, request, issues, worstCaseMicroUsd(challengeModel, prompt.length, maxOutputTokens.challenge), deadline.signal, cutOffEstimator(challengeModel, prompt.length, maxOutputTokens.challenge));
   if (budget instanceof Response) return budget;
-  return settleAfter(budget, scoreChallenge(request, deps, challenge, key, parsed.data.answer, prompt, budget));
+  return settleAfter(budget, scoreChallenge(request, deps, challenge, key, parsed.data.answer, prompt, budget, deadline));
 }
 
 /** The scoring itself, once its worst-case cost is held on the budget (handleChallenge). */
@@ -54,6 +57,7 @@ async function scoreChallenge(
   answer: string,
   prompt: string,
   budget: BudgetReservation,
+  deadline: CallDeadline,
 ): Promise<Response> {
   const limited = await limitResponse(limiter, "challenge", request);
   if (limited) return limited;
@@ -62,16 +66,16 @@ async function scoreChallenge(
   // of a crown and the person never sees the hiccup.
   const call = measureCall(limiter.metrics, "challenge");
   let raw: unknown;
-  for (let attempt = 1; attempt <= 2 && raw === undefined; attempt++) {
+  for (let attempt = 1; attempt <= 2 && raw === undefined && (attempt === 1 || (await mayTryAgain(deadline, budget))); attempt++) {
     try {
       raw = parseJsonReply(
         await claude.evaluateChallenge(prompt, {
-          signal: request.signal,
+          signal: deadline.signal,
           onUsage: (model, usage) => (call.usage(model, usage), budget.record(model, usage)),
         }),
       );
     } catch (error) {
-      const failure = asClaudeError(error);
+      const failure = asClaudeError(error, deadline);
       await handleClaudeFailure({ limiter, issues }, "challenge", request, failure);
       await call.finish(failure.code);
       return json({ kind: "error", code: failure.code, message: failure.message } satisfies ChallengeResponse);

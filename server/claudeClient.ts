@@ -24,7 +24,8 @@ export type ClaudeClient = {
   generateCustomTask?(prompt: { system: string; user: string }, options: CallOptions): Promise<string>;
 };
 
-export type ClaudeError = { code: string; message: string; text?: string };
+// reason: for the author only (server log, backlog issue), never sent to the page.
+export type ClaudeError = { code: string; message: string; text?: string; reason?: string };
 
 // Models chosen in docs/PRODUCTION.md, section 5: the same tiers as in claude.ai
 // ("default" for the assistant, "complex" for the evaluator).
@@ -46,16 +47,40 @@ export function toClaudeError(error: unknown, partialText = ""): ClaudeError {
   if (error instanceof Anthropic.RateLimitError) return { code: "rate_limited", message: "Rate limited.", text: partialText };
   // Our account, not the person's fault: the key was rejected or expired, or the prepaid
   // credit ran out (a 400 that says so). Retrying cannot help until the author steps in.
+  // The reason is for the author only (log, backlog issue): the page learns just that AI is unavailable.
   if (error instanceof Anthropic.AuthenticationError || error instanceof Anthropic.PermissionDeniedError) {
-    return { code: "ai_unavailable", message: "The server's API key was rejected.", text: partialText };
+    return { code: "ai_unavailable", message: "AI is unavailable.", reason: "The server's API key was rejected.", text: partialText };
   }
   if (error instanceof Anthropic.BadRequestError && /credit balance/i.test(error.message)) {
-    return { code: "ai_unavailable", message: "Anthropic credit balance too low.", text: partialText };
+    return { code: "ai_unavailable", message: "AI is unavailable.", reason: "Anthropic credit balance too low.", text: partialText };
   }
   if (error instanceof Anthropic.APIError) {
     return { code: "upstream_error", message: `Anthropic API error ${error.status ?? ""}`.trim(), text: partialText };
   }
   return { code: "upstream_error", message: "Unexpected error while calling Claude.", text: partialText };
+}
+
+/**
+ * One deadline for all Claude calls of a request. Vercel stops a function after 300 s
+ * (vercel.json); a function stopped mid-call records no spend and sends the page nothing.
+ * Each call alone may take up to 280 s (the client below), and an evaluation may try twice, so
+ * the calls share this deadline instead, with a little room left to answer the page.
+ */
+export const requestDeadlineMs = 285_000;
+// A second try only with this much time left; an evaluation takes 30–60 s, rarely two minutes.
+export const minTimeForRetryMs = 120_000;
+
+export type CallDeadline = { signal: AbortSignal; timeLeftMs(): number; timedOut(): boolean };
+
+export function callDeadline(request: Request, now: () => number = Date.now): CallDeadline {
+  const startedAt = now();
+  const timeout = AbortSignal.timeout(requestDeadlineMs);
+  return {
+    // Ends the call when the person leaves or the deadline passes, whichever comes first.
+    signal: AbortSignal.any([request.signal, timeout]),
+    timeLeftMs: () => requestDeadlineMs - (now() - startedAt),
+    timedOut: () => timeout.aborted && !request.signal.aborted,
+  };
 }
 
 /** Output allowance of each call; the daily budget holds this much before a call (spendBudget.ts). */

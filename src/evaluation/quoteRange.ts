@@ -1,4 +1,5 @@
 import { quoteParts } from "./verifyQuote";
+import { invisibleCharacters } from "../text/invisibleCharacters.js";
 
 // Finds where a quote sits in the original text, so the result screen can
 // highlight it. Compares words and numbers only, exactly like verifyQuote,
@@ -6,19 +7,35 @@ import { quoteParts } from "./verifyQuote";
 
 export type TextRange = { start: number; end: number };
 
-// Normalized text plus, for every normalized character, its index in the original.
-function normalizeWithMap(text: string): { normalized: string; originalIndex: number[] } {
+// Normalized text plus, for every normalized character, where it starts and ends in the original
+// (the end matters for a character beyond U+FFFF, two UTF-16 units: a highlight must not split it).
+function normalizeWithMap(text: string): { normalized: string; originalIndex: number[]; originalEnd: number[] } {
   let normalized = "";
   const originalIndex: number[] = [];
-  for (let index = 0; index < text.length; index++) {
-    const isContent = /[\p{L}\p{N}%]/u.test(text[index]);
-    const char = isContent ? text[index].toLowerCase() : " ";
+  const originalEnd: number[] = [];
+  let lastWasSpace = false;
+  // Whole characters, not UTF-16 halves: a character beyond U+FFFF (an invisible tag character,
+  // a rare letter) is one unit for the checks, as in verifyQuote.
+  for (let index = 0; index < text.length; ) {
+    const whole = String.fromCodePoint(text.codePointAt(index) ?? 0);
+    const start = index;
+    index += whole.length;
+    // Invisible characters vanish, as in verifyQuote (src/text/invisibleCharacters.ts).
+    invisibleCharacters.lastIndex = 0;
+    if (invisibleCharacters.test(whole)) continue;
+    const isContent = /[\p{L}\p{N}%]/u.test(whole);
+    const char = isContent ? whole.toLowerCase() : " ";
     // Runs of non-content characters collapse into one space, as in verifyQuote.
-    if (char === " " && (normalized === "" || normalized.endsWith(" "))) continue;
+    // A flag, not a look at the string built so far: reading it each time made long texts slow.
+    if (char === " " && (normalized === "" || lastWasSpace)) continue;
+    lastWasSpace = char === " ";
     normalized += char;
-    originalIndex.push(index);
+    for (let unit = 0; unit < char.length; unit++) {
+      originalIndex.push(start);
+      originalEnd.push(index);
+    }
   }
-  return { normalized, originalIndex };
+  return { normalized, originalIndex, originalEnd };
 }
 
 /**
@@ -26,7 +43,9 @@ function normalizeWithMap(text: string): { normalized: string; originalIndex: nu
  * ellipsis), or null when the quote is not in the text.
  */
 export function findQuoteRange(text: string, quote: string): TextRange | null {
-  const { normalized, originalIndex } = normalizeWithMap(text);
+  const { normalized, originalIndex, originalEnd } = normalizeWithMap(text);
+  // Whole words, as in verifyQuote: "kontrol" must not be found inside "nekontroloval".
+  const padded = ` ${normalized} `;
   const parts = quoteParts(quote);
   if (parts.length === 0) return null;
 
@@ -34,13 +53,15 @@ export function findQuoteRange(text: string, quote: string): TextRange | null {
   let start = -1;
   let end = -1;
   for (const part of parts) {
-    const index = normalized.indexOf(part, searchFrom);
-    if (index < 0) return null;
+    const found = padded.indexOf(` ${part} `, searchFrom);
+    if (found < 0) return null;
+    // `found` points at the space before the part; in `normalized` the part starts there.
+    const index = found;
     if (start < 0) start = index;
     end = index + part.length;
     searchFrom = end;
   }
-  return { start: originalIndex[start], end: originalIndex[end - 1] + 1 };
+  return { start: originalIndex[start], end: originalEnd[end - 1] };
 }
 
 /** Sorted, non-overlapping ranges: overlapping highlights merge into one. */

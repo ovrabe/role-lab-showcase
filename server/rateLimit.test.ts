@@ -178,15 +178,15 @@ describe("limits per browser on a shared network", () => {
 
   it("keeps one IP address within a third of the day's total, so it cannot block everyone", async () => {
     const { takeFromLimit, dailyLimits, ipCeiling } = await import("./rateLimit");
-    // The real limits: 2 evaluations a person, 15 a day for everyone, so 5 for one address.
+    // The real limits: 2 evaluations a person, 24 a day for everyone, so 8 for one address.
     const shared: RateLimiter = { counter: memoryCounter(), secret: "s", now: () => new Date("2026-11-11T10:00:00Z") };
     const evaluate = (ip: string, index: number) => takeFromLimit(shared, "evaluate", new Request("http://localhost/api/evaluate", { headers: { "x-real-ip": ip, "x-role-lab-browser": browser(index) } }));
     // A script inventing a new browser for every call…
-    for (let index = 1; index <= 5; index++) expect(await evaluate("9.9.9.9", index)).toBeNull();
+    for (let index = 1; index <= 8; index++) expect(await evaluate("9.9.9.9", index)).toBeNull();
     // …stops at the address's third of the day…
-    expect(await evaluate("9.9.9.9", 6)).toBe("limit_person");
+    expect(await evaluate("9.9.9.9", 9)).toBe("limit_person");
     // …and people elsewhere can still evaluate.
-    expect(await evaluate("8.8.8.8", 7)).toBeNull();
+    expect(await evaluate("8.8.8.8", 10)).toBeNull();
     // Every action keeps at least one person's worth and at most a third of the total.
     for (const action of Object.keys(dailyLimits.perPerson) as (keyof typeof dailyLimits.perPerson)[]) {
       const ceiling = ipCeiling(dailyLimits.perPerson[action], dailyLimits.total[action]);
@@ -210,3 +210,101 @@ describe("limits per browser on a shared network", () => {
     expect(await takeFromLimit(shared, "chat", call("9.9.9.9", browser(1)))).toBeNull();
   });
 });
+
+describe("the address limits count by", () => {
+  const from = (address: string) => new Request("http://localhost/api/chat", { headers: { "x-real-ip": address } });
+
+  it.each([
+    ["an IPv4 address as it is", "203.0.113.7", "203.0.113.7"],
+    ["an IPv6 address by its /64 network", "2001:db8:abcd:12:1:2:3:4", "2001:db8:abcd:12::/64"],
+    ["a shortened IPv6 address the same way", "2001:db8::1", "2001:db8:0:0::/64"],
+    ["leading zeros and capitals ignored", "2001:0DB8:00AB:0012::FFFF", "2001:db8:ab:12::/64"],
+    ["an IPv4 address written as IPv6 as IPv4", "::ffff:198.51.100.2", "198.51.100.2"],
+    ["brackets and a port taken off", "[2001:db8::1]:443", "2001:db8:0:0::/64"],
+    ["a zone id taken off", "fe80::1%eth0", "fe80:0:0:0::/64"],
+    ["an IPv4 address without its port", "203.0.113.7:5678", "203.0.113.7"],
+    ["a malformed address as it is, without a crash", "1:2:3:4:5:6:7::8:9", "1:2:3:4:5:6:7::8:9"],
+  ])("%s", async (_name, address, expected) => {
+    const { clientAddress } = await import("./rateLimit");
+    expect(clientAddress(from(address))).toBe(expected);
+  });
+
+  it("gives one machine with many IPv6 addresses one person's limit", async () => {
+    const { takeFromLimit } = await import("./rateLimit");
+    const limits = { perPerson: { chat: 2, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 }, total: { chat: 100, evaluate: 100, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 } };
+    const shared: RateLimiter = { counter: memoryCounter(), secret: "s", limits };
+    expect(await takeFromLimit(shared, "chat", from("2001:db8:1:2::a"))).toBeNull();
+    expect(await takeFromLimit(shared, "chat", from("2001:db8:1:2::b"))).toBeNull();
+    expect(await takeFromLimit(shared, "chat", from("2001:db8:1:2::c"))).toBe("limit_person");
+    expect(await takeFromLimit(shared, "chat", from("2001:db8:1:3::a"))).toBeNull();
+  });
+
+  it("gives an attempt back after unusable paid answers at most once a day, after an outage always", async () => {
+    const { takeFromLimit, giveBackToLimit } = await import("./rateLimit");
+    const limits = { perPerson: { chat: 1, evaluate: 1, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 }, total: { chat: 100, evaluate: 100, feedback: 1, challenge: 1, example: 1, stats: 1, why: 1, customTask: 1, customTaskStatus: 1, customTaskShare: 1 } };
+    const shared: RateLimiter = { counter: memoryCounter(), secret: "s", limits, now: () => new Date("2026-11-24T10:00:00Z") };
+    expect(await takeFromLimit(shared, "evaluate", from("192.0.2.1"))).toBeNull();
+    await giveBackToLimit(shared, "evaluate", from("192.0.2.1"), { afterPaidCalls: true });
+    expect(await takeFromLimit(shared, "evaluate", from("192.0.2.1"))).toBeNull();
+    await giveBackToLimit(shared, "evaluate", from("192.0.2.1"), { afterPaidCalls: true });
+    expect(await takeFromLimit(shared, "evaluate", from("192.0.2.1"))).toBe("limit_person");
+    // An outage (nothing paid) gives the attempt back every time.
+    const outage: RateLimiter = { counter: memoryCounter(), secret: "s", limits, now: () => new Date("2026-11-24T10:00:00Z") };
+    for (let round = 0; round < 3; round++) {
+      expect(await takeFromLimit(outage, "evaluate", from("192.0.2.2"))).toBeNull();
+      await giveBackToLimit(outage, "evaluate", from("192.0.2.2"));
+    }
+  });
+
+  it("gives a paid failure back once a day per address, even when the browser id changes each time", async () => {
+    const { takeFromLimit, giveBackToLimit } = await import("./rateLimit");
+    const shared: RateLimiter = { counter: memoryCounter(), secret: "s", now: () => new Date("2026-11-24T10:00:00Z") };
+    const withBrowser = (index: number) =>
+      new Request("http://localhost/api/evaluate", { headers: { "x-real-ip": "192.0.2.9", "x-role-lab-browser": `00000000-0000-4000-8000-${String(index).padStart(12, "0")}` } });
+    const results: boolean[] = [];
+    for (let index = 1; index <= 4; index++) {
+      expect(await takeFromLimit(shared, "evaluate", withBrowser(index))).toBeNull();
+      results.push(await giveBackToLimit(shared, "evaluate", withBrowser(index), { afterPaidCalls: true }));
+    }
+    expect(results).toEqual([true, false, false, false]);
+  });
+
+  it("lets four colleagues on one network finish their day: 50 messages and 2 evaluations each", async () => {
+    const { takeFromLimit } = await import("./rateLimit");
+    const shared: RateLimiter = { counter: memoryCounter(), secret: "s", now: () => new Date("2026-11-25T10:00:00Z") };
+    const call = (action: "chat" | "evaluate", person: number) =>
+      takeFromLimit(shared, action, new Request("http://localhost/api/x", { headers: { "x-real-ip": "203.0.113.50", "x-role-lab-browser": `00000000-0000-4000-8000-${String(person).padStart(12, "0")}` } }));
+    for (let person = 1; person <= 4; person++) {
+      for (let message = 0; message < 50; message++) expect(await call("chat", person)).toBeNull();
+      for (let evaluation = 0; evaluation < 2; evaluation++) expect(await call("evaluate", person)).toBeNull();
+    }
+    // A fifth person on the same network waits for tomorrow; the rest of the world does not.
+    expect(await call("evaluate", 5)).toBe("limit_person");
+  });
+
+  it("gives an attempt taken before midnight back to that day, without a key that never expires", async () => {
+    const { takeFromLimit, giveBackToLimit } = await import("./rateLimit");
+    let now = new Date("2026-11-25T22:59:59Z"); // 23:59:59 in Prague
+    const counter = memoryCounter();
+    const shared: RateLimiter = { counter, secret: "s", now: () => now };
+    const request = new Request("http://localhost/api/evaluate", { headers: { "x-real-ip": "192.0.2.77" } });
+    expect(await takeFromLimit(shared, "evaluate", request)).toBeNull();
+    now = new Date("2026-11-25T23:00:05Z"); // 00:00:05 the next day
+    await giveBackToLimit(shared, "evaluate", request);
+    expect(await counter.add!("rl:2026-11-25:evaluate:total", 0)).toBe(0);
+    expect(await counter.add!("rl:2026-11-26:evaluate:total", 0)).toBe(0);
+  });
+});
+
+describe("the Upstash counter", () => {
+  it("gives a decremented counter its expiry too", async () => {
+    const { upstashCounter } = await import("./rateLimit");
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify([{ result: 0 }, { result: 1 }])));
+    vi.stubGlobal("fetch", fetchMock);
+    await upstashCounter("https://example.upstash.io", "t").decrement!("k");
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual([["DECR", "k"], ["EXPIRE", "k", expect.any(String)]]);
+    vi.unstubAllGlobals();
+  });
+});
+

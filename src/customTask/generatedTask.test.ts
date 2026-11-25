@@ -69,3 +69,16 @@ describe("helpers", () => {
     expect(visible).toContain("Kapky do očí");
   });
 });
+
+describe("invisible characters in a generated task", () => {
+  it("removes them everywhere, so the author approves exactly what other people's AI gets", () => {
+    const hidden = structuredClone(sampleGeneratedTask);
+    hidden.notes.markdown = `${hidden.notes.markdown}\u{E0049}\u{E0047}\u202E`;
+    hidden.judgmentMarkers[0] = `${hidden.judgmentMarkers[0]}\u200B`;
+    hidden.facts["skrytý\u{E0049}\u202E"] = 1;
+    const result = checkGeneratedTask(hidden);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(JSON.stringify(result.task)).not.toMatch(/[\u200B\u202E]|\u{E0049}/u);
+  });
+});

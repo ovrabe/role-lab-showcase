@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchCustomTaskStatus, type StatusOutcome } from "./customTaskApi";
 import { GeneratedPreview } from "./GeneratedPreview";
-import { saveCustomTask } from "./savedCustomTask";
+import { loadCustomTask, saveCustomTask } from "./savedCustomTask";
 import { customTaskConfigId } from "./customTaskRole";
 
 // A link ?vlastni-vyzva=<id> opened in another browser than the one that generated the task.
@@ -29,6 +29,10 @@ export function SharedTaskView({ id, onStart }: { id: string; onStart: (taskId: 
       <GeneratedPreview
         task={task}
         onStart={() => {
+          // One task fits in this browser: never replace the person's own without asking.
+          const own = loadCustomTask();
+          const replace = `V tomhle prohlížeči může být uložená jen jedna vlastní výzva. Když otevřeš „${task.title}“, výzva „${own?.task.title}“ i rozpracovaný postup v ní z tohohle prohlížeče zmizí. Pokračovat?`;
+          if (own && own.id !== id && !window.confirm(replace)) return;
           // Kept in this browser like an own task, so a reload goes back to it.
           saveCustomTask({ id, task });
           onStart(customTaskConfigId(id));

@@ -79,7 +79,9 @@ export function useScreenHistory(initial: () => Screen) {
     if (sameScreen(trail.current, next)) return;
     if (isWebBuild) {
       const index = browserIndex + 1;
-      window.history.pushState({ roleLab: true, screen: next, index } satisfies Entry, "");
+      // Without the query: ?vlastni-vyzva=<id> or ?admin belongs to the screen the link opened,
+      // not to every later one (Home and back to "Vlastní výzva" showed the shared task again).
+      window.history.pushState({ roleLab: true, screen: next, index } satisfies Entry, "", window.location.pathname);
       indexRef.current = index;
       setBrowserIndex(index);
       setBrowserForward(0);

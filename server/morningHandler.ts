@@ -3,6 +3,7 @@ import { json, badRequest } from "./http.js";
 import { adminUrl, slackMessage } from "./notify.js";
 import { memoryAdminLog, overview, readDays, writeSummary, type AdminDeps } from "./adminHandler.js";
 import { digest } from "../src/admin/digest.js";
+import { pragueDay } from "./metrics.js";
 import { attentionItems } from "../src/admin/attention.js";
 import type { AdminOverview as PageOverview } from "../src/admin/adminApi.js";
 
@@ -18,16 +19,29 @@ const same = (given: string, expected: string) => {
   return timingSafeEqual(digest(given), digest(expected));
 };
 
+const maxMorningMessagesPerDay = 5;
+
 const usd = (value: number) => `${value.toFixed(2).replace(".", ",")} $`;
 
 export async function handleMorning(request: Request, deps: AdminDeps & { cronSecret: string | undefined }): Promise<Response> {
   const secret = deps.cronSecret;
   const given = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   if (!secret || secret.length < 16 || !same(given, secret)) return badRequest("unauthorized", "Not allowed.", 401);
+  // The daily cleanup, with or without Slack: notes older than 90 days go even on days with no
+  // new note (they used to wait for the next one, so up to 180 days).
+  try {
+    await deps.feedback.prune();
+  } catch (error) {
+    console.error("Pruning old feedback failed:", error);
+  }
   const notifier = deps.limiter.notifier;
   if (!notifier) return json({ skipped: "no Slack webhook" });
 
   const now = (deps.limiter.now ?? (() => new Date()))();
+  // Vercel calls once a day; a few more are the author's "Run" in the Vercel settings (to show
+  // it to someone). More would mean a leaked secret: no message flood in Slack then.
+  const today = (await deps.limiter.counter.add?.(`morning:${pragueDay(now)}`, 1)) ?? 1;
+  if (today > maxMorningMessagesPerDay) return json({ skipped: "enough messages today" });
   const [yesterday] = await readDays(deps.limiter, 1, 1, now);
   const numbers = digest([yesterday]);
   const data = await overview(deps, deps.adminLog ?? memoryAdminLog(), 7, now);

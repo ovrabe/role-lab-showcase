@@ -21,7 +21,7 @@ Rozhraní Role Lab  ── zpráva ──▶   ověří vstup a limity
 ```
 
 - **Jeden kód, dvě sestavení.** Build pro claude.ai volá Clauda přes `claude.use("sample")` jako dnes. Webový build volá vlastní funkci. Rozdíl je na jednom místě v kódu.
-- **Bez databáze.** Postup i výsledek zůstávají v prohlížeči, výsledek jde stáhnout. Na serveru se nic neukládá.
+- **Bez databáze pro práci na úkolu.** Postup i výsledek zůstávají v prohlížeči, výsledek jde stáhnout. Konverzace se na serveru neukládá. Server drží jen limity a počty (2 dny), anonymní denní součty (90 dní), zpětnou vazbu s nepovinným e-mailem (90 dní) a vlastní výzvy (30 dní), vše v Upstash.
 - **Pokyny hodnotitele a klíč k záludnostem jen na serveru.** Ve webovém buildu nebudou ve zdrojovém kódu stránky.
 - Úroveň dál počítá kód podle konfigurace role, ne model. Kontrola citací zůstává.
 
@@ -32,13 +32,13 @@ Rozhraní Role Lab  ── zpráva ──▶   ověří vstup a limity
 2. Samostatný workspace v Anthropic Console s tvrdým měsíčním limitem útraty. Zvlášť klíč pro vývoj a pro ostrý provoz.
 3. Klíč jde kdykoli zneplatnit a vytvořit nový. GitHub hlídá, jestli klíč omylem neskončil v repozitáři.
 
-   Stejně se zachází s tokenem pro backlog na GitHubu (`GITHUB_ISSUES_TOKEN`): jen v nastavení serveru, omezený na zakládání issues v jednom soukromém repozitáři. Kontrola webového buildu hledá i GitHub tokeny.
+   Stejně se zachází s tokenem pro backlog na GitHubu (`GITHUB_ISSUES_TOKEN`): jen v nastavení serveru, fine-grained, jen jeden soukromý repozitář a jen oprávnění Issues (číst a zapisovat; čistě „zakládat“ GitHub neumí). Ověřeno 23. 11. 2026. Kontrola webového buildu hledá i GitHub tokeny.
 
 **Server**
 4. Server sám skládá pokyny pro Clauda. Uživatel posílá jen svou zprávu a vybrané podklady úkolu, ne vlastní systémové pokyny. Funkci tak nejde zneužít jako „Clauda zadarmo“.
 5. Kontrola vstupů: platná role, délka zprávy, počet zpráv (25 jako dnes), velikost příloh. Omezená délka odpovědi.
-6. Limity: pokusy na uživatele a den, celkový denní strop. Při vyčerpání srozumitelná hláška. Ochrana proti robotům (Cloudflare Turnstile), až když bude potřeba.
-7. Server přijímá požadavky jen z vlastní stránky (CORS).
+6. Limity: pokusy na uživatele a den, celkový denní strop. Při vyčerpání srozumitelná hláška. Před serverem Vercel Firewall: nejvýš 60 požadavků na `/api/` za minutu z jedné IP adresy (pravidlo `api-limit`, od 23. 11. 2026). Ochrana proti robotům (Cloudflare Turnstile), až když bude potřeba.
+7. Server přijímá požadavky jen z vlastní stránky: hlavička Origin musí přesně odpovídat adrese serveru (`server/http.ts`). Hlavičky CORS se neposílají, takže cizí stránka nemůže volat API z prohlížeče návštěvníka.
 8. Logy bez obsahu konverzací, jen počty, doba a chyby.
 
 **Specifické pro AI**
@@ -76,7 +76,7 @@ Modely (rozhodnuto): asistent Sonnet 5.5 s cachováním promptů, hodnotitel Opu
 | Krátká výzva | pod 0,01 $ | odhad |
 | **Celý pokus** | **~0,2–0,3 $, tedy zhruba 5–7 Kč** | |
 
-Útratu hlídají tři vrstvy: předplacený kredit bez automatického dobíjení, denní rozpočet podle skutečné útraty (1,50 $ na IP adresu, 3 $ celkem, `server/spendBudget.ts`) a denní limity počtu volání (`server/rateLimit.ts`). Přesné číslo za pokus ukáže řádek „Chat usage“ v logu Vercelu.
+Útratu hlídají tři vrstvy: předplacený kredit bez automatického dobíjení, denní rozpočet podle skutečné útraty (5 $ na IP adresu a 8 $ celkem od 25. 11. 2026, sdílená síť zvládne čtyři testery i s rezervacemi souběžných hodnocení; denní počty 600 zpráv a 24 hodnocení, `server/spendBudget.ts`; před každým voláním se drží jeho nejvyšší možná cena, takže ho souběžné požadavky nepřestřelí) a denní limity počtu volání (`server/rateLimit.ts`). Přesné číslo za pokus ukáže řádek „Chat usage“ v logu Vercelu.
 
 ## 6. Co udělá autor (nejde za něj)
 
@@ -217,7 +217,7 @@ Schváleno 22. 11. 2026. Autor chce vidět návštěvnost, průběh a výsledky 
   - **Účel:** provoz, bezpečnost a zlepšování aplikace (hledání chyb, ladění úkolů a hodnotitele, kontrola nákladů).
   - **Nezbytnost:** bez součtů nejde poznat, kde lidé odpadají, který úkol je špatně nastavený nebo kdy model zpomalí. Užší varianta (jen chyby) by na to nestačila.
   - **Vyvážení:** data jsou agregovaná a bez identity, krátce uchovávaná (90 dní) a lidé o nich vědí ze stránky Jak hodnotíme. Dopad na soukromí je zanedbatelný.
-- **Zpracovatelé:** Vercel (hosting, analytika), Upstash (databáze, EU), Anthropic (modely), GitHub (upozornění pro autora).
+- **Zpracovatelé:** Vercel (hosting a analytika, serverové funkce ve Frankfurtu, region fra1 od 24. 11. 2026, dřív iad1 v USA), Upstash (databáze, Frankfurt), Anthropic (modely), GitHub (soukromý backlog: texty zpětné vazby a žádosti o sdílení, bez e-mailů), Slack (upozornění pro autora, jen druh události a počty). Písmo webu je z vlastní domény (`scripts/selfHostedFont.ts`), Google Fonts zůstávají jen ve verzích pro claude.ai.
 
 ### Admin
 
@@ -261,4 +261,4 @@ Schváleno 22. 11. 2026. Autor chce vidět návštěvnost, průběh a výsledky 
 | Přetížení dotazy | Tělo nejvýš 2 kB (413), období nejvýš 90 dní (400), jen POST (405) | ručně |
 | Únik osobních údajů | Admin vrací jen součty a vlastní frontu zpětné vazby (kontakt testera jen přihlášenému autorovi); log akcí bez adres | test |
 
-**Zbylé riziko:** kdo získá token (třeba z odemčeného počítače), vidí zpětnou vazbu včetně kontaktů a může schvalovat sdílení. Proto token jen ve správci hesel. Při podezření vygeneruj nový a ve Vercelu ho přepiš (starý tím přestane platit po dalším nasazení).
+**Zbylé riziko:** kdo získá token (třeba z odemčeného počítače), vidí zpětnou vazbu včetně kontaktů a může schvalovat sdílení. Proto token jen ve správci hesel. Při podezření vygeneruj nový, ve Vercelu ho přepiš a nasaď znovu. Starší nasazení si drží starou hodnotu, ale jejich adresy (`role-xxxx-ovrabe.vercel.app`) chrání Vercel Authentication (Deployment Protection, Standard), takže se k nim bez přihlášení do Vercelu nikdo nedostane. Ověřeno 23. 11. 2026.

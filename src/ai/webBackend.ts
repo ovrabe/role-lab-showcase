@@ -84,13 +84,14 @@ export const webBackend: AiBackend = {
       if (!response.ok) return { kind: "error", handling: handleSampleError(await errorFrom(response)) };
       const body = (await response.json()) as
         | { kind: "ok"; evaluation: unknown }
-        | { kind: "invalid"; problems: string[] }
+        | { kind: "invalid"; problems: string[]; attemptReturned?: boolean }
         | { kind: "error"; code: string; message: string }
         | { kind: "missing_key" };
       if (body.kind === "ok") {
         // The server checked it already; this guards the shape the page stores.
         const parsed = StoredEvaluation.safeParse(body.evaluation);
-        return parsed.success ? { kind: "ok", evaluation: parsed.data } : { kind: "invalid", problems: ["unexpected_shape"] };
+        // The server counted the evaluation as done; the page (an older version?) cannot read it.
+        return parsed.success ? { kind: "ok", evaluation: parsed.data } : { kind: "invalid", problems: ["unexpected_shape"], attemptReturned: false };
       }
       if (body.kind === "error") return { kind: "error", handling: handleSampleError(body) };
       return body;
