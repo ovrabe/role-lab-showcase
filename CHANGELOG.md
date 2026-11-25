@@ -2,6 +2,20 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.7.0 – 25. 11. 2026
+
+Průvodce při první návštěvě a ochrana proti robotům.
+
+### Přidáno
+
+- Průvodce při první návštěvě úvodní stránky: tři krátké bubliny ukážou prohlídku, výběr role a výzvu dne. Dá se přeskočit, zavřít klávesou Esc a znovu otevřít tlačítkem „?“.
+- Průvodce při prvním otevření úkolu: kde je zadání a podklady, kde se pracuje s AI a kam patří výsledek. Na telefonu ukazuje na spodní lištu, znovu ho otevře „Jak na úkol“.
+- Ochrana proti robotům (Vercel BotID) u volání AI, zpětné vazby a vlastních výzev. Zatím jen zapisuje, za koho požadavek považuje, a nikoho neblokuje. Když nefunguje, stránka pošle požadavek bez ní, jednou a bez zdržení.
+
+### Soukromí
+
+- Metodika uvádí ochranu proti robotům: co posuzuje, kdo ji zajišťuje a na jakém základě.
+
 ## 2.6.0 – 25. 11. 2026
 
 Bezpečnost, soukromí a spolehlivost po auditu a třech kolech ověření.

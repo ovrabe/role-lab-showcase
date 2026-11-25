@@ -95,6 +95,8 @@ export function TabBar({ tabs, activeTab, onSelect, placement = "top", stepState
         <button
           key={tab}
           id={tabId(tab)}
+          // On a phone the guide points at the assistant and submit tabs (src/task/TaskGuide.tsx).
+          data-guide={`task-${tab}`}
           type="button"
           role="tab"
           aria-selected={tab === activeTab}

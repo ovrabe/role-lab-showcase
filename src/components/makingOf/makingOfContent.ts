@@ -18,10 +18,10 @@ export const benefits = [
 export const figures = [
   { value: "9 / 22 / 15", label: "rolí, úkolů a výzev" },
   { value: "< 1 min", label: "trvá hodnocení" },
-  { value: "33", label: "releasů za 10 dní" },
+  { value: "34", label: "releasů za 12 dní" },
   { value: "3", label: "Claude modely podle úlohy" },
   { value: "11", label: "kontrol webu po každém releasu" },
-  { value: "951", label: "automatických testů" },
+  { value: "981", label: "automatických testů" },
 ];
 
 /**
@@ -46,7 +46,7 @@ export const workingDays: { month: number; day: number; commits: number; hours: 
   { month: 11, day: 21, commits: 18, hours: 3.78 },
   { month: 11, day: 23, commits: 21, hours: 4.0 },
   { month: 11, day: 24, commits: 16, hours: 1.53 },
-  { month: 11, day: 25, commits: 13, hours: 1.5 },
+  { month: 11, day: 25, commits: 23, hours: 3.88 },
 ];
 
 /** The prototype phase, highlighted in the chart: up to the full prototype (3. 10.). */
@@ -139,7 +139,7 @@ export const decisions = [
 export const pipeline = [
   { title: "Specifikace", detail: "SPEC.md · PROMPTS.md", icon: "spec" },
   { title: "Kód a revize", detail: "Claude Code · 4 revizní agenti", icon: "code" },
-  { title: "Testy a kalibrace", detail: "951 testů · 22 úkolů", icon: "tests" },
+  { title: "Testy a kalibrace", detail: "981 testů · 22 úkolů", icon: "tests" },
   { title: "Sestavení", detail: "kontrola tajných dat · CSP", icon: "build" },
   { title: "Release", detail: "semver · changelog", icon: "release" },
   { title: "Produkce", detail: "Vercel · 11 kontrol", icon: "production" },

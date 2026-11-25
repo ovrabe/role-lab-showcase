@@ -103,7 +103,7 @@ const webDataFacts = [
   },
   {
     icon: HardDrive,
-    text: "Průběh úkolu se ukládá jen ve tvém prohlížeči. Server z konverzace nic neukládá. Kvůli dennímu limitu si nejdéle dva dny pamatuje jen počet pokusů a otisk IP adresy a náhodného čísla, které si vygeneroval tvůj prohlížeč. Z otisku původní hodnotu zjistit nejde a náhodné číslo s tebou nijak nesouvisí. Díky němu má vlastní limit každý, i když jednu síť sdílí několik lidí. Výsledek si můžeš stáhnout.",
+    text: "Průběh úkolu se ukládá jen ve tvém prohlížeči. Server z konverzace nic neukládá. Kvůli dennímu limitu si nejdéle dva dny pamatuje jen počet pokusů a otisk IP adresy a náhodného čísla, které si vygeneroval tvůj prohlížeč. Z otisku původní hodnotu zjistit nejde a náhodné číslo s tebou nijak nesouvisí. Díky němu má vlastní limit každý, i když jednu síť sdílí několik lidí. Proti robotům web chrání Vercel BotID: když voláš AI, posíláš zpětnou vazbu nebo vlastní výzvu, posoudí podle IP adresy a technických údajů o prohlížeči, jestli jde o člověka. Do provozního záznamu jde jen jeho verdikt, bez adresy. Výsledek si můžeš stáhnout.",
   },
   {
     icon: BarChart3,
@@ -118,11 +118,11 @@ const webDataFacts = [
   // 24. 11. 2026); the legal basis "you asked for it" for the task and conversation too (25. 11.).
   {
     icon: UserCheck,
-    text: "Osobní údaje zpracovává autor aplikace Ondřej Vrabeľ. Kromě otisku pro denní limit se uloží jen to, co pošleš: zpětná vazba s nepovinným e-mailem na 90 dní a vlastní výzva na 30 dní. E-mail vidí jen autor. Text zpětné vazby a žádost o sdílení výzvy jdou i do jeho soukromého seznamu námětů na GitHubu, kde zůstanou, dokud je nesmaže. Databáze Upstash a serverové funkce na Vercelu běží ve Frankfurtu. Dál data zpracovávají Anthropic (konverzace s AI), GitHub (seznam námětů) a Vercel (provoz webu a měření návštěvnosti), a to i v USA.",
+    text: "Osobní údaje zpracovává autor aplikace Ondřej Vrabeľ. Kromě otisku pro denní limit se uloží jen to, co pošleš: zpětná vazba s nepovinným e-mailem na 90 dní a vlastní výzva na 30 dní. E-mail vidí jen autor. Text zpětné vazby a žádost o sdílení výzvy jdou i do jeho soukromého seznamu námětů na GitHubu, kde zůstanou, dokud je nesmaže. Databáze Upstash a serverové funkce na Vercelu běží ve Frankfurtu. Dál data zpracovávají Anthropic (konverzace s AI), GitHub (seznam námětů) a Vercel (provoz webu, měření návštěvnosti a ochrana proti robotům), a to i v USA.",
   },
   {
     icon: Scale,
-    text: "Konverzace s AI a vlastní výzva se zpracovávají, protože o ně žádáš: bez toho by nešlo vyřešit úkol ani vytvořit výzvu. Limity a anonymní součty se zpracovávají na základě oprávněného zájmu na bezpečném provozu a proti tomu můžeš vznést námitku. Zpětná vazba se zpracovává na základě tvého souhlasu, když ji pošleš, a souhlas můžeš kdykoli odvolat. Chceš vědět, co o tobě aplikace má, opravit to nebo smazat? Napiš přes „Poslat zpětnou vazbu“ dole na stránce. Stížnost můžeš podat Úřadu pro ochranu osobních údajů.",
+    text: "Konverzace s AI a vlastní výzva se zpracovávají, protože o ně žádáš: bez toho by nešlo vyřešit úkol ani vytvořit výzvu. Limity, ochrana proti robotům a anonymní součty se zpracovávají na základě oprávněného zájmu na bezpečném provozu a proti tomu můžeš vznést námitku. Zpětná vazba se zpracovává na základě tvého souhlasu, když ji pošleš, a souhlas můžeš kdykoli odvolat. Chceš vědět, co o tobě aplikace má, opravit to nebo smazat? Napiš přes „Poslat zpětnou vazbu“ dole na stránce. Stížnost můžeš podat Úřadu pro ochranu osobních údajů.",
   },
 ];
 

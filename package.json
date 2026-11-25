@@ -1,12 +1,12 @@
 {
   "name": "role-lab",
   "private": true,
-  "version": "2.6.0",
+  "version": "2.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "build:resitel": "tsc --noEmit && vite build --mode participant",
+    "build": "tsc --noEmit && vite build && node scripts/check-claude-bundle.mjs dist/index.html",
+    "build:resitel": "tsc --noEmit && vite build --mode participant && node scripts/check-claude-bundle.mjs dist-resitel/index.html",
     "build:web": "tsc --noEmit && tsc -p tsconfig.server.json && vite build --mode web && node scripts/add-csp.mjs && node scripts/check-web-bundle.mjs && node scripts/check-server-functions.mjs",
     "dev:web": "vite --mode web",
     "dev:web:mock": "ANTHROPIC_API_KEY=' ' vite --mode web",
@@ -21,6 +21,7 @@
     "@anthropic-ai/sdk": "^1.6.0",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.1.0",
+    "botid": "1.5.13",
     "lucide-react": "^1.51.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

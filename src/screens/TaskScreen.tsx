@@ -23,6 +23,7 @@ import { stepStates, taskProgress } from "../task/taskProgress";
 import { track } from "../ai/track";
 import { customTaskIdOf, isCustomTask } from "../customTask/customTaskRole";
 import { SharePanel } from "../customTask/SharePanel";
+import { useTaskGuide } from "../task/TaskGuide";
 
 type TaskScreenProps = {
   role: RoleConfig;
@@ -58,6 +59,7 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
   }
   const controls = useTaskSession(role);
   const evaluation = useEvaluation(role, controls, backend);
+  const guide = useTaskGuide();
   // Materials attached but not sent yet. Kept in memory only: after a reload they are simply attached again.
   const [pendingAttachmentIds, setPendingAttachmentIds] = useState<string[]>([]);
 
@@ -168,7 +170,9 @@ export function TaskScreen({ role, roleSweepPosition, aiStatus, backend }: TaskS
           <SoftTimer startedAt={controls.session.startedAt} limitMinutes={role.timeLimitMinutes} />
         )}
         <RestartButton onConfirm={restart} />
+        {!controls.session.submittedAt && guide.button}
       </div>
+      {!controls.session.submittedAt && guide.guide}
 
       {controls.session.submittedAt ? (
         // Submitted work is locked; only "Začít znovu" starts a new attempt.

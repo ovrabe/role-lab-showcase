@@ -6,3 +6,18 @@
 @import "./styles/components.css";
 @import "./styles/markdown.css";
 @import "./styles/motion.css";
+
+/* First-visit guide (src/home/FirstVisitGuide.tsx): the bubble fades in, the frame pulses once. */
+@keyframes rl-guide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes rl-guide-pulse {
+  0% { outline: 0 solid rgb(138 92 246 / 0.4); outline-offset: 0; }
+  100% { outline: 8px solid rgb(138 92 246 / 0); outline-offset: 4px; }
+}
+.rl-guide-in { animation: rl-guide-in 240ms ease-out; }
+.rl-guide-spot { animation: rl-guide-pulse 1.1s ease-out 1; }
+@media (prefers-reduced-motion: reduce) {
+  .rl-guide-in, .rl-guide-spot { animation: none; }
+}

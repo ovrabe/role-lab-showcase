@@ -6,10 +6,13 @@ import { DailyChallengeCard } from "../challenges/DailyChallengeCard";
 import { CustomTaskCard } from "../customTask/CustomTaskCard";
 import type { ChallengeConfig } from "../challenges/challengeSchema";
 import { useState } from "react";
-import { MessageSquare } from "lucide-react";
+import { CircleHelp, MessageSquare } from "lucide-react";
 import { FeedbackDialog } from "../components/FeedbackDialog";
 import { isWebBuild } from "../buildFlags";
 import { RoleList } from "../home/RoleList";
+import { FirstVisitGuide, hasSeenGuide } from "../home/FirstVisitGuide";
+import { guideKey, guideSteps } from "../home/homeGuide";
+
 
 type HomeScreenProps = {
   activeRoles: RoleConfig[];
@@ -44,23 +47,27 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const roleCards = roleGroups(activeRoles);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(() => !hasSeenGuide(guideKey));
   return (
     <section className="mx-auto max-w-4xl">
-      <HomeHero onOpenTour={onOpenTour} onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} />
+      <HomeHero onOpenTour={onOpenTour} onOpenMethodology={onOpenMethodology} onOpenAbout={onOpenAbout} onOpenGuide={() => setIsGuideOpen(true)} />
+      {isGuideOpen && <FirstVisitGuide steps={guideSteps} storageKey={guideKey} onClose={() => setIsGuideOpen(false)} />}
 
       {errors.length > 0 && <ConfigErrors errors={errors} />}
 
       <ProgressTeaser roles={activeRoles} onOpenProfile={onOpenProfile} />
 
-      <DailyChallengeCard
-        challenge={dailyChallenge}
-        totalCount={challenges.length}
-        onStart={onSelectChallenge}
-        onOpenMap={onOpenChallengeMap}
-      />
+      <div data-guide={dailyChallenge ? "challenge" : undefined}>
+        <DailyChallengeCard
+          challenge={dailyChallenge}
+          totalCount={challenges.length}
+          onStart={onSelectChallenge}
+          onOpenMap={onOpenChallengeMap}
+        />
+      </div>
 
       {/* The note sits under the heading on every screen; the extra space below keeps it apart from the cards. */}
-      <div className="mb-5 space-y-1">
+      <div className="mb-5 space-y-1" data-guide="roles">
         <h2>Vyber si roli</h2>
         {/* Role Lab is for practice for now (decided 17. 11. 2026): said once, where people choose. */}
         <p className="text-sm text-ink-muted">Je to trénink, ne zkouška. Výsledek vidíš jen ty.</p>
@@ -99,7 +106,17 @@ export function HomeScreen({
 // because cropping them cuts the waves off where they rise on the left; on a phone a
 // low strip of waves drawn for that height runs along the bottom, so nothing is cut off.
 // Inline SVG, so nothing is downloaded.
-function HomeHero({ onOpenTour, onOpenMethodology, onOpenAbout }: { onOpenTour: () => void; onOpenMethodology: () => void; onOpenAbout?: () => void }) {
+function HomeHero({
+  onOpenTour,
+  onOpenMethodology,
+  onOpenAbout,
+  onOpenGuide,
+}: {
+  onOpenTour: () => void;
+  onOpenMethodology: () => void;
+  onOpenAbout?: () => void;
+  onOpenGuide: () => void;
+}) {
   return (
     <div className="relative overflow-hidden rounded-card mb-6 bg-linear-to-br from-[#241d5c] via-[#3a2a8a] to-[#5a37b8]">
       <svg viewBox="0 0 640 80" preserveAspectRatio="none" aria-hidden="true" className="sm:hidden absolute bottom-0 left-0 w-full h-10">
@@ -140,7 +157,7 @@ function HomeHero({ onOpenTour, onOpenMethodology, onOpenAbout }: { onOpenTour: 
         <p className="text-white/85 leading-relaxed text-balance sm:text-lg">Vyřeš úkol z praxe s AI asistentem a uvidíš hodnocení výsledku i postupu.</p>
         <div className="mt-5 sm:mt-8 flex flex-wrap gap-2">
           {/* The one solid button: for anyone who wants to see how it works before spending 15 minutes. */}
-          <button type="button" onClick={onOpenTour} className="rounded-full bg-white text-[#241d5c] px-4 py-2 font-semibold hover:bg-white/90">
+          <button type="button" data-guide="tour" onClick={onOpenTour} className="rounded-full bg-white text-[#241d5c] px-4 py-2 font-semibold hover:bg-white/90">
             Prohlídka na 2 minuty
           </button>
           <button type="button" onClick={onOpenMethodology} className={heroButtonClass}>
@@ -151,6 +168,9 @@ function HomeHero({ onOpenTour, onOpenMethodology, onOpenAbout }: { onOpenTour: 
               O projektu
             </button>
           )}
+          <button type="button" onClick={onOpenGuide} aria-label="Jak začít" title="Jak začít" className={`${heroButtonClass} px-2.5`}>
+            <CircleHelp aria-hidden="true" size={20} />
+          </button>
         </div>
       </div>
     </div>

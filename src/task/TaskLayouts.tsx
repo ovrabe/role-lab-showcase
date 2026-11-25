@@ -23,7 +23,7 @@ export function WideTaskLayout({ panels, leftTab, onSelect }: { panels: Panels; 
         </div>
         {/* Sticky beside the brief and materials, so the chat stays in view while reading;
             its height fills the window (the chat in AssistantPanel is sized to match). */}
-        <aside aria-label="Asistent" className="soft-card min-w-0 p-6 self-start sticky top-4">
+        <aside aria-label="Asistent" data-guide="task-assistant" className="soft-card min-w-0 p-6 self-start sticky top-4">
           <h2 className="mb-3 flex items-center gap-2">
             <AiIcon size={20} />
             Asistent
@@ -31,7 +31,7 @@ export function WideTaskLayout({ panels, leftTab, onSelect }: { panels: Panels; 
           {panels.assistant}
         </aside>
       </div>
-      <div className="soft-card p-6">
+      <div className="soft-card p-6" data-guide="task-submit">
         <h2 className="mb-3">Odevzdání</h2>
         {panels.submit}
       </div>

@@ -8,11 +8,13 @@ import { applyThemeChoice, loadThemeChoice } from "./components/ThemeToggle";
 applyThemeChoice(loadThemeChoice());
 import { trackScriptErrors } from "./ai/track";
 import { startVercelInsights } from "./ai/vercelInsights";
+import { startBotProtection } from "./ai/botProtection";
 import "./index.css";
 import "./phoneLayout.css";
 
 trackScriptErrors();
 void startVercelInsights();
+void startBotProtection();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
