@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeTasks, endpointStats, group, latencyPercentile, modelStats, series, spendOfDay, sumDays, taskStats, type DayMetrics } from "./aggregate";
+import { activeTasks, botHealth, botStats, endpointStats, group, latencyPercentile, modelStats, series, spendOfDay, sumDays, taskStats, type DayMetrics } from "./aggregate";
 
 const days: DayMetrics[] = [
   { day: "2026-11-23", visitors: 3, metrics: { "screen.home": 3, "call.chat.ok": 2, "latency.chat.le2": 1, "latency.chat.le5": 1, "latency.chat.total_ms": 5000, "spend.chat.claude-sonnet-5-5": 1_500_000 } },
@@ -47,5 +47,17 @@ describe("admin aggregation", () => {
 
   it("lists active tasks, most active first", () => {
     expect(activeTasks({ "funnel.a.started": 1, "funnel.b.started": 3, "outcome.b.count": 1, "screen.home": 9 })).toEqual(["b", "a"]);
+  });
+});
+
+describe("botStats", () => {
+  it("adds up BotID verdicts and judges whether BotID works", () => {
+    const stats = botStats({ "botid.human": 18, "botid.bot": 3, "botid.verified-bot": 3, "botid.known.bingbot": 1, "botid.known.googlebot": 2, "botid.unknown": 2, "botid.problem": 1, "call.chat.ok": 9 });
+    expect(stats).toEqual({ checked: 26, human: 18, bot: 3, verifiedBot: 3, unknown: 2, skipped: 0, problems: 1, knownBots: [["googlebot", 2], ["bingbot", 1]] });
+    expect(botHealth(stats)).toBe("warning");
+    expect(botHealth(botStats({ "botid.human": 40, "botid.bot": 30 }))).toBe("ok");
+    expect(botHealth(botStats({ "botid.human": 5, "botid.skipped": 5 }))).toBe("critical");
+    expect(botHealth(botStats({ "botid.unknown": 6, "botid.human": 4 }))).toBe("critical");
+    expect(botHealth(botStats({}))).toBe("idle");
   });
 });

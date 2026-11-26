@@ -2,6 +2,19 @@
 
 Přehled změn v každé verzi Role Lab. Formát vychází z Keep a Changelog, verze se číslují podle sémantického verzování: oprava zvýší poslední číslo, nová funkce prostřední, zásadní změna první.
 
+## 2.9.0 – 26. 11. 2026
+
+Přehled ochrany proti robotům v adminu.
+
+### Přidáno
+
+- Admin ukazuje v Zdraví provozu řádek Ochrana proti robotům: kolik požadavků poslali lidé, roboti a známí roboti (vyhledávače, monitoring, se jménem) a kolik zůstalo neověřeno. Žlutě nebo červeně upozorní, když ochrana sama nefunguje.
+- Verdikty se počítají v anonymních denních součtech na 90 dní, bez adresy. Log na Vercelu drží jen hodinu.
+
+### Změněno
+
+- Jak hodnotíme uvádí, že verdikt ochrany proti robotům jde i do anonymních denních součtů.
+
 ## 2.8.0 – 25. 11. 2026
 
 Jedno místo pro nápovědu a jedna sekce o projektu.

@@ -37,7 +37,13 @@ Rozhraní Role Lab  ── zpráva ──▶   ověří vstup a limity
 **Server**
 4. Server sám skládá pokyny pro Clauda. Uživatel posílá jen svou zprávu a vybrané podklady úkolu, ne vlastní systémové pokyny. Funkci tak nejde zneužít jako „Clauda zadarmo“.
 5. Kontrola vstupů: platná role, délka zprávy, počet zpráv (25 jako dnes), velikost příloh. Omezená délka odpovědi.
-6. Limity: pokusy na uživatele a den, celkový denní strop. Při vyčerpání srozumitelná hláška. Před serverem Vercel Firewall: nejvýš 60 požadavků na `/api/` za minutu z jedné IP adresy (pravidlo `api-limit`, od 23. 11. 2026). Ochrana proti robotům (Cloudflare Turnstile), až když bude potřeba.
+6. Limity: pokusy na uživatele a den, celkový denní strop. Při vyčerpání srozumitelná hláška. Před serverem Vercel Firewall: nejvýš 60 požadavků na `/api/` za minutu z jedné IP adresy (pravidlo `api-limit`, od 23. 11. 2026). Ochrana proti robotům: Vercel BotID od verze 2.7.0, podrobnosti níž v bodě 6a.
+6a. **Ochrana proti robotům (Vercel BotID, od 2.7.0, zatím jen zapisuje).**
+   - *Jak funguje:* stránka (`src/ai/botProtection.ts`) načte přes vlastní doménu ověřovací skript Vercelu (přesměrování ve `vercel.json`) a ke každému volání AI, zpětné vazbě a vlastní výzvě přidá podpis. Server (`server/botCheck.ts`) se Vercelu zeptá, jestli požadavek poslal člověk. Základní BotID je zdarma i na tarifu Hobby, Deep Analysis je placená a nepoužívá se.
+   - *Zatím nic neblokuje.* Verdikt (člověk, robot, známý robot, neověřeno, přeskočeno, chyba) jde do logu funkce a do anonymních denních součtů (`botid.*`). U známých robotů (vyhledávače, monitoring) i jejich jméno ověřené Vercelem (`botid.known.<jméno>`); u ostatních robotů BotID důvod neuvádí. V adminu je řádek Ochrana proti robotům v Zdraví provozu. Log na Vercelu (Runtime Logs, hledat `botid`) drží jen hodinu, součty 90 dní.
+   - *Když BotID nefunguje,* nic se nerozbije: stránka po 4 s pošle požadavek bez podpisu (nikdy dvakrát, chat stojí peníze) a server po 1,5 s pokračuje bez verdiktu. Náklady dál hlídají limity a rozpočet.
+   - *Před zapnutím blokování ověřit v adminu:* převažují lidé, žádné „přeskočeno“ (to by znamenalo, že BotID běží ve vývojovém režimu) a málo „neověřeno“ (skript blokuje CSP nebo blokovač reklam, nebo chybí OIDC v nastavení projektu). Pak: robot dostane 403 s českou hláškou, při výpadku služby BotID požadavek projde, ve Vercel Firewall zapnout Bot Protection a revize jedním agentem.
+   - *Soukromí:* BotID posílá Vercelu IP adresu a hlavičky prohlížeče a skript sbírá technické údaje o prohlížeči. Vercel je už zpracovatel (hosting). Stránka Jak hodnotíme to uvádí, právní základ je oprávněný zájem na bezpečném provozu.
 7. Server přijímá požadavky jen z vlastní stránky: hlavička Origin musí přesně odpovídat adrese serveru (`server/http.ts`). Hlavičky CORS se neposílají, takže cizí stránka nemůže volat API z prohlížeče návštěvníka.
 8. Logy bez obsahu konverzací, jen počty, doba a chyby.
 
@@ -100,7 +106,7 @@ Náročnost: **S** = do půl dne, **M** = 1–2 dny, **L** = víc dní.
 | 1 ✅ | Serverová funkce pro asistenta a hodnotitele, pokyny a klíč na serveru, webový build vedle buildu pro claude.ai | M |
 | 2 ✅ | Nasazení z GitHubu, klíč v nastavení, limit útraty, první veřejný odkaz | S |
 | 3 ✅ | Limity pokusů a denní strop, hlášky při vyčerpání, test proti vnuceným instrukcím | M |
-| 4 ✅ | Stránka „O projektu“: co to je, jak vznikl (SPEC, milníky, testy), výsledky kalibrace, bezpečnost a férovost, co se děje s daty | M |
+| 4 ✅ | Stránka „O projektu“: co to je, jak vznikl (SPEC, milníky, testy), výsledky kalibrace, bezpečnost a férovost, co se děje s daty. Od 2.8.0 jedna sekce se záložkami O projektu (čísla, graf vývoje, schéma, hrozby, vlastní výzva, cesta do produkce, rozhodnutí; odkaz `?jak-vznikl`) a Jak hodnotíme (rubrika, férovost, kalibrace, asistent, data) | M |
 | 5 ✅ | Zpětná vazba ve výsledku: „Odpovídá hodnocení tvé práci?“ a „Tady nesouhlasím“ u oblasti (část 10, fáze 1) | S–M |
 | 6 ✅ | Veřejný GitHub s README pro náboráře (role-lab-showcase), kontrola tajných údajů, security review (verze 1.6.5–1.7.0) | S |
 
@@ -172,7 +178,7 @@ První dva nápady pokrývá část 10 (fáze 1 a 2).
 - Pokrok se ukládá v prohlížeči po každém hodnocení (role, úroveň, skóre pěti dovedností, počet odhalených záludností; žádná konverzace).
 - Obrazovka **Můj profil** (ikona v hlavičce): dovednosti, doporučený další krok s mikro-cvičením, odznaky, historie pokusů. Na úvodu je jen řádek s odkazem.
 - **20 odznaků** v šesti skupinách (Začátky, Pravidelnost, Data, Mistrovství, Posun, Celkově). Jednou získaný odznak zůstává.
-- **Avatar:** 18 emblémů z game-icons.net (CC BY 3.0, autoři uvedeni na stránkách Jak hodnotíme a O projektu), šest barev a nepovinná přezdívka. Část emblémů a zlatou barvu odemykají odznaky, Bránu všech 20. Názvy emblémů jsou jen v nápovědě po najetí myší.
+- **Avatar:** 18 emblémů z game-icons.net (CC BY 3.0, autoři uvedeni na záložce Jak hodnotíme), šest barev a nepovinná přezdívka. Část emblémů a zlatou barvu odemykají odznaky, Bránu všech 20. Názvy emblémů jsou jen v nápovědě po najetí myší.
 - Ve výsledku blok „Co se změnilo“ a ve webové verzi otázka „Odpovídá hodnocení tvé práci?“ (odpověď a skóre jdou do Upstash, bez záznamu práce).
 - Další úpravy: tlačítko Kopírovat u odpovědí asistenta, chat na celou výšku okna na širší obrazovce, „krok“ místo „tah“ (stránka, pokyny hodnotitele, ukázky).
 
@@ -204,7 +210,7 @@ Schváleno 22. 11. 2026. Autor chce vidět návštěvnost, průběh a výsledky 
 
 ### Co se měří
 
-- **Vlastní počítadla** (`server/metrics.ts`, `server/outcomeMetrics.ts`, `server/pageEvents.ts`): denní součty v Upstash (Frankfurt), 90 dní. Obrazovky, kroky úkolu, výsledky hodnocení po úkolech (úroveň, skóre oblastí, stav záludností, délka, počet zpráv), pořadí pokusu a změna úrovně, ruční úpravy skóre, volání modelů (doba, tokeny, cena, výsledek), chyby podle kódu, zásahy limitů a rozpočtu, zablokované citlivé údaje, vlastní výzvy, chyby na stránce, dokončená prohlídka.
+- **Vlastní počítadla** (`server/metrics.ts`, `server/outcomeMetrics.ts`, `server/pageEvents.ts`): denní součty v Upstash (Frankfurt), 90 dní. Obrazovky, kroky úkolu, výsledky hodnocení po úkolech (úroveň, skóre oblastí, stav záludností, délka, počet zpráv), pořadí pokusu a změna úrovně, ruční úpravy skóre, volání modelů (doba, tokeny, cena, výsledek), chyby podle kódu, zásahy limitů a rozpočtu, zablokované citlivé údaje, vlastní výzvy, chyby na stránce, dokončená prohlídka, verdikty ochrany proti robotům (od 2.9.0, bez adresy a bez cesty).
 - **Unikátní návštěvníci:** odhad (HyperLogLog) z otisku adresy a prohlížeče s klíčem, který se mění každý den. Otisk se neukládá a návštěvy nejde spojit mezi dny.
 - **Vercel Web Analytics a Speed Insights:** zdroj návštěvy, země, zařízení, prohlížeč, rychlost načítání. Bez cookies, skripty z vlastní domény. Z adresy se odstraní hodnoty parametrů (`src/ai/vercelInsights.ts`), zůstávají jen UTM značky.
 

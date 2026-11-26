@@ -57,12 +57,13 @@ export function HealthRow({ name, detail, health }: { name: string; detail: stri
     health === "ok" ? <CircleCheck aria-hidden="true" size={18} className="text-[#1f8a4c]" /> : health === "warning" ? <TriangleAlert aria-hidden="true" size={18} className="text-[#b07400]" /> : health === "critical" ? <CircleAlert aria-hidden="true" size={18} className="text-[#c0362c]" /> : <CircleCheck aria-hidden="true" size={18} className="text-ink-muted" />;
   const word = { ok: "v pořádku", warning: "pozor", critical: "problém", idle: "bez provozu" }[health];
   return (
-    <div className="flex items-center gap-3 rounded-[16px] bg-paper px-3 py-2.5">
+    // A long detail (the BotID verdicts) moves under the name instead of squeezing it.
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[16px] bg-paper px-3 py-2.5">
       {icon}
-      <span className="flex-1 min-w-0 text-sm font-semibold">
+      <span className="flex-1 basis-36 text-sm font-semibold">
         {name} <span className="font-normal text-ink-muted">· {word}</span>
       </span>
-      <span className="text-sm text-ink-muted tabular-nums text-right">{detail}</span>
+      <span className="ml-auto text-sm text-ink-muted tabular-nums text-right">{detail}</span>
     </div>
   );
 }

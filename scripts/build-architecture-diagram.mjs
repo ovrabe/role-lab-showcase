@@ -75,7 +75,8 @@ function diagram(t) {
     // User side
     card(t, { x: 40, y: 110, width: 240, height: 150, iconName: "browser", title: "Prohlížeč", lines: ["Stránka Role Lab", "Pokrok a odznaky jen", "v tomto prohlížeči"] }),
     `<path d="M160 260V318" stroke="${t.line}" stroke-width="1.5" stroke-dasharray="4 4"/>`,
-    card(t, { x: 40, y: 318, width: 240, height: 54, iconName: "type", title: "Google Fonts", lines: [], iconColor: t.muted }),
+    // Since 2.7.0 the page loads Vercel BotID's script through its own domain; the font is self-hosted since 2.6.0.
+    card(t, { x: 40, y: 318, width: 240, height: 54, iconName: "lock", title: "Vercel BotID", lines: [], iconColor: t.muted }),
 
     // Vercel
     `<rect x="350" y="30" width="460" height="540" rx="16" fill="${t.panel}" stroke="${t.panelStroke}"/>`,
@@ -97,7 +98,7 @@ function diagram(t) {
         `<text x="${x + 45}" y="${y + 20.5}" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="${t.accent}" text-anchor="middle">${name}</text>`,
       ];
     }),
-    text(390, 356, "Ověří původ, limity a citace, spočítá úroveň", { size: 13, color: t.muted }),
+    text(390, 356, "Ověří původ, robota, limity a citace, spočítá úroveň", { size: 13, color: t.muted }),
 
     `<path d="M580 412V382" stroke="${t.secretStroke}" stroke-width="1.5" stroke-dasharray="4 4"/>`,
     `<path d="M575.5 389L580 381L584.5 389z" fill="${t.secretStroke}"/>`,

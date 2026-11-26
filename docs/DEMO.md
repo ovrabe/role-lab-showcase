@@ -2,7 +2,7 @@
 
 Cíl: ukázat dvě věci. Role Lab měří, jak člověk s AI pracuje, ne co o ní ví. A celý produkt vznikl přístupem AI-first: AI psala kód, testy a revize, člověk určoval směr, kontroloval kvalitu a rozhodoval o riziku a nákladech.
 
-Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé volání Clauda nespoléhej. Prohlídka a stránka Jak vznikl fungují bez AI a hned.
+Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé volání Clauda nespoléhej. Prohlídka a záložka O projektu fungují bez AI a hned.
 
 ## Průběh (živě nebo na sdílené obrazovce)
 
@@ -12,7 +12,7 @@ Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé vol
 
 **Hodnocení (50 s).** Na výsledku prohlídky klikni na citaci a nech záznam sjet na dané místo. Řekni: každé skóre dokládá citace, aplikace ověří, že v záznamu opravdu je. Celkovou úroveň počítá kód, ne model. Člověk může každé skóre upravit. Na vlastním výsledku je navíc „Proč tohle skóre?“ a silný pokus o stejný úkol pro srovnání.
 
-**Jak vznikl (30 s).** Otevři `?jak-vznikl`. Křivka práce: funkční prototyp po ~4,5 h aktivní práce, úplný prototyp za víkend (~9,5 h), veřejný web po ~16 h, dnešní stav ~45 h. Pak jedna věc podle publika: schéma a tabulka hrozeb (pro IT), cesta změny do produkce (pro vývojáře), rozhodnutí podle měření (pro vedení).
+**Jak vznikl (30 s).** Otevři `?jak-vznikl` (záložka O projektu, nahoře čísla a graf). Křivka práce: funkční prototyp po ~4,5 h aktivní práce, úplný prototyp za víkend (~9,5 h), veřejný web po ~16 h, dnešní stav ~58 h. Pak jedna věc podle publika: schéma a tabulka hrozeb (pro IT), cesta změny do produkce (pro vývojáře), rozhodnutí podle měření (pro vedení).
 
 **Co dál (10 s).** Teď trénink, ne zkouška. Na úvodní stránce je i vlastní výzva (beta): úkol podle popisu vlastní práce, z tabulky odejde jen struktura. Další kroky: obtížnost 3 u dalších rolí, kalibrace na skutečných lidech.
 
@@ -20,7 +20,7 @@ Předvádí se z webové verze: https://role-lab-gamma.vercel.app. Na živé vol
 
 Adresát projde sám, v tomhle pořadí:
 
-1. `?jak-vznikl`, 2 minuty: jak a za kolik práce produkt vznikl.
+1. `?jak-vznikl`, 2 minuty: co to je a jak a za kolik práce produkt vznikl (záložka O projektu).
 2. `?prohlidka`, 2 minuty: celý průběh na hotovém příkladu, bez čekání na AI.
 3. Volitelně jedna výzva (asi 5 minut) nebo celý úkol (asi 15 minut) s vlastním hodnocením.
 

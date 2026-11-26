@@ -1,6 +1,6 @@
 import changelog from "../../CHANGELOG.md?raw";
 import { appVersion } from "../buildFlags";
-import { activeTasks, endpointStats, sumDays, taskStats } from "./aggregate";
+import { activeTasks, botHealth, botStats, endpointStats, sumDays, taskStats } from "./aggregate";
 import { change, digest } from "./digest";
 import { count, usd } from "./AdminParts";
 import { adminEndpoints, attentionItems, endpointNames, type AttentionItem } from "./attention";
@@ -50,6 +50,7 @@ export function OverviewTab({ data, token, onOpenTab }: { data: AdminOverview; t
   const ratings = data.feedback.filter((item) => item.kind === "evaluation");
   const agree = ratings.filter((item) => item.kind === "evaluation" && (item.rating === "yes" || item.rating === "rather_yes")).length;
   const endpoints = endpointStats(total).filter((row) => !adminEndpoints.has(row.endpoint));
+  const bots = botStats(total);
   const spentShare = data.budget.totalUsd > 0 ? data.budget.spentTodayUsd / data.budget.totalUsd : 0;
   const topTasks = activeTasks(total).slice(0, 3).map((task) => taskStats(total, task));
 
@@ -136,6 +137,22 @@ export function OverviewTab({ data, token, onOpenTab }: { data: AdminOverview; t
               detail={`${row.median ? `medián ${row.median}` : "–"} · ${row.calls > 0 ? Math.round((row.errors / row.calls) * 100) : 0} % chyb`}
             />
           ))}
+          {bots.checked > 0 && (
+            <HealthRow
+              name="Ochrana proti robotům"
+              health={botHealth(bots)}
+              detail={[
+                `lidé ${count(bots.human)}`,
+                `roboti ${count(bots.bot)}`,
+                // Known bots with their names, the three most frequent: "známí roboti 3 (googlebot 2, bingbot 1)".
+                ...(bots.verifiedBot > 0
+                  ? [`známí roboti ${count(bots.verifiedBot)}${bots.knownBots.length > 0 ? ` (${bots.knownBots.slice(0, 3).map(([name, value]) => `${name} ${count(value)}`).join(", ")})` : ""}`]
+                  : []),
+                `neověřeno ${count(bots.unknown)}`,
+                ...(bots.skipped > 0 ? [`přeskočeno ${count(bots.skipped)}`] : []),
+              ].join(" · ")}
+            />
+          )}
           <div className="space-y-1.5 pt-1">
             <div className="flex justify-between text-sm">
               <span>Dnešní rozpočet</span>

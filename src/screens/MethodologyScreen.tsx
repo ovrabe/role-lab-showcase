@@ -120,7 +120,7 @@ const webDataFacts = [
   },
   {
     icon: HardDrive,
-    text: "Průběh úkolu se ukládá jen ve tvém prohlížeči. Server z konverzace nic neukládá. Kvůli dennímu limitu si nejdéle dva dny pamatuje jen počet pokusů a otisk IP adresy a náhodného čísla, které si vygeneroval tvůj prohlížeč. Z otisku původní hodnotu zjistit nejde a náhodné číslo s tebou nijak nesouvisí. Díky němu má vlastní limit každý, i když jednu síť sdílí několik lidí. Proti robotům web chrání Vercel BotID: když voláš AI, posíláš zpětnou vazbu nebo vlastní výzvu, posoudí podle IP adresy a technických údajů o prohlížeči, jestli jde o člověka. Do provozního záznamu jde jen jeho verdikt, bez adresy. Výsledek si můžeš stáhnout.",
+    text: "Průběh úkolu se ukládá jen ve tvém prohlížeči. Server z konverzace nic neukládá. Kvůli dennímu limitu si nejdéle dva dny pamatuje jen počet pokusů a otisk IP adresy a náhodného čísla, které si vygeneroval tvůj prohlížeč. Z otisku původní hodnotu zjistit nejde a náhodné číslo s tebou nijak nesouvisí. Díky němu má vlastní limit každý, i když jednu síť sdílí několik lidí. Proti robotům web chrání Vercel BotID: když voláš AI, posíláš zpětnou vazbu nebo vlastní výzvu, posoudí podle IP adresy a technických údajů o prohlížeči, jestli jde o člověka. Do provozního záznamu a do anonymních denních součtů jde jen jeho verdikt, bez adresy. Výsledek si můžeš stáhnout.",
   },
   {
     icon: BarChart3,

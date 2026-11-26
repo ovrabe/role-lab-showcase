@@ -147,3 +147,29 @@ export function activeTasks(total: MetricEntries): string[] {
   }
   return [...activity.entries()].sort((a, b) => b[1] - a[1]).map(([task]) => task);
 }
+
+// knownBots: known good bots by name (server/botCheck.ts), most frequent first.
+export type BotStats = { checked: number; human: number; bot: number; verifiedBot: number; unknown: number; skipped: number; problems: number; knownBots: [string, number][] };
+
+/** BotID verdicts (server/botCheck.ts): people, bots, known good bots, unchecked, and BotID's own trouble. */
+export function botStats(total: MetricEntries): BotStats {
+  const verdicts = group(total, "botid.");
+  const human = verdicts.human ?? 0;
+  const bot = verdicts.bot ?? 0;
+  const verifiedBot = verdicts["verified-bot"] ?? 0;
+  const unknown = verdicts.unknown ?? 0;
+  const knownBots = Object.entries(group(total, "botid.known.")).sort((a, b) => b[1] - a[1]);
+  return { checked: human + bot + verifiedBot + unknown, human, bot, verifiedBot, unknown, skipped: verdicts.skipped ?? 0, problems: verdicts.problem ?? 0, knownBots };
+}
+
+/**
+ * Whether BotID itself works, not how many bots came (blocking bots is the point). Skipped
+ * checks mean BotID thinks it runs in development; many unchecked requests mean its script
+ * does not reach the server (an ad blocker, the Content Security Policy, a missing setting).
+ */
+export function botHealth(stats: BotStats): "idle" | "ok" | "warning" | "critical" {
+  if (stats.checked === 0) return "idle";
+  if (stats.skipped > 0) return "critical";
+  const unchecked = (stats.unknown + stats.problems) / stats.checked;
+  return unchecked > 0.5 ? "critical" : unchecked > 0.1 ? "warning" : "ok";
+}

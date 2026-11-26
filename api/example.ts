@@ -6,6 +6,6 @@ import { logBotVerdict } from "../server/botCheck.js";
 export async function POST(request: Request): Promise<Response> {
   const deps = getServerDeps();
   if ("misconfigured" in deps) return misconfiguredResponse(deps.misconfigured);
-  await logBotVerdict("example");
+  await logBotVerdict("example", { metrics: deps.limiter.metrics });
   return handleExample(request, deps);
 }

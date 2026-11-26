@@ -7,8 +7,8 @@
 <text x="58" y="212" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">v tomto prohlížeči</text>
 <path d="M160 260V318" stroke="#768390" stroke-width="1.5" stroke-dasharray="4 4"/>
 <rect x="40" y="318" width="240" height="54" rx="12" fill="#151b23" stroke="#3d444d"/>
-<g transform="translate(58 336)" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" color="#9198a1"><path d="M3 17 8 3.5h1L14 17M4.6 12.5h7.8M14.5 17v-6.2a2.7 2.7 0 0 1 5 0V17"/></g>
-<text x="88" y="351" font-size="15" font-weight="600" fill="#e6edf3" text-anchor="start">Google Fonts</text>
+<g transform="translate(58 336)" fill="none" stroke="#9198a1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" color="#9198a1"><rect x="3.5" y="8.5" width="13" height="10" rx="2"/><path d="M6.5 8.5V6a3.5 3.5 0 0 1 7 0v2.5M10 12.5v2"/></g>
+<text x="88" y="351" font-size="15" font-weight="600" fill="#e6edf3" text-anchor="start">Vercel BotID</text>
 <rect x="350" y="30" width="460" height="540" rx="16" fill="#0f141a" stroke="#3d444d"/>
 <text x="372" y="62" font-size="16" font-weight="700" fill="#e6edf3" text-anchor="start">Vercel</text>
 <text x="434" y="62" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">· hosting a serverové funkce</text>
@@ -36,7 +36,7 @@
 <text x="631" y="312.5" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#a5b4fc" text-anchor="middle">/stats</text>
 <rect x="684" y="292" width="90" height="32" rx="8" fill="#1e1b4b" stroke="#4f46e5"/>
 <text x="729" y="312.5" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#a5b4fc" text-anchor="middle">/custom-*</text>
-<text x="390" y="356" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Ověří původ, limity a citace, spočítá úroveň</text>
+<text x="390" y="356" font-size="13" font-weight="400" fill="#9198a1" text-anchor="start">Ověří původ, robota, limity a citace, spočítá úroveň</text>
 <path d="M580 412V382" stroke="#9e6a03" stroke-width="1.5" stroke-dasharray="4 4"/>
 <path d="M575.5 389L580 381L584.5 389z" fill="#9e6a03"/>
 <rect x="372" y="412" width="416" height="126" rx="12" fill="#2e2311" stroke="#9e6a03"/>
